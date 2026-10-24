@@ -1,0 +1,12 @@
+* text=auto
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.ipynb text eol=lf
+
+# Giữ nguyên bytes dữ liệu và kết quả để SHA-256 không đổi khi clone Windows.
+/data/raw/*.csv -text
+/data/splits/*.txt -text
+/data/*.json -text
+/artifacts/** -text
+/results/** -text

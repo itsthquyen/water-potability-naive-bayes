@@ -1,0 +1,40 @@
+# Python and environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# Local settings and secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+.vscode/
+.idea/
+*.log
+Thumbs.db
+.DS_Store
+
+# Dữ liệu/model được chia sẻ theo yêu cầu; chỉ bỏ qua tệp ngoài gói đã chọn.
+/data/raw/*
+!/data/raw/.gitkeep
+!/data/raw/water_potability.csv
+/data/splits/*
+!/data/splits/.gitkeep
+!/data/splits/*.txt
+/artifacts/*
+!/artifacts/.gitkeep
+!/artifacts/20261024-E4-local-v1/
+!/artifacts/20261024-E4-reviewed-v2/
+!/artifacts/20261024-E4-reviewed-v3/
+*.evaluate.lock

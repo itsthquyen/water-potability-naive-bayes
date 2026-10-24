@@ -1,0 +1,50 @@
+{
+  "run_id": "20261024-E4-local-v1",
+  "stage": "trained_not_tested",
+  "model_sha256": "f7d9d25afa4e3710d1a43744344e026a46f8b108ceb6a95bbc37afbb7a35e5c7",
+  "model_path": "artifacts/20261024-E4-local-v1/pipeline.json",
+  "files": {
+    "results/metrics/20261024-E4-local-v1/cv_results.json": "def3e6c80f31f5b0fe74a461001de795f772c3fbe8214ee3453d1d65a4c461c0",
+    "results/figures/20261024-E4-local-v1/boxplots.png": "e41819e5a1dec8b2458ef8ef82d6f4a535f0a31e4f388d3706036a9e5b8b38cb",
+    "results/figures/20261024-E4-local-v1/class_counts.png": "f7a7902a0eb1509c6ff1c0f8355d03e5e828967eb510750b10c25c1fafa5d7f6",
+    "results/figures/20261024-E4-local-v1/eda_manifest.json": "e9a88158a1da1fff4a0ac1ae9d4c6e552271475143e061240d549cb1c6b68a07",
+    "results/figures/20261024-E4-local-v1/histogram_Chloramines.png": "a87f94695cf1a00edd517e5572322d234cbb52f764d67be64db73a50f857f042",
+    "results/figures/20261024-E4-local-v1/histogram_Conductivity.png": "d840c529ddc79313bbd9004b2d4d31f767c6cef95a1fc92efcb1c29c60128b85",
+    "results/figures/20261024-E4-local-v1/histogram_Hardness.png": "82e2a3930213ea445dccb43944dd0ac05b6a60ed0dbd85bd913675c46720ac2c",
+    "results/figures/20261024-E4-local-v1/histogram_Organic_carbon.png": "f407df104170d4d5b88a3cceade3aa7facab3abf45b5dd932b4fd1dc1f35bb38",
+    "results/figures/20261024-E4-local-v1/histogram_ph.png": "b5ae18f377c11d9c0c909802de49128c829b7df3eba4c59bc2ce64a12b722c93",
+    "results/figures/20261024-E4-local-v1/histogram_Solids.png": "1f4f516cabc981e9bcdf8e9c0f473159f3cbe6fc7146c0b945435ca0900316bc",
+    "results/figures/20261024-E4-local-v1/histogram_Sulfate.png": "9aa50327898676aa7d93aced82758410169af1b2636e30acb7976ccf5291777a",
+    "results/figures/20261024-E4-local-v1/histogram_Trihalomethanes.png": "c12e1a7b804f2675c3bff9ed124c25b1dafa4533c40b8587f16cba1522e914b7",
+    "results/figures/20261024-E4-local-v1/histogram_Turbidity.png": "b677112dc84bec42146a6d6b0d3301830ab933061e01eeef354599cef8711981",
+    "results/figures/20261024-E4-local-v1/missing_counts.png": "c6bd012a5c7807bcc8850489fde8fa213802647e4bd4adbc96d7c05bfd20fabe",
+    "results/figures/20261024-E4-local-v1/pearson.png": "0e4402bb50ed9fba488f11d8745c6ac6205a3ac3bb99c49454ed2cdca50e89e4",
+    "artifacts/20261024-E4-local-v1/pipeline.json": "f7d9d25afa4e3710d1a43744344e026a46f8b108ceb6a95bbc37afbb7a35e5c7",
+    "artifacts/20261024-E4-local-v1/pipeline.json.sha256": "22a672a4dd62f88adad24ac3eb8973e099ad23ad07e05599c48660d627d26fa9"
+  },
+  "csv_sha256": "904004bde729bfe3d2e195f46343bceead09e32a0eb95bb8184e7e20e029b2bf",
+  "data_manifest_sha256": "1e222d410868a14b1b42742935336414448d7c144ed42e8ded88c5385358f2b1",
+  "selected_config": {
+    "strategy": "mean",
+    "standardize": false,
+    "var_smoothing": 1e-09,
+    "variance_floor": 1e-12
+  },
+  "baseline_prior_1": 0.3900763358778626,
+  "environment": {
+    "python": "3.12.3",
+    "packages": {
+      "numpy": "2.5.4",
+      "pandas": "3.1.0",
+      "matplotlib": "3.11.2",
+      "streamlit": "1.66.1",
+      "pytest": "9.1.1",
+      "nbformat": "5.11.1",
+      "nbclient": "0.11.0"
+    },
+    "commit": "659409158dddf9702f3b2f6595803898cd7ca8d2",
+    "dirty": true
+  },
+  "verification": "Automated tests must pass before final evaluation; not a final signed acceptance.",
+  "created_at": "2026-10-24T10:52:06.689108+00:00"
+}

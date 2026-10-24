@@ -1,0 +1,11 @@
+{
+  "source_url": "https://www.kaggle.com/datasets/adityakadiwal/water-potability",
+  "download_url": "https://www.kaggle.com/api/v1/datasets/download/adityakadiwal/water-potability?datasetVersionNumber=3",
+  "metadata_url": "https://www.kaggle.com/api/v1/datasets/list?search=water-potability&user=adityakadiwal",
+  "dataset_version": 3,
+  "license": "CC0: Public Domain",
+  "downloaded_at": "2026-10-24T10:44:35.248293+00:00",
+  "csv_sha256": "904004bde729bfe3d2e195f46343bceead09e32a0eb95bb8184e7e20e029b2bf",
+  "archive_sha256": "d12c1c95fc3eb378cbf7fe250b29daa1cac23199a1552932d12efbcdc179ec79",
+  "origin_limitations": "Trang tổng hợp chưa xác minh được địa điểm/thời gian đo hoặc quy trình tạo nhãn; không coi là dữ liệu Việt Nam."
+}

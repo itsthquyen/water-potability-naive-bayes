@@ -1,0 +1,14 @@
+---
+description: Bắt buộc tự cài thuật toán và quy trình học máy tường minh cho đồ án Naive Bayes.
+alwaysApply: true
+---
+
+# CODE TƯỜNG MINH — YÊU CẦU TRỰC TIẾP CỦA NGƯỜI DÙNG
+
+- Đọc và tuân thủ `AGENTS.md` ở gốc repository và mục 0 của `DOCS/KE_HOACH_NAIVE_BAYES_CHAT_LUONG_NUOC.md`.
+- Áp dụng cho mọi mã nguồn, notebook, tests, demo và brief giao cho agent/worker.
+- Tự viết thuật toán, tiền xử lý, chia tập/fold, baseline, cross-validation, tìm cấu hình và metric; không dùng `sklearn` hay hàm thư viện làm thay các phần này.
+- Ví dụ không hợp lệ: hàm tự đặt tên nhưng bên trong gọi `GaussianNB.fit`, `train_test_split`, `np.mean` hoặc `accuracy_score`.
+- Ví dụ hợp lệ: tự cộng từng giá trị, đếm số mẫu và chia để tính trung bình; tự tính tổng bình phương độ lệch chia số mẫu để tính phương sai MLE.
+- Chỉ dùng thư viện nền trong giới hạn tại `AGENTS.md`; kiểm chứng bằng đáp án tính tay và tính chất đã biết.
+- Nếu bản tự cài chưa đạt thì tiếp tục sửa và báo trạng thái thật, không chuyển sang mô hình thư viện.

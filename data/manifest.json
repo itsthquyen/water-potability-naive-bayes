@@ -1,0 +1,93 @@
+{
+  "csv_sha256": "904004bde729bfe3d2e195f46343bceead09e32a0eb95bb8184e7e20e029b2bf",
+  "source": {
+    "source_url": "https://www.kaggle.com/datasets/adityakadiwal/water-potability",
+    "download_url": "https://www.kaggle.com/api/v1/datasets/download/adityakadiwal/water-potability?datasetVersionNumber=3",
+    "metadata_url": "https://www.kaggle.com/api/v1/datasets/list?search=water-potability&user=adityakadiwal",
+    "dataset_version": 3,
+    "license": "CC0: Public Domain",
+    "downloaded_at": "2026-10-24T10:44:35.248293+00:00",
+    "csv_sha256": "904004bde729bfe3d2e195f46343bceead09e32a0eb95bb8184e7e20e029b2bf",
+    "archive_sha256": "d12c1c95fc3eb378cbf7fe250b29daa1cac23199a1552932d12efbcdc179ec79",
+    "origin_limitations": "Trang tổng hợp chưa xác minh được địa điểm/thời gian đo hoặc quy trình tạo nhãn; không coi là dữ liệu Việt Nam."
+  },
+  "raw_count": 3276,
+  "clean_count": 3276,
+  "audit": {
+    "missing_counts": {
+      "ph": 491,
+      "Hardness": 0,
+      "Solids": 0,
+      "Chloramines": 0,
+      "Sulfate": 781,
+      "Conductivity": 0,
+      "Organic_carbon": 0,
+      "Trihalomethanes": 162,
+      "Turbidity": 0
+    },
+    "class_counts": {
+      "0": 1998,
+      "1": 1278
+    },
+    "duplicate_groups": [],
+    "input_count": 3276,
+    "valid_count": 3276,
+    "invalid_count": 0
+  },
+  "cleaning": {
+    "missing_counts": {
+      "ph": 491,
+      "Hardness": 0,
+      "Solids": 0,
+      "Chloramines": 0,
+      "Sulfate": 781,
+      "Conductivity": 0,
+      "Organic_carbon": 0,
+      "Trihalomethanes": 162,
+      "Turbidity": 0
+    },
+    "class_counts": {
+      "0": 1998,
+      "1": 1278
+    },
+    "duplicate_groups": [],
+    "input_count": 3276,
+    "output_count": 3276,
+    "removed_count": 0
+  },
+  "removed_row_ids": [],
+  "cleaning_version": 1,
+  "cleaning_rule": "keep_first_exact_duplicate_reject_conflicting_labels",
+  "seed": 42,
+  "test_fraction": 0.2,
+  "n_folds": 5,
+  "rounding": "floor(class_count * 0.2 + 0.5)",
+  "split_checksums": {
+    "development": "e0aa1f7e81d019f625329f8005651e1b11bf8341362deac2a48e8453c299ec06",
+    "test": "3aacf3209237e31fa8467916cf5845263d9f67deb3cd7842f19bd48e5e4e6661",
+    "fold_0_train": "c5e61d8c8b47ee8097297a22122100a16b382cb4ddef534833f9f4b26ab9e2a0",
+    "fold_0_validation": "61acd5b0686ec516e782c2b7381d875f43e7a8cbb44004ed9d0c4980e85dce12",
+    "fold_1_train": "bb3f9b2f286b0c7602f811bce657561dca0765e6996b7c69cee6024b38fe275d",
+    "fold_1_validation": "03a7b32687520827a1e3a2322565e9c1bca11cceefb27a2ab023cda260ff654d",
+    "fold_2_train": "c93e8e560272256aeb4d23553bd6b1106fdc017afb288c5f750981af824be323",
+    "fold_2_validation": "b3648fe9474e6fc057c798ee93a9820fb7a19a431fcfeb20cddc9f11c73c0c75",
+    "fold_3_train": "79fcd616837d70dab5d99624d780ec37b25c48d8f5bc4bee339b8f715a04eea5",
+    "fold_3_validation": "9de846fbf76aff807f0885418f4e3143c1b3ee3b9c1668fd830f3c9b6cd7eb70",
+    "fold_4_train": "3a64a8fedb6b81ab4a0068b0c84d82f521763fdaa49f43bbea360af58b584378",
+    "fold_4_validation": "ab4c03c1b0f79dc581c4054c9891ce0884cfc2cbad4e603395d780925d7ef341"
+  },
+  "environment": {
+    "python": "3.12.3",
+    "packages": {
+      "numpy": "2.5.4",
+      "pandas": "3.1.0",
+      "matplotlib": "3.11.2",
+      "streamlit": "1.66.1",
+      "pytest": "9.1.1",
+      "nbformat": "5.11.1",
+      "nbclient": "0.11.0"
+    },
+    "commit": "659409158dddf9702f3b2f6595803898cd7ca8d2",
+    "dirty": true
+  }
+}

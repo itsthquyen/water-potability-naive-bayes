@@ -8,7 +8,7 @@
 - **Ngày lập:** 24/10/2026.
 - **Thời gian đề xuất:** 6 tuần kể từ ngày thống nhất kế hoạch; điều chỉnh theo hạn nộp thực tế.
 - **Công nghệ chính:** Python, NumPy ở mức mảng/phép toán cơ bản, pandas cho đọc/ghi bảng, Jupyter Notebook và Streamlit. Không dùng scikit-learn trong mã dự án.
-- **Trạng thái:** Đã tạo bộ khung và liên kết remote GitHub; chưa triển khai chức năng chính, chưa tải và kiểm tra tệp dữ liệu, chưa huấn luyện, chưa có kết quả thực nghiệm.
+- **Trạng thái:** Đã triển khai bản tự cài, 457 tests đạt, tải/audit dữ liệu, chạy CV và đánh giá test giữ riêng một lần (run `20261024-E4-reviewed-v3`). Chưa nghiệm thu gói nộp cuối; bằng chứng và giới hạn theo [checklist triển khai](NGHIEM_THU_TRIEN_KHAI.md).
 
 > Kế hoạch được thiết kế cho nhóm 3 sinh viên, ưu tiên hiểu thuật toán, thực nghiệm đúng và bảo vệ được kết quả. Nhóm chưa cung cấp đề cương, mẫu báo cáo hoặc tiêu chí chấm của giảng viên; các yêu cầu về số trang, số slide và thời lượng bên dưới là đề xuất, không phải quy định chính thức của trường.
 
@@ -609,7 +609,7 @@ Mã thí nghiệm E0–E5 mô tả loại thí nghiệm; `run_id` định danh m
 - Quyền đóng gói thư mục pipeline cùng manifest, cấu hình, phiên bản môi trường và hướng dẫn nạp trong gói nộp/gói bàn giao riêng. Gói này được chuyển trực tiếp cho máy trình chiếu; chưa yêu cầu đăng mô hình lên GitHub. Séc kiểm tra checksum, nạp đúng môi trường và thử lại các mẫu đối chiếu trước buổi demo.
 - Chốt `run_id` cuối dùng cho báo cáo, slide và app tại M4. App hiển thị mã phiên bản mô hình trong phần thông tin; báo cáo/slide ghi ID để truy vết. Chạy lại do sửa lỗi tạo ID mới và ghi lý do, không trộn model của lần cũ với chỉ số của lần mới.
 
-**Hợp đồng lưu/nạp tối thiểu:** Quyền chốt tại M1 định dạng JSON UTF-8, `schema_version=1`, không chứa `NaN`/vô hạn. Trạng thái bắt buộc gồm `run_id`, thứ tự bước/cột/lớp, `n_features`, cấu hình và checksum dữ liệu/phép chia; giá trị imputer; cờ bật scaler cùng mean/scale nếu bật; min/max trước tiền xử lý; prior, trung bình lớp, phương sai MLE, epsilon, `variance_floor` và phương sai hiệu dụng. Các mảng ghi rõ kích thước và ý nghĩa; khi tắt scaler, trạng thái scaler là `null`. Không cần hệ thống định dạng mở rộng hoặc pickle cho phạm vi này.
+**Hợp đồng lưu/nạp tối thiểu:** Quyền chốt tại M1 định dạng JSON UTF-8, `schema_version=1`, không chứa `NaN`/vô hạn. Trạng thái bắt buộc gồm `run_id`, thứ tự bước/cột/lớp, `n_features`, cấu hình và checksum dữ liệu/phép chia; giá trị imputer; cờ bật scaler cùng mean/scale; min/max trước tiền xử lý; prior, trung bình lớp, phương sai MLE, epsilon, `variance_floor` và phương sai hiệu dụng. Các mảng ghi rõ kích thước và ý nghĩa. Bản triển khai lưu mean/scale sau điền thiếu kể cả khi `standardize=false` để kiểm tra liên kết thống kê, nhưng không áp dụng phép chuẩn hóa khi tắt; không có trường scaler riêng `null`. Không cần hệ thống định dạng mở rộng hoặc pickle cho phạm vi này.
 
 Loader kiểm tra checksum theo manifest, phiên bản schema được hỗ trợ, trường bắt buộc, thứ tự cột/lớp, kích thước mảng, số hữu hạn, prior dương có tổng xấp xỉ 1, scale/phương sai hiệu dụng dương và quan hệ `variance_effective = variance_mle + epsilon` trong sai số đã chốt. Từ chối trạng thái không hợp lệ bằng lỗi rõ ràng; chỉ khôi phục trạng thái đã fit, không fit lại hoặc cộng epsilon lần hai. Kiểm tra round-trip cho cả cấu hình có/không chuẩn hóa và từ chối schema lạ, trạng thái thiếu, sai kích thước hoặc sai checksum.
 
