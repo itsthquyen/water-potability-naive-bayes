@@ -1,5 +1,8 @@
 # Nghiệm thu triển khai Gaussian Naive Bayes
 
+> Hồ sơ lịch sử của bản thử nghiệm tháng 10/2026. Bản chạy hiện tại dùng
+> [Naive Bayes đếm tần suất](RA_SOAT_LY_THUYET_VA_WEKA.md).
+
 Ngày bắt đầu: 24/10/2026. Căn cứ: kế hoạch 1.3 và AGENTS.md.
 
 ## Quy ước theo dõi
@@ -60,13 +63,14 @@ Ngày bắt đầu: 24/10/2026. Căn cứ: kế hoạch 1.3 và AGENTS.md.
 
 ## 7. Trình bày và bàn giao
 
-- [x] Streamlit tiếng Việt: nhập mẫu, CSV, cảnh báo học thuật rõ; AppTest 9 tests đạt. Nhánh kết quả test thật vẫn chờ đánh giá.
+- [x] Streamlit tiếng Việt: nhập mẫu, CSV, cảnh báo học thuật rõ; AppTest 9 tests đạt. Nhánh thực nghiệm nạp kết quả đã xác minh từ run v3.
 - [x] App không có model thì báo thiếu, không train khi bấm dự đoán, không dùng dữ liệu giả (AppTest chặn fit).
 - [x] EDA tự tính bin/phân vị/tương quan, thư viện chỉ vẽ; kiểm thử dữ liệu nhỏ, hồi quy cột hằng thập phân.
 - [x] Notebook gọi src, cả hai chạy từ đầu bằng nbclient trong .venv; notebook02 đã chạy nhánh evaluated v3, hiển thị 15 PNG và CV/test/baseline đã kiểm tra hash.
 - [x] README và data/README đồng bộ lệnh chạy, nguồn, cấu hình, giới hạn.
 - [x] Sơ đồ luồng huấn luyện/dự đoán ở cuối file; phản ánh dev/test và pipeline dùng chung.
-- [ ] Báo cáo, slide, video/bảo vệ thử và xác minh trên máy khác (chỉ tick khi có bằng chứng).
+- [x] Báo cáo PDF theo mẫu, kèm hình Weka thật và [ghi chú rà soát](RA_SOAT_LY_THUYET_VA_WEKA.md).
+- [ ] Slide, video/bảo vệ thử và xác minh trên máy khác.
 
 ## 8. Kiểm tra cuối
 

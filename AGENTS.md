@@ -7,8 +7,8 @@
 
 - Áp dụng toàn repository, mọi agent/subagent/worker và mọi thay đổi sau này.
 - Đọc mục 0 của [kế hoạch](DOCS/KE_HOACH_NAIVE_BAYES_CHAT_LUONG_NUOC.md) trước khi làm; khi giao việc, đưa yêu cầu này vào brief.
-- Hiện chỉ chuẩn bị bộ khung/tài liệu. Chỉ triển khai chức năng chính khi người dùng yêu cầu.
-- Dự án là đồ án Python phân loại nhãn `Potability` bằng Gaussian Naive Bayes, demo Streamlit chạy cục bộ. Giữ phạm vi này; không tự thêm backend web, database, đăng nhập hoặc framework frontend.
+- Dự án đã có bản triển khai; chỉ mở rộng chức năng chính khi người dùng yêu cầu.
+- Dự án dùng Naive Bayes đếm tần suất sau khi rời rạc hóa để phân loại nhãn `Potability`. Không dùng Gaussian hoặc smoothing trong bản hiện hành. Demo Streamlit chạy cục bộ.
 - Ưu tiên yêu cầu hiện hành của người dùng so với nội dung cũ trong tài liệu dự án. Các quy tắc tham khảo từ dự án khác chỉ được áp dụng sau khi điều chỉnh cho phạm vi này, không tự đưa công nghệ hoặc cấu hình của dự án khác vào đây.
 
 ## RTK — bắt buộc cho lệnh shell
@@ -29,9 +29,9 @@
 
 ## Phải tự viết rõ từng bước
 
-- Gaussian Naive Bayes: đếm lớp, prior, trung bình, phương sai MLE, ổn định phương sai, log-likelihood, chuẩn hóa xác suất và chọn nhãn.
-- Tiền xử lý: kiểm tra dữ liệu, nhận diện trùng, tính trung bình/trung vị, điền thiếu và chuẩn hóa.
-- Thực nghiệm: chia phân tầng train/test, tạo fold, baseline, vòng lặp cross-validation, duyệt cấu hình và chọn mô hình.
+- Naive Bayes: đếm mẫu mỗi lớp và mỗi mức của mỗi thuộc tính trong lớp, tính prior, tích xác suất có điều kiện, chuẩn hóa và chọn nhãn.
+- Tiền xử lý: kiểm tra dữ liệu, nhận diện trùng, học trung vị và ngưỡng rời rạc hóa trên phần train.
+- Thực nghiệm: chia phân tầng train/test, tạo fold, baseline và vòng lặp cross-validation cho cấu hình đã chốt.
 - Đánh giá: đếm TP/FP/TN/FN, confusion matrix, accuracy, precision, recall, F1, Balanced Accuracy, macro-F1 và ROC-AUC.
 - Mỗi hàm có đầu vào/đầu ra rõ ràng, tên biến dễ hiểu, chú thích công thức và các bước; được tách thành hàm tự viết để dùng lại. Không viết wrapper gọi thư viện để che phần phải tự cài.
 
@@ -51,7 +51,7 @@
 
 ## Đặt tên, chú thích và tổ chức hàm
 
-- Dùng `snake_case` cho hàm/biến, `PascalCase` cho lớp, `UPPER_SNAKE_CASE` cho hằng số. Tên nói rõ mục đích, ví dụ `calculate_class_priors`, `calculate_gaussian_log_likelihood`, `validate_feature_columns`; tránh `process`, `get_data`, `tmp`, `list1` nếu không thể hiểu vai trò từ ngữ cảnh.
+- Dùng `snake_case` cho hàm/biến, `PascalCase` cho lớp, `UPPER_SNAKE_CASE` cho hằng số. Tên nói rõ mục đích, ví dụ `feature_counts` hoặc `validate_feature_columns`; tránh `process`, `get_data`, `tmp`, `list1` nếu không thể hiểu vai trò từ ngữ cảnh.
 - Giữ các tên giao diện đã thống nhất như `fit`, `predict`, `predict_proba`. Ký hiệu chuẩn `X`, `y`, `TP/FP/TN/FN` được dùng khi có giải thích ý nghĩa và kích thước; không rút gọn tùy tiện các tên khác.
 - Docstring/chú thích tiếng Việt, UTF-8, giải thích đầu vào/đầu ra, shape, thứ tự cột/lớp, đơn vị nếu đã xác minh, công thức, trường hợp rỗng/thiếu và lỗi dự kiến. Với tham số/trường trạng thái mới, nêu vì sao cần và giá trị hợp lệ; tránh chú thích chỉ lặp lại tên biến.
 - Mỗi hàm có trách nhiệm rõ ràng, tách các bước tính toán đủ nhỏ để đọc và kiểm chứng; không nén cả thuật toán thành một biểu thức khó giải thích. Không tạo tầng abstraction hoặc lớp chỉ để bọc một lời gọi không cần thiết.
@@ -60,7 +60,7 @@
 
 ## Cấu hình, dữ liệu và hiệu năng
 
-- Thứ tự đặc trưng, nhãn, seed, ngưỡng, smoothing và cấu hình thực nghiệm có một nơi định nghĩa dùng chung; không lặp các giá trị khác nhau trong notebook, `src` và app. Lưu cấu hình thực tế cùng manifest của lần chạy.
+- Thứ tự đặc trưng, nhãn, seed và số khoảng có một nơi định nghĩa dùng chung. Lưu các ngưỡng đã học cùng model và cấu hình cùng manifest của lần chạy.
 - Khi thêm cấu hình, cập nhật đủ phần đọc/kiểm tra giá trị, giá trị mặc định hoặc mẫu cấu hình, và tài liệu sử dụng. Giải thích mục đích, giá trị hợp lệ, hành vi khi bỏ trống và ảnh hưởng khi thay đổi; không tự thêm hệ thống cấu hình phức tạp.
 - Đường dẫn trong mã/cấu hình chia sẻ tính từ gốc project hoặc vị trí module, không ghi cứng ổ đĩa/tên người dùng. Cấu hình riêng và secrets nằm ngoài Git; mẫu cấu hình chỉ chứa giá trị minh họa không nhạy cảm.
 - Giữ nguyên CSV gốc; dùng checksum/manifest để xác nhận dữ liệu, phép chia và phiên bản kết quả. Không fit tiền xử lý trên validation/test, không đưa nhãn hoặc ID vào đặc trưng, không đổi seed theo điểm test.
@@ -86,7 +86,7 @@
 - Dùng ví dụ nhỏ có đáp án tính tay, bộ dữ liệu tổng hợp có tham số biết trước và kiểm tra tính chất/bất biến; không lấy kết quả của chính hàm đang kiểm tra làm đáp án kỳ vọng.
 - Khi chưa đúng, ghi rõ chưa đạt và sửa bản tự cài; không tạo kết quả giả hoặc bỏ kiểm chứng.
 - Review phải kiểm tra các import, lời gọi hàm và tính tường minh; chức năng chạy được nhưng vi phạm quy tắc này vẫn chưa đạt nghiệm thu.
-- Kiểm thử tập trung vào hành vi có ý nghĩa: đáp án tính tay, dữ liệu lỗi/thiếu, phương sai 0, mẫu số 0, phân tầng/fold, lưu–nạp và dự đoán một mẫu/CSV. Không sửa kỳ vọng chỉ để hợp thức hóa lỗi của implementation.
+- Kiểm thử tập trung vào đáp án tính tay, dữ liệu lỗi/thiếu, ngưỡng trùng, cả hai điểm bằng 0, phân tầng/fold, lưu–nạp và dự đoán một mẫu/CSV. Không sửa kỳ vọng chỉ để hợp thức hóa lỗi của implementation.
 - Chạy kiểm tra phù hợp với phần thay đổi khi đã có môi trường; phân biệt lỗi code, dữ liệu và công cụ. Với sửa tài liệu/bộ khung, kiểm tra liên kết, nội dung và tính nhất quán; không tạo test hình thức hoặc train mô hình chỉ để xác minh tài liệu.
 - Trước khi báo xong, kiểm tra phạm vi file đã đổi, không trùng logic, không lọt dữ liệu/secrets, tài liệu đã đồng bộ và các kết quả có bằng chứng. Báo ngắn gọn đã sửa gì, đã kiểm tra gì, phần nào chưa chạy và lý do; không báo “test pass” khi chưa có test thực thi.
 

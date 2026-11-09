@@ -20,6 +20,11 @@ Chạy tại gốc project: `rtk proxy .\.venv\Scripts\python.exe -X utf8 -m src
 
 ## Từ Điển Dữ Liệu
 
+Trong bản Naive Bayes hiện hành, CSV vẫn giữ số đo gốc. Mã học trung vị và
+tối đa hai ngưỡng cho từng cột từ các ô quan sát ở phần train, rồi mã hóa
+khoảng thành thuộc tính nominal. Các mã khoảng không phải đơn vị đo hoặc
+ngưỡng đánh giá an toàn. Xem [đặc tả](../DOCS/KE_HOACH_NAIVE_BAYES_CHAT_LUONG_NUOC.md).
+
 Tất cả 9 cột là số thực, có thể thiếu theo hợp đồng đầu vào. Đơn vị dưới đây được đọc từ mô tả nguồn Kaggle, **không phải xác nhận độc lập quy trình đo**. Giữ giá trị nguyên trạng; không tự quy đổi hoặc suy ra ngưỡng an toàn.
 
 - `ph`: chỉ số pH, không đơn vị. Nguồn không mô tả quy trình đo từng dòng.
