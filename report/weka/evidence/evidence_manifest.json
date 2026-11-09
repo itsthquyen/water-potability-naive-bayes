@@ -1,0 +1,22 @@
+{
+  "run_id": "20261109-NB-final",
+  "model_sha256": "b717708f822b5eabc16bd68ba33d30a303ab79ba4e139e09fcb01042df98350f",
+  "csv_sha256": "904004bde729bfe3d2e195f46343bceead09e32a0eb95bb8184e7e20e029b2bf",
+  "files": {
+    "development_processed.arff": "c99b35b1f6c5ccc47218027521a77dd1dec63a5f6d050593bbc71c182a4f8674",
+    "development_raw.arff": "3b1484eb9e4b159bb5ae00f4308972aa69206cd56b7ebb31dfde3811bb6b2eb3",
+    "errors.arff": "278d8cfd52361975aab8d013dcf36c4f98c8d192a9668badacbd46449903a64f",
+    "raw.arff": "7be70716c6b696e35df4f6ae62f01573a2ef11ddf0ea2dd4cfb8edd109066541",
+    "roc.arff": "25815bcb28e3bd7db8c2a27d793827aa8007b628dfaaa3b1ca92d75c18463e1d",
+    "test_processed.arff": "53f3148ed83990bf900aeb04ffb9315f18ae4d60958e10930748df83355e7c5f",
+    "test_raw.arff": "16a4a4ace1f893b127337a15592670725e123e5adec90ca0a46cad59a3b1f9b9",
+    "01-data-and-class.png": "8d1c3e3fb13a86264fb54d9fd0bc15b1aee25b2ca800033d20b91d10e11b2e4a",
+    "02-development-missing.png": "eefccd823fc77a0d98e920a5907eb7646b98e00716148e6c3bac9eb3c001c1e2",
+    "03-development-processed.png": "94678e2da6045b221633f228d81dc76d27c8408815e3ea8825c6b7af0f8a4bdc",
+    "04-test-partition.png": "9efa8bbb112ce3cc9da14fd3f31f63feeb3d1a8a282e7cc0f7c4abd14edbfeaa",
+    "05-roc.png": "ed8689396af01ff66bd3070eba1150b9bbb5b997ae03936170c6168afbbd113b",
+    "06-errors.png": "6d4925c5b7a3c9792c957db7f8caceb370a1e8afb470f2235e3dcc1d9096bd1e",
+    "07-development-class.png": "94dfcee7654912179a3cf3026ad116a124b77e2ff9bfbc69f62ca2ec4e40c32d",
+    "08-ph-processed.png": "aa25e2348abf2bce4eb9a65c96a17c052a4ebfa0a2f22c2274d0cf82279ffa7e"
+  }
+}
