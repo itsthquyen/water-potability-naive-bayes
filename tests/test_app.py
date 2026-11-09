@@ -36,7 +36,7 @@ def test_missing_model_has_warning_no_prediction_or_training(tmp_path):
     assert any("Chưa có model" in error.value for error in app.error)
     assert any("không thay thế kiểm nghiệm" in warning.value for warning in app.warning)
     assert not app.button
-    assert not app.dataframe
+    assert not app.get("html")
 
 
 def test_shared_prediction_contract_available():
@@ -68,11 +68,12 @@ def test_loaded_model_uses_shared_validation_and_does_not_train(tmp_path):
         assert not app.exception
         assert not app.error
         assert any("theo nhãn dữ liệu" in item.value for item in app.success)
-        assert app.dataframe
+        assert any("Nhãn dự đoán" in item.proto.body and "<td>0 - không uống được</td>" in item.proto.body
+                   for item in app.get("html"))
         assert any("Chưa có kết quả thực nghiệm" in item.value for item in app.info)
         app.sidebar.text_input[0].set_value(str(tmp_path / "missing.json")).run()
         assert not app.exception
-        assert not app.dataframe
+        assert not app.get("html")
 
 
 def test_verified_files_require_run_model_and_content_checksums(tmp_path, monkeypatch):

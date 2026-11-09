@@ -183,9 +183,8 @@ def _infer_checkpoint(run_id, csv_path, output_root, run_path, manifest):
     ids = [data["clean"]["row_ids"][index] for index in data["test"]]
     manifest["stage"] = "evaluation_started"
     _durable_json(run_path, manifest)
-    probabilities = pipeline.predict_proba(X)
+    predictions, probabilities = pipeline.predict_with_proba(X)
     scores = [row[1] for row in probabilities]
-    predictions = [1 if row[1] > row[0] else 0 for row in probabilities]
     metrics = evaluate_predictions(y, predictions, scores)
     prior = manifest["baseline_prior_1"]
     baseline_label = 1 if prior > 0.5 else 0
@@ -193,14 +192,16 @@ def _infer_checkpoint(run_id, csv_path, output_root, run_path, manifest):
     output = io.StringIO(newline="")
     writer = csv.writer(output, lineterminator="\n")
     writer.writerow(["row_id", "actual", "predicted", "probability_0", "probability_1", "error_type", "run_id"])
-    errors = []
+    error_examples = {"FP": [], "FN": []}
     for row_id, actual, prediction, probability, values in zip(ids, y, predictions, probabilities, X):
         error_type = "FP" if actual == 0 and prediction == 1 else "FN" if actual == 1 and prediction == 0 else ""
         writer.writerow([row_id, actual, prediction, *probability, error_type, run_id])
-        if error_type:
-            errors.append({"row_id": row_id, "actual": actual, "predicted": prediction,
-                           "error_type": error_type, "probability_1": probability[1],
-                           "missing_count": sum(value is None for value in values), "features": values})
+        if error_type and len(error_examples[error_type]) < 5:
+            error_examples[error_type].append({
+                "row_id": row_id, "actual": actual, "predicted": prediction,
+                "error_type": error_type, "probability_1": probability[1],
+                "missing_count": sum(value is None for value in values), "features": values,
+            })
     matrix = metrics["confusion_matrix"]
     true_negative, false_positive = matrix[0]
     false_negative, true_positive = matrix[1]
@@ -209,7 +210,7 @@ def _infer_checkpoint(run_id, csv_path, output_root, run_path, manifest):
         "false_negative_count": false_negative,
         "false_positive_rate": false_positive / (false_positive + true_negative) if false_positive + true_negative else None,
         "false_discovery_rate": false_positive / (false_positive + true_positive) if false_positive + true_positive else None,
-        "examples": (errors[:5] + [item for item in errors if item["error_type"] == "FN"][:5]),
+        "examples": error_examples["FP"] + error_examples["FN"],
         "note": "Chỉ phân tích kết quả cuối, không dùng để chọn lại cấu hình."}
     outputs = {"test_predictions.csv": output.getvalue()}
     for filename, value in (("test_metrics.json", metrics), ("baseline_test_metrics.json", baseline_metrics),

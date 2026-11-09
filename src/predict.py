@@ -33,7 +33,7 @@ def predict_records(records, pipeline, run_id=""):
         result = results[row_id]
         missing = [FEATURE_COLUMNS[index] for index, value in enumerate(values) if value is None]
         if missing:
-            result["warnings"].append("Đã điền thiếu từ train: " + ", ".join(missing))
+            result["warnings"].append("Đã điền thiếu bằng trung vị train: " + ", ".join(missing))
         if len(missing) >= MISSING_WARNING_COUNT:
             result["warnings"].append("Thiếu từ 3/9 chỉ tiêu; kết quả có giới hạn lớn.")
         outside = []
@@ -43,12 +43,12 @@ def predict_records(records, pipeline, run_id=""):
         if outside:
             result["warnings"].append("Ngoài min/max train: " + ", ".join(outside))
         try:
-            probability = pipeline.predict_proba([values])[0]
-            result["predicted_label"] = 1 if probability[1] > probability[0] else 0
-            result["probability_0"], result["probability_1"] = probability
+            labels, probabilities = pipeline.predict_with_proba([values])
+            result["predicted_label"] = labels[0]
+            result["probability_0"], result["probability_1"] = probabilities[0]
             result["status"] = "warning" if result["warnings"] else "ok"
         except (ValueError, OverflowError, ArithmeticError) as error:
-            result["error"] = "Không thể dự đoán do lỗi số học: " + str(error)
+            result["error"] = "Không thể dự đoán: " + str(error)
     return results
 
 
@@ -75,7 +75,7 @@ def results_to_csv(results):
 def main():
     """CLI nhận đường dẫn model, CSV đầu vào và CSV đầu ra."""
     from src.pipeline import load_pipeline
-    parser = argparse.ArgumentParser(description="Dự đoán nhãn dữ liệu nước bằng GNB tự cài")
+    parser = argparse.ArgumentParser(description="Dự đoán nhãn dữ liệu nước bằng Naive Bayes đếm tần suất")
     parser.add_argument("--model", required=True, type=Path)
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)

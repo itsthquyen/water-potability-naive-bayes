@@ -1,40 +1,10 @@
-"""Vòng lặp CV và chọn cấu hình tự cài, chỉ dùng dữ liệu phát triển."""
+"""Kiểm định chéo Naive Bayes và baseline trên dữ liệu phát triển."""
 
-from copy import deepcopy
-import math
 from numbers import Integral, Real
 
-from .config import SMOOTHING_VALUES, VARIANCE_FLOOR
+from .config import MODEL_ALGORITHM, N_BINS
 from .metrics import evaluate_predictions, summarize_scores
 from .pipeline import WaterPipeline
-
-
-def _number(value, name):
-    """Nhận số thực hữu hạn, không ép bool/chuỗi; sai kiểu gây ValueError."""
-    if isinstance(value, bool) or not isinstance(value, Real):
-        raise ValueError(f"{name} phải là số thực hữu hạn.")
-    try:
-        value = float(value)
-    except (OverflowError, ValueError) as error:
-        raise ValueError(f"{name} vượt giới hạn số học.") from error
-    if not math.isfinite(value):
-        raise ValueError(f"{name} phải hữu hạn.")
-    return value
-
-
-def _configuration(config):
-    """Chuẩn hóa bốn khóa cấu hình, không bổ sung mặc định ngầm khi thiếu khóa."""
-    keys = {"strategy", "standardize", "var_smoothing", "variance_floor"}
-    if not isinstance(config, dict) or set(config) != keys:
-        raise ValueError("Cấu hình phải có đúng strategy/standardize/var_smoothing/variance_floor.")
-    if config["strategy"] not in ("mean", "median") or type(config["standardize"]) is not bool:
-        raise ValueError("strategy phải mean/median, standardize phải bool.")
-    result = dict(config)
-    for key in ("var_smoothing", "variance_floor"):
-        result[key] = _number(config[key], key)
-        if result[key] <= 0:
-            raise ValueError(f"{key} phải dương.")
-    return result
 
 
 def _sequence(values, name):
@@ -100,26 +70,25 @@ def _result(config, fold_metrics):
                         for name in ("balanced_accuracy", "macro_f1")}}
 
 
-def cross_validate(X, y, folds, config):
-    """Đánh giá cấu hình trên các cặp chỉ số; trả config/fold_metrics/summary.
+def cross_validate(X, y, folds):
+    """Đánh giá cấu hình cố định trên các cặp chỉ số; trả config/fold_metrics/summary.
 
     X (n, 9) có thể thiếu, y (n,) nhị phân. Mỗi fold tạo WaterPipeline mới và
     chỉ fit phần train. fold_metrics là list dict từ evaluate_predictions;
     summary chứa balanced_accuracy/macro_f1, mỗi mục {mean, std}. Lỗi dữ liệu,
     tiền xử lý, mô hình hay metric được truyền ra, không âm thầm bỏ fold.
     """
-    configuration = _configuration(config)
+    configuration = {"algorithm": MODEL_ALGORITHM, "max_bins": N_BINS, "missing": "median", "smoothing": False}
     labels, partitions = _validated_folds(y, folds)
     rows = _sequence(X, "X")
     if len(rows) != len(labels):
         raise ValueError("X và y phải cùng số mẫu.")
     fold_metrics = []
     for train, validation in partitions:
-        pipeline = WaterPipeline(**configuration)
+        pipeline = WaterPipeline()
         pipeline.fit([rows[index] for index in train], [labels[index] for index in train])
         validation_X = [rows[index] for index in validation]
-        predictions = pipeline.predict(validation_X)
-        probabilities = pipeline.predict_proba(validation_X)
+        predictions, probabilities = pipeline.predict_with_proba(validation_X)
         fold_metrics.append(evaluate_predictions(
             [labels[index] for index in validation], predictions,
             [row[1] for row in probabilities],
@@ -146,64 +115,3 @@ def baseline_cross_validate(y, folds):
             [prior_one] * len(validation),
         ))
     return _result({"baseline": "majority"}, fold_metrics)
-
-
-def select_configuration(results, tolerance=0.005):
-    """Chọn bản sao result hợp lệ trong best BA - tolerance, không làm tròn.
-
-    Ưu tiên không chuẩn hóa, mean, |log10(smoothing)+9| nhỏ nhất rồi smoothing
-    nhỏ hơn. Nếu mọi khóa ưu tiên bằng nhau, giữ thứ tự đầu vào. tolerance
-    hữu hạn trong [0,1]; thiếu/điểm mean/std sai khiến ValueError, không bỏ qua.
-    """
-    tolerance = _number(tolerance, "tolerance")
-    if not 0 <= tolerance <= 1:
-        raise ValueError("tolerance phải thuộc [0, 1].")
-    candidates = _sequence(results, "results")
-    if not candidates:
-        raise ValueError("results không được rỗng.")
-    checked = []
-    for result in candidates:
-        if not isinstance(result, dict) or "config" not in result or "summary" not in result:
-            raise ValueError("Result thiếu config/summary.")
-        configuration = _configuration(result["config"])
-        summary = result["summary"]
-        if not isinstance(summary, dict):
-            raise ValueError("summary phải là dict.")
-        for name in ("balanced_accuracy", "macro_f1"):
-            statistics = summary.get(name)
-            if not isinstance(statistics, dict) or set(statistics) != {"mean", "std"}:
-                raise ValueError("Summary phải có mean/std cho BA và macro-F1.")
-            for key in ("mean", "std"):
-                value = _number(statistics[key], f"{name}.{key}")
-                if not 0 <= value <= 1:
-                    raise ValueError("Điểm và độ lệch chuẩn phải thuộc [0,1].")
-        checked.append((result, configuration, float(summary["balanced_accuracy"]["mean"])))
-    best_score = max(item[2] for item in checked)
-    # So sánh với biên best - tolerance để biên .8 - .005 = .795 được nhận.
-    eligible = [item for item in checked if item[2] >= best_score - tolerance]
-    selected = min(eligible, key=lambda item: (
-        item[1]["standardize"], item[1]["strategy"] != "mean",
-        abs(math.log10(item[1]["var_smoothing"]) + 9), item[1]["var_smoothing"],
-    ))
-    return deepcopy(selected[0])
-
-
-def search_configurations(X, y, folds, configs=None):
-    """Duyệt tuần tự cấu hình, trả {results, best}; lỗi bất kỳ dừng toàn lượt.
-
-    configs=None dùng 2 strategy x 2 standardize x SMOOTHING_VALUES (28 cấu
-    hình), cùng VARIANCE_FLOOR. Không fit mô hình cuối, không đọc dữ liệu test.
-    Dãy đầu vào được giữ lại một lần để không cạn generator giữa cấu hình.
-    """
-    if configs is None:
-        configs = [{"strategy": strategy, "standardize": standardize,
-                    "var_smoothing": smoothing, "variance_floor": VARIANCE_FLOOR}
-                   for strategy in ("mean", "median") for standardize in (False, True)
-                   for smoothing in SMOOTHING_VALUES]
-    configurations = [_configuration(config) for config in _sequence(configs, "configs")]
-    if not configurations:
-        raise ValueError("configs không được rỗng.")
-    labels, partitions = _validated_folds(y, folds)
-    rows = _sequence(X, "X")
-    results = [cross_validate(rows, labels, partitions, config) for config in configurations]
-    return {"results": results, "best": select_configuration(results)}

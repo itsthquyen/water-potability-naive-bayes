@@ -39,11 +39,11 @@ def synthetic_run(tmp_path, monkeypatch):
     def predict(rows):
         calls["predict"] += 1
         assert rows == [[None] * 9, [2.0] * 9]
-        return [[0.8, 0.2], [0.1, 0.9]]
+        return [0, 1], [[0.8, 0.2], [0.1, 0.9]]
 
     def load(*args, **kwargs):
         calls["load"] += 1
-        return SimpleNamespace(run_id=run_id, predict_proba=predict, metadata={"source_verified": False})
+        return SimpleNamespace(run_id=run_id, predict_with_proba=predict, metadata={"source_verified": False})
 
     def prepare(path, root, *, seed):
         calls["prepare"].append(seed)
@@ -68,6 +68,18 @@ def synthetic_run(tmp_path, monkeypatch):
 def run(fixture):
     """Chỉ gọi evaluate với các đường dẫn synthetic đã khóa trong tmp_path."""
     return evaluation.evaluate_run(fixture.run_id, fixture.csv, fixture.root, verification_confirmed=True)
+
+
+def test_error_examples_include_each_direction_once(synthetic_run, monkeypatch):
+    fixture = synthetic_run
+    model = SimpleNamespace(run_id=fixture.run_id, metadata={},
+                            predict_with_proba=lambda rows: ([1, 0], [[0.1, 0.9], [0.9, 0.1]]))
+    monkeypatch.setattr(pipeline_module, "load_pipeline", lambda *args, **kwargs: model)
+    checkpoint = evaluation._infer_checkpoint(
+        fixture.run_id, fixture.csv, fixture.root, fixture.run, fixture.original.copy()
+    )
+    errors = json.loads(checkpoint["outputs"]["error_analysis.json"])
+    assert [(row["row_id"], row["error_type"]) for row in errors["examples"]] == [(4, "FP"), (9, "FN")]
 
 
 def test_verified_seed_and_preserved_old_hashes(synthetic_run):
@@ -151,7 +163,7 @@ def test_inference_failure_blocks_automatic_retry(synthetic_run, monkeypatch):
         raise OSError("synthetic inference failure")
 
     monkeypatch.setattr(pipeline_module, "load_pipeline", lambda *args, **kwargs:
-                        SimpleNamespace(run_id=fixture.run_id, predict_proba=fail_predict))
+                        SimpleNamespace(run_id=fixture.run_id, predict_with_proba=fail_predict))
     with pytest.raises(OSError, match="inference failure"):
         run(fixture)
     with pytest.raises(ValueError, match="interrupted.*checkpoint"):
@@ -258,10 +270,10 @@ def test_second_evaluator_is_blocked_during_inference(synthetic_run, monkeypatch
         fixture.calls["predict"] += 1
         with pytest.raises(ValueError, match="exclusive lock"):
             run(fixture)
-        return [[0.8, 0.2], [0.1, 0.9]]
+        return [0, 1], [[0.8, 0.2], [0.1, 0.9]]
 
     monkeypatch.setattr(pipeline_module, "load_pipeline", lambda *args, **kwargs:
-                        SimpleNamespace(run_id=fixture.run_id, predict_proba=predict, metadata={}))
+                        SimpleNamespace(run_id=fixture.run_id, predict_with_proba=predict, metadata={}))
     assert run(fixture)["model"]["accuracy"] == 1.0
     assert fixture.calls["predict"] == 1
 

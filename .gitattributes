@@ -8,5 +8,5 @@
 /data/raw/*.csv -text
 /data/splits/*.txt -text
 /data/*.json -text
-/artifacts/** -text
-/results/** -text
+/artifacts/** -text whitespace=cr-at-eol
+/results/** -text whitespace=cr-at-eol

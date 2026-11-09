@@ -37,4 +37,11 @@ Thumbs.db
 !/artifacts/20261024-E4-local-v1/
 !/artifacts/20261024-E4-reviewed-v2/
 !/artifacts/20261024-E4-reviewed-v3/
+!/artifacts/20261109-NB-final/
 *.evaluate.lock
+/results/figures/20261109-NB-frequency/
+/results/metrics/20261109-NB-frequency/
+/results/runs/20261109-NB-frequency*.json
+/report/weka/evidence/*.arff
+/report/students.local.json
+/output/pdf/BaiTapLon.pdf

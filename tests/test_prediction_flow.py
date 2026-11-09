@@ -20,7 +20,7 @@ def record(value, sample_id="001"):
     return {**dict.fromkeys(FEATURE_COLUMNS, value), "sample_id": sample_id}
 
 
-def test_rows_keep_order_errors_missing_and_numeric_overflow():
+def test_rows_keep_order_errors_missing_and_outside_training_range():
     pipeline = fitted_pipeline()
     rows = [record(0), record("bad", "002"), record("", "003"), record(1e308, "004"), record(5, "005")]
     rows[0][FEATURE_COLUMNS[0]] = ""
@@ -29,11 +29,13 @@ def test_rows_keep_order_errors_missing_and_numeric_overflow():
     assert [item["sample_id"] for item in results] == ["001", "002", "003", "004", "005"]
     assert results[0]["status"] == "warning"
     assert results[0]["predicted_label"] == 0
-    for index in (1, 2, 3):
+    for index in (1, 2):
         assert results[index]["status"] == "error"
         assert results[index]["predicted_label"] is None
         assert results[index]["probability_1"] is None
     assert results[4]["predicted_label"] == 1
+    assert results[3]["predicted_label"] == 1
+    assert any("Ngoài min/max train" in warning for warning in results[3]["warnings"])
     parsed = list(csv.DictReader(io.StringIO(results_to_csv(results))))
     assert parsed[0]["sample_id"] == "001"
     assert parsed[1]["predicted_label"] == ""
@@ -51,7 +53,7 @@ def test_all_invalid_does_not_call_model(monkeypatch):
     pipeline = fitted_pipeline()
     def forbidden(*args):
         raise AssertionError("Không được gọi model khi mọi dòng đều lỗi")
-    monkeypatch.setattr(pipeline, "predict_proba", forbidden)
+    monkeypatch.setattr(pipeline, "predict_with_proba", forbidden)
     assert predict_records([record("bad")], pipeline)[0]["status"] == "error"
 
 

@@ -29,8 +29,7 @@ def test_end_to_end_freezes_data_and_evaluates_once(tmp_path):
     assert len(prepared["dev"]) == 16
     assert len(prepared["test"]) == 4
     assert set(prepared["dev"]).isdisjoint(prepared["test"])
-    config = {"strategy": "mean", "standardize": False, "var_smoothing": 1e-9, "variance_floor": 1e-12}
-    manifest = run_training(path, "synthetic-test", tmp_path, configs=[config])
+    manifest = run_training(path, "synthetic-test", tmp_path)
     assert manifest["stage"] == "trained_not_tested"
     assert not (tmp_path / "results/metrics/synthetic-test/test_metrics.json").exists()
     with pytest.raises(ValueError, match="xác nhận"):
@@ -46,7 +45,7 @@ def test_end_to_end_freezes_data_and_evaluates_once(tmp_path):
     with pytest.raises(ValueError, match="đã đánh giá|đánh giá"):
         evaluate_run("synthetic-test", path, tmp_path, verification_confirmed=True)
     with pytest.raises(ValueError, match="tồn tại"):
-        run_training(path, "synthetic-test", tmp_path, configs=[config])
+        run_training(path, "synthetic-test", tmp_path)
 
 
 def test_changed_data_or_split_stops_comparison(tmp_path):

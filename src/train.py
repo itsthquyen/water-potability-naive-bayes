@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from src.config import (PROJECT_ROOT, RAW_DATA_PATH, SEED, N_FOLDS, TEST_FRACTION,
-                        DEFAULT_VAR_SMOOTHING, VARIANCE_FLOOR, FEATURE_COLUMNS)
+                        FEATURE_COLUMNS)
 
 
 def write_json(path, value):
@@ -102,17 +102,17 @@ def prepare_data(csv_path, output_root=PROJECT_ROOT, seed=SEED):
             "manifest": manifest, "manifest_path": manifest_path}
 
 
-def run_training(csv_path=RAW_DATA_PATH, run_id=None, output_root=PROJECT_ROOT, *, configs=None, seed=SEED):
+def run_training(csv_path=RAW_DATA_PATH, run_id=None, output_root=PROJECT_ROOT, *, seed=SEED):
     """Chạy CV và lưu pipeline cuối trên dev; không tính điểm test trong hàm này.
 
-    configs=None là lưới 28 cấu hình. Đối số configs phục vụ tests nhỏ có nguồn
-    ghi rõ; không thay thế thực nghiệm chính. Output mới, không ghi đè run cũ.
+    Cấu hình cố định trước CV; không chọn số khoảng theo test.
+    Output mới, không ghi đè run cũ.
     """
-    from src.experiments import cross_validate, baseline_cross_validate, search_configurations
+    from src.experiments import cross_validate, baseline_cross_validate
     from src.pipeline import WaterPipeline, save_pipeline, sha256_file
     from src.visualization import create_eda_figures
     output_root = Path(output_root)
-    run_id = validate_run_id(run_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ-E4"))
+    run_id = validate_run_id(run_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ-NB"))
     run_path = output_root / "results" / "runs" / f"{run_id}.json"
     model_path = output_root / "artifacts" / run_id / "pipeline.json"
     metrics_directory = output_root / "results" / "metrics" / run_id
@@ -125,24 +125,19 @@ def run_training(csv_path=RAW_DATA_PATH, run_id=None, output_root=PROJECT_ROOT, 
     X = [data["clean"]["X"][index] for index in data["dev"]]
     y = [data["clean"]["y"][index] for index in data["dev"]]
     baseline = baseline_cross_validate(y, data["folds"])
-    fixed_results = {}
-    for experiment, strategy, standardize in (("E1", "mean", False), ("E2", "median", False), ("E3", "median", True)):
-        config = {"strategy": strategy, "standardize": standardize,
-                  "var_smoothing": DEFAULT_VAR_SMOOTHING, "variance_floor": VARIANCE_FLOOR}
-        fixed_results[experiment] = cross_validate(X, y, data["folds"], config)
-    search = search_configurations(X, y, data["folds"], configs=configs)
-    selected = search["best"]["config"]
-    pipeline = WaterPipeline(**selected).fit(X, y)
+    cv = cross_validate(X, y, data["folds"])
+    configuration = cv["config"]
+    pipeline = WaterPipeline().fit(X, y)
     environment = environment_metadata()
     metadata = {"csv_sha256": data["manifest"]["csv_sha256"],
                 "data_manifest_sha256": sha256_file(data["manifest_path"]),
-                "environment": environment, "selection": "balanced_accuracy_5fold_tolerance_0.005",
+                "environment": environment, "configuration": configuration,
                 "feature_columns": FEATURE_COLUMNS,
                  "source_verified": "csv_sha256" in data["manifest"]["source"],
                  "status": "development_run_uncommitted" if environment["dirty"] else
                            "unverified_source_run" if "csv_sha256" not in data["manifest"]["source"] else "candidate_run"}
     model_checksum = save_pipeline(pipeline, model_path, run_id, metadata)
-    write_json(metrics_directory / "cv_results.json", {"E0": baseline, **fixed_results, "E4": search})
+    write_json(metrics_directory / "cv_results.json", {"baseline": baseline, "naive_bayes": cv})
     create_eda_figures(X, y, figures)
     files = {}
     for folder in (metrics_directory, figures, model_path.parent):
@@ -154,7 +149,7 @@ def run_training(csv_path=RAW_DATA_PATH, run_id=None, output_root=PROJECT_ROOT, 
                 "model_path": model_path.relative_to(output_root).as_posix(), "files": files,
                 "csv_sha256": metadata["csv_sha256"],
                 "data_manifest_sha256": metadata["data_manifest_sha256"],
-                "selected_config": selected, "baseline_prior_1": prior,
+                "configuration": configuration, "baseline_prior_1": prior,
                 "environment": environment, "verification": "Automated tests must pass before final evaluation; not a final signed acceptance.",
                 "created_at": datetime.now(timezone.utc).isoformat()}
     write_json(run_path, manifest)
@@ -163,7 +158,7 @@ def run_training(csv_path=RAW_DATA_PATH, run_id=None, output_root=PROJECT_ROOT, 
 
 def main():
     """Huấn luyện chạy bằng python -m src.train; test có lệnh tách riêng."""
-    parser = argparse.ArgumentParser(description="CV và fit GNB tự cài, chưa mở test")
+    parser = argparse.ArgumentParser(description="CV và fit Naive Bayes đếm tần suất, chưa mở test")
     parser.add_argument("--data", type=Path, default=RAW_DATA_PATH)
     parser.add_argument("--run-id")
     parser.add_argument("--prepare-only", action="store_true", help="Chỉ audit/chia tập, chưa fit")

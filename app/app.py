@@ -1,6 +1,7 @@
 """Demo tiếng Việt chỉ sử dụng pipeline đã học và API dự đoán chung."""
 
 import hashlib
+from html import escape
 import json
 from pathlib import Path
 import re
@@ -10,7 +11,7 @@ import streamlit as st
 
 # Streamlit chạy file theo đường dẫn nên cần gốc project để import src.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src.config import FEATURE_COLUMNS, PROJECT_ROOT
+from src.config import DEMO_RUN_ID, FEATURE_COLUMNS, POTABILITY_LABEL_NAMES, PROJECT_ROOT
 from src.predict import predict_csv, predict_records, results_to_csv
 
 
@@ -95,10 +96,30 @@ def show_prediction_results(results, download_key):
         for warning in result["warnings"]:
             st.warning(f"Dòng {result['input_row_id']}: {warning}")
     if len(results) == 1 and results[0]["predicted_label"] is not None:
-        label = "uống được" if results[0]["predicted_label"] == 1 else "không uống được"
+        label = POTABILITY_LABEL_NAMES[results[0]["predicted_label"]]
         st.success(f"Mô hình dự đoán: {label} theo nhãn dữ liệu.")
     st.caption("probability_0/1 là xác suất do mô hình ước lượng, không phải tỷ lệ an toàn thực tế.")
-    st.dataframe(results, hide_index=True, width="stretch")
+    # Dùng HTML tĩnh để máy không cần nạp DLL PyArrow khi hiển thị dự đoán.
+    display_limit = 100
+    fields = ("input_row_id", "sample_id", "predicted_label", "probability_0", "probability_1", "error")
+    header = ("Dòng", "ID mẫu", "Nhãn dự đoán", "Xác suất lớp 0", "Xác suất lớp 1", "Lỗi")
+    table = ["<div style='overflow-x:auto'><table><thead><tr>"]
+    table.extend(f"<th scope='col'>{title}</th>" for title in header)
+    table.append("</tr></thead><tbody>")
+    for result in results[:display_limit]:
+        table.append("<tr>")
+        for field in fields:
+            value = result[field]
+            if field == "predicted_label" and value is not None:
+                value = f"{value} - {POTABILITY_LABEL_NAMES[value]}"
+            if field.startswith("probability_") and value is not None:
+                value = f"{value:.6f}"
+            table.append(f"<td>{escape(str(value)) if value is not None else ''}</td>")
+        table.append("</tr>")
+    table.append("</tbody></table></div>")
+    st.html("".join(table))
+    if len(results) > display_limit:
+        st.caption(f"Đang xem {display_limit}/{len(results)} dòng. Tệp CSV chứa toàn bộ kết quả.")
     st.download_button(
         "Tải kết quả CSV", data=results_to_csv(results).encode("utf-8-sig"),
         file_name="ket_qua_du_doan.csv", mime="text/csv", key=download_key,
@@ -111,17 +132,17 @@ def main():
     st.title("Phân loại khả năng uống được của nước")
     st.warning("Demo học thuật; không thay thế kiểm nghiệm chất lượng nước.")
     st.write(
-        "Gaussian Naive Bayes tự cài đặt dự đoán nhãn Potability từ 9 chỉ tiêu. "
+        "Naive Bayes đếm tần suất dự đoán nhãn Potability từ 9 chỉ tiêu đã chia khoảng. "
         "Nhãn 0: không uống được; nhãn 1: uống được theo bộ dữ liệu, không phải chứng nhận an toàn."
     )
     with st.expander("Giới thiệu và giới hạn"):
         st.write("Nhóm Quyền, Lộc, Séc | Trường Đại học Thủy Lợi.")
-        st.markdown("Nguồn dự kiến: [Water Potability, Aditya Kadiwal trên Kaggle](https://www.kaggle.com/datasets/adityakadiwal/water-potability).")
+        st.markdown("Nguồn: [Water Potability, Aditya Kadiwal trên Kaggle](https://www.kaggle.com/datasets/adityakadiwal/water-potability), phiên bản 3.")
         st.write("Ứng dụng chỉ nạp model đã học, không huấn luyện khi dự đoán. Xác suất Naive Bayes có thể chưa được hiệu chỉnh tốt; dữ liệu thiếu hoặc ngoài phạm vi train làm kết quả có giới hạn.")
 
     with st.sidebar:
         st.header("Model đã học")
-        selected_path = st.text_input("Đường dẫn model", value="artifacts/pipeline.json", help="Đường dẫn tương đối từ gốc project hoặc đường dẫn cục bộ. Cần file .sha256 đi kèm.")
+        selected_path = st.text_input("Đường dẫn model", value=f"artifacts/{DEMO_RUN_ID}/pipeline.json", help="Đường dẫn tương đối từ gốc project hoặc đường dẫn cục bộ. Cần file .sha256 đi kèm.")
         st.caption("Chọn tệp pipeline đã lưu từ thực nghiệm. Không có thao tác huấn luyện trong demo.")
     model_path = Path(selected_path).expanduser()
     if not model_path.is_absolute():

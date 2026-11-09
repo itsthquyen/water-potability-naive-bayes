@@ -1,13 +1,14 @@
-"""Ghép tiền xử lý và Gaussian NB tự cài; lưu JSON kèm SHA-256."""
+"""Ghép rời rạc hóa và Naive Bayes đếm tần suất; lưu JSON kèm SHA-256."""
 
 import hashlib
 import json
 import math
 from pathlib import Path
 
-from .config import CLASS_LABELS, DEFAULT_VAR_SMOOTHING, FEATURE_COLUMNS, VARIANCE_FLOOR
-from .gaussian_nb_numpy import GaussianNaiveBayes
-from .preprocessing import Preprocessor
+from .config import CLASS_LABELS, FEATURE_COLUMNS, MODEL_ALGORITHM
+from .discretization import Discretizer
+from .naive_bayes import NaiveBayes
+from .preprocessing import _validate_matrix
 
 
 def _json_copy(value):
@@ -56,136 +57,79 @@ def sha256_file(path):
 
 
 class WaterPipeline:
-    """Pipeline nghiệp vụ đúng 9 cột FEATURE_COLUMNS, xác suất theo [0, 1].
+    """Chuỗi 9 số đo → điền thiếu/rời rạc hóa → Naive Bayes đếm tần suất."""
 
-    preprocessor/model công khai để truy xuất trạng thái qua to_state; không
-    cần truy cập thuộc tính nội bộ của mô hình. run_id/metadata theo artifact.
-    """
-
-    def __init__(self, strategy="mean", standardize=False,
-                 var_smoothing=DEFAULT_VAR_SMOOTHING, variance_floor=VARIANCE_FLOOR):
-        """Cấu hình như hai bộ tự cài; giá trị không hợp lệ gây ValueError."""
-        self.preprocessor = Preprocessor(strategy, standardize)
-        self.model = GaussianNaiveBayes(var_smoothing=var_smoothing,
-                                       variance_floor=variance_floor)
-        self.var_smoothing = var_smoothing
-        self.variance_floor = variance_floor
+    def __init__(self):
+        self.preprocessor = Discretizer()
+        self.model = NaiveBayes()
         self.run_id = ""
         self.metadata = {}
 
     def fit(self, X, y):
-        """Fit X (n, 9), y nhị phân; trả self, không đổi state cũ nếu fit lỗi.
-
-        Thống kê tiền xử lý chỉ học trên X của lần gọi này. Sai shape/nhãn,
-        cột toàn thiếu hay lỗi số học gây ValueError từ các bộ tự cài.
-        """
-        preprocessor = Preprocessor(self.preprocessor.strategy, self.preprocessor.standardize)
-        transformed = preprocessor.fit_transform(X)
-        if preprocessor.to_state()["n_features"] != len(FEATURE_COLUMNS):
-            raise ValueError("Pipeline yêu cầu đúng 9 đặc trưng theo FEATURE_COLUMNS.")
-        model = GaussianNaiveBayes(var_smoothing=self.var_smoothing,
-                                  variance_floor=self.variance_floor)
-        model.fit(transformed, y)
-        self.preprocessor = preprocessor
-        self.model = model
-        self.run_id = ""
-        self.metadata = {}
+        """Fit trên X (n, 9), y (n,); lỗi không làm mất trạng thái trước đó."""
+        preprocessor = Discretizer()
+        # Giữ bản sao hàng và cột nếu đầu vào là iterator.
+        rows = _validate_matrix(X, len(FEATURE_COLUMNS))
+        preprocessor.fit(rows)
+        sizes = preprocessor.category_sizes
+        model = NaiveBayes().fit(preprocessor.transform(rows), y, sizes)
+        self.preprocessor, self.model = preprocessor, model
+        self.run_id, self.metadata = "", {}
         return self
 
     def predict(self, X):
-        """Trả nhãn n mẫu sau transform chung; batch có lỗi bị từ chối toàn bộ."""
-        return self.model.predict(self.preprocessor.transform(X))
+        """Trả nhãn n mẫu; lỗi dữ liệu hoặc hai điểm bằng 0 được báo rõ."""
+        return self.predict_with_proba(X)[0]
 
     def predict_proba(self, X):
-        """Trả xác suất shape (n, 2), thứ tự lớp [0, 1], không fit lại."""
-        return self.model.predict_proba(self.preprocessor.transform(X))
+        """Trả hậu nghiệm (n, 2) theo [0, 1]."""
+        return self.predict_with_proba(X)[1]
+
+    def predict_with_proba(self, X):
+        """Dùng tham số train đã lưu; trả nhãn và xác suất từ cùng lượt suy luận."""
+        return self.model.predict_with_proba(self.preprocessor.transform(X))
 
     def to_state(self, run_id="", metadata=None):
-        """Trả state schema_version=1, JSON thuần, bản sao không chia sẻ dữ liệu.
-
-        run_id rỗng và metadata=None giữ thông tin hiện có; metadata phải là
-        dict JSON hữu hạn. Chưa fit hoặc cấu trúc liên kết sai gây ValueError.
-        """
+        """Trả JSON schema v2, có định danh thuật toán và thứ tự cột/nhãn."""
         if not isinstance(run_id, str):
             raise ValueError("run_id phải là chuỗi.")
         metadata = self.metadata if metadata is None else metadata
-        if not isinstance(metadata, dict):
-            raise ValueError("metadata phải là dict.")
         state = _json_copy({
-            "schema_version": 1, "feature_columns": list(FEATURE_COLUMNS),
-            "class_labels": list(CLASS_LABELS), "run_id": run_id or self.run_id,
-            "metadata": metadata, "preprocessor": self.preprocessor.to_state(),
-            "model": self.model.to_state(),
+            "schema_version": 2, "algorithm": MODEL_ALGORITHM,
+            "feature_columns": FEATURE_COLUMNS, "class_labels": CLASS_LABELS,
+            "run_id": run_id or self.run_id, "metadata": metadata,
+            "preprocessor": self.preprocessor.to_state(), "model": self.model.to_state(),
         })
-        self._validate_components(state)
+        self.from_state(state)
         return state
-
-    @staticmethod
-    def _validate_components(state):
-        """Kiểm tra liên kết số cột/lớp, còn schema con do từng bộ tự cài kiểm tra."""
-        preprocessor = Preprocessor.from_state(state["preprocessor"])
-        model = GaussianNaiveBayes.from_state(state["model"])
-        if preprocessor.to_state()["n_features"] != len(FEATURE_COLUMNS):
-            raise ValueError("Số cột tiền xử lý không khớp FEATURE_COLUMNS.")
-        model_state = model.to_state()
-        if model_state["n_features"] != len(FEATURE_COLUMNS):
-            raise ValueError("Số cột mô hình không khớp tiền xử lý.")
-        if model_state["classes"] != CLASS_LABELS:
-            raise ValueError("Thứ tự lớp mô hình không khớp [0, 1].")
-        preprocessing_state = preprocessor.to_state()
-        counts = model_state["class_counts"]
-        for column in range(len(FEATURE_COLUMNS)):
-            expected_mean = preprocessing_state["means"][column]
-            scale = preprocessing_state["scales"][column]
-            constant = preprocessing_state["raw_min"][column] == preprocessing_state["raw_max"][column]
-            expected_variance = 0.0 if constant else scale * scale
-            if preprocessing_state["standardize"]:
-                expected_mean = 0.0
-                expected_variance = 0.0 if constant else 1.0
-            model_mean = sum(model_state["means"][label][column] * counts[label]
-                             for label in (0, 1)) / sum(counts)
-            mean_tolerance = 1e-9
-            if preprocessing_state["standardize"]:
-                # Tâm lưu bằng float có thể lệch nửa ULP ở dữ liệu offset lớn.
-                mean_tolerance += 2 * math.ulp(preprocessing_state["means"][column]) / scale
-                # Scale dựa trên độ lệch quanh tâm float, không phải mean chính xác.
-                expected_variance = 0.0 if constant else max(0.0, 1.0 - model_mean * model_mean)
-            if not math.isclose(model_mean, expected_mean, rel_tol=1e-8, abs_tol=mean_tolerance):
-                raise ValueError("Trung bình mô hình không khớp trạng thái tiền xử lý.")
-            if not math.isclose(model_state["global_variances_mle"][column], expected_variance,
-                                rel_tol=1e-8, abs_tol=1e-9):
-                raise ValueError("Phương sai mô hình không khớp trạng thái tiền xử lý.")
-        return preprocessor, model
 
     @classmethod
     def from_state(cls, state):
-        """Nạp state v1 đã kiểm tra; không fit, không cộng lại smoothing.
-
-        Bắt buộc đúng khóa, đúng thứ tự 9 đặc trưng, lớp nguyên [0, 1],
-        schema con hợp lệ và số chiều khớp. Mọi lỗi state gây ValueError.
-        """
+        """Nạp model đếm v2; không chuyển mô hình Gaussian v1 thành bản đếm."""
         state = _json_copy(state)
-        keys = {"schema_version", "feature_columns", "class_labels", "run_id",
-                "metadata", "preprocessor", "model"}
-        if not isinstance(state, dict) or set(state) != keys:
-            raise ValueError("Bộ khóa pipeline không đúng schema v1.")
-        if type(state["schema_version"]) is not int or state["schema_version"] != 1:
-            raise ValueError("schema_version phải là số nguyên 1.")
+        if isinstance(state, dict) and type(state.get("schema_version")) is int and state["schema_version"] == 1:
+            raise ValueError("Model Gaussian cũ không dùng được; hãy chọn Naive Bayes đếm tần suất.")
+        keys = {"schema_version", "algorithm", "feature_columns", "class_labels",
+                "run_id", "metadata", "preprocessor", "model"}
+        if (not isinstance(state, dict) or set(state) != keys
+                or type(state["schema_version"]) is not int or state["schema_version"] != 2
+                or state["algorithm"] != MODEL_ALGORITHM):
+            raise ValueError("Pipeline phải đúng schema v2 của Naive Bayes đếm tần suất.")
         if state["feature_columns"] != FEATURE_COLUMNS:
-            raise ValueError("Tên/thứ tự feature_columns không đúng cấu hình.")
+            raise ValueError("Tên/thứ tự cột không khớp FEATURE_COLUMNS.")
         labels = state["class_labels"]
-        if not isinstance(labels, list) or labels != CLASS_LABELS or any(type(x) is not int for x in labels):
-            raise ValueError("class_labels phải là [0, 1] nguyên theo đúng thứ tự.")
+        if labels != CLASS_LABELS or any(type(label) is not int for label in labels):
+            raise ValueError("Thứ tự lớp phải là [0, 1].")
         if not isinstance(state["run_id"], str) or not isinstance(state["metadata"], dict):
             raise ValueError("run_id phải là chuỗi và metadata phải là dict.")
-        preprocessor, model = cls._validate_components(state)
-        pipeline = cls.__new__(cls)
-        pipeline.preprocessor = preprocessor
-        pipeline.model = model
-        pipeline.var_smoothing = state["model"]["var_smoothing"]
-        pipeline.variance_floor = state["model"]["variance_floor"]
-        pipeline.run_id = state["run_id"]
-        pipeline.metadata = state["metadata"]
+        preprocessor = Discretizer.from_state(state["preprocessor"])
+        model = NaiveBayes.from_state(state["model"])
+        sizes = preprocessor.category_sizes
+        if len(sizes) != len(FEATURE_COLUMNS) or state["model"]["category_sizes"] != sizes:
+            raise ValueError("Số khoảng/số cột không khớp giữa tiền xử lý và Naive Bayes.")
+        pipeline = cls()
+        pipeline.preprocessor, pipeline.model = preprocessor, model
+        pipeline.run_id, pipeline.metadata = state["run_id"], state["metadata"]
         return pipeline
 
 

@@ -1,10 +1,11 @@
-"""Gaussian Naive Bayes tự cài; mọi cột xác suất theo thứ tự lớp [0, 1]."""
+"""Mã lịch sử của đề tài, không được import bởi bản chạy Naive Bayes hiện tại."""
 
 from copy import deepcopy
 import math
 from numbers import Real
 
-from .config import DEFAULT_VAR_SMOOTHING, VARIANCE_FLOOR
+DEFAULT_VAR_SMOOTHING = 1e-9
+VARIANCE_FLOOR = 1e-12
 
 
 def _finite_number(value, name):
@@ -72,6 +73,27 @@ def _moments(rows):
         means.append(mean)
         variances.append(squared_total / len(rows))
     return means, variances
+
+
+def _label_from_joint_scores(scores):
+    """Chọn MAP từ hai điểm log theo [0, 1]; chỉ chọn lớp 0 khi hòa thật."""
+    return 1 if scores[1] > scores[0] else 0
+
+
+def _log_posterior(scores):
+    """Chuẩn hóa hai điểm log bằng tổng exp sau khi trừ điểm lớn nhất."""
+    largest = max(scores)
+    shifted = [_finite_number(score - largest, "Điểm log đã dịch") for score in scores]
+    exponential_sum = 0.0
+    for score in shifted:
+        exponential_sum += math.exp(score)
+    log_total = math.log(exponential_sum)
+    return [_finite_number(score - log_total, "Log xác suất") for score in shifted]
+
+
+def _posterior(scores):
+    """Đổi log hậu nghiệm chuẩn hóa thành xác suất theo [0, 1]."""
+    return [math.exp(value) for value in _log_posterior(scores)]
 
 
 class GaussianNaiveBayes:
@@ -179,24 +201,27 @@ class GaussianNaiveBayes:
 
     def predict_log_proba(self, X):
         """Trả list (n, 2) log hậu nghiệm chuẩn hóa theo lớp [0, 1]."""
-        result = []
-        for scores in self._joint_log_scores(X):
-            largest = max(scores)
-            shifted = [_finite_number(score - largest, "Điểm log đã dịch") for score in scores]
-            exponential_sum = 0.0
-            for score in shifted:
-                exponential_sum += math.exp(score)
-            log_total = math.log(exponential_sum)
-            result.append([_finite_number(score - log_total, "Log xác suất") for score in shifted])
-        return result
+        return [_log_posterior(scores) for scores in self._joint_log_scores(X)]
 
     def predict_proba(self, X):
         """Trả list (n, 2) xác suất; exp có thể về 0 khi hậu nghiệm rất nhỏ."""
-        return [[math.exp(value) for value in row] for row in self.predict_log_proba(X)]
+        return [_posterior(scores) for scores in self._joint_log_scores(X)]
 
     def predict(self, X):
         """Trả list nhãn; so sánh điểm log gốc và chọn lớp 0 khi hòa."""
-        return [1 if scores[1] > scores[0] else 0 for scores in self._joint_log_scores(X)]
+        return [_label_from_joint_scores(scores) for scores in self._joint_log_scores(X)]
+
+    def predict_with_proba(self, X):
+        """Trả (nhãn n mẫu, xác suất n×2) từ cùng một lượt tính điểm log.
+
+        Dùng điểm log gốc chọn MAP; hai xác suất float có thể cùng làm tròn
+        thành 0.5 dù điểm log khác nhau. Xác suất vẫn theo thứ tự lớp [0, 1].
+        """
+        labels, probabilities = [], []
+        for scores in self._joint_log_scores(X):
+            labels.append(_label_from_joint_scores(scores))
+            probabilities.append(_posterior(scores))
+        return labels, probabilities
 
     def to_state(self):
         """Trả bản sao dict có thể ghi JSON, không chia sẻ list với mô hình."""

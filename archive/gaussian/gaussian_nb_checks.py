@@ -5,8 +5,7 @@ import math
 
 import pytest
 
-from src.config import DEFAULT_VAR_SMOOTHING, VARIANCE_FLOOR
-from src.gaussian_nb_numpy import GaussianNaiveBayes
+from archive.gaussian.gaussian_nb_numpy import DEFAULT_VAR_SMOOTHING, VARIANCE_FLOOR, GaussianNaiveBayes
 
 
 def hand_model():
@@ -50,6 +49,30 @@ def test_multiple_features_unequal_priors_and_constant_column():
     assert state["variances_mle"] == [[1, 0], [1, 0]]
     # Tại trung điểm 3, hai likelihood bằng nhau: hậu nghiệm bằng prior.
     assert model.predict_proba([[3, 7]])[0] == pytest.approx([2 / 3, 1 / 3])
+
+
+def test_hand_calculated_two_features_with_different_class_variances():
+    model = GaussianNaiveBayes(var_smoothing=0.01, variance_floor=1).fit(
+        [[0, 0], [2, 2], [4, 4], [8, 6]], [0, 0, 1, 1]
+    )
+    # Prior bằng nhau. Tâm (1, 1) và (6, 5); phương sai hiệu dụng (2, 2) và (5, 2).
+    # Với x=(3, 4), tổng bình phương chuẩn hóa: 6.5 và 2.3.
+    likelihood_ratio = math.sqrt(2 / 5) * math.exp((6.5 - 2.3) / 2)
+    labels, probabilities = model.predict_with_proba([[3, 4]])
+    assert labels == [1]
+    assert probabilities[0] == pytest.approx(
+        [1 / (1 + likelihood_ratio), likelihood_ratio / (1 + likelihood_ratio)], abs=1e-14
+    )
+
+
+def test_near_equal_probabilities_do_not_override_log_map(monkeypatch):
+    model = hand_model()
+    # Chênh lệch log 2^-55 khác 0, nhưng nhỏ hơn độ phân giải của p quanh 0.5.
+    monkeypatch.setattr(model, "_joint_log_scores", lambda _: [[0.0, 2.0 ** -55], [0.0, 0.0]])
+    samples = [[1], [3]]
+    labels, probabilities = model.predict_with_proba(samples)
+    assert probabilities == [[0.5, 0.5], [0.5, 0.5]]
+    assert labels == model.predict(samples) == [1, 0]
 
 
 def test_all_constant_singletons_floor_and_tie():

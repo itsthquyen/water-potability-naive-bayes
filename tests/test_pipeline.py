@@ -7,9 +7,9 @@ import json
 import pytest
 
 from src.config import FEATURE_COLUMNS
-from src.gaussian_nb_numpy import GaussianNaiveBayes
+from src.discretization import Discretizer
+from src.naive_bayes import NaiveBayes
 from src.pipeline import WaterPipeline, load_pipeline, save_pipeline, sha256_file
-from src.preprocessing import Preprocessor
 
 
 def training_example():
@@ -20,19 +20,18 @@ def training_example():
     return matrix, [0, 0, 0, 1, 1, 1]
 
 
-def test_large_offset_standardized_roundtrip():
+def test_large_offset_discretized_roundtrip():
     """Offset 1e16 có ULP=2; tâm float lệch vẫn phải lưu/nạp được."""
     rows = [[value] * 9 for value in (1e16, 1e16 + 2, 1e16 + 4, 1e16 + 6)]
-    pipeline = WaterPipeline(standardize=True).fit(rows, [0, 0, 1, 1])
+    pipeline = WaterPipeline().fit(rows, [0, 0, 1, 1])
     restored = WaterPipeline.from_state(pipeline.to_state())
     assert restored.predict(rows) == [0, 0, 1, 1]
     assert restored.predict_proba(rows) == pipeline.predict_proba(rows)
 
 
-@pytest.mark.parametrize("standardize", [False, True])
-def test_roundtrip_predictions_probabilities_metadata(tmp_path, standardize):
+def test_roundtrip_predictions_probabilities_metadata(tmp_path):
     matrix, labels = training_example()
-    pipeline = WaterPipeline("median", standardize)
+    pipeline = WaterPipeline()
     assert pipeline.fit(matrix, labels) is pipeline
     samples = [matrix[0], matrix[-1], [None] + matrix[2][1:]]
     expected_labels = pipeline.predict(samples)
@@ -54,13 +53,13 @@ def test_roundtrip_predictions_probabilities_metadata(tmp_path, standardize):
     metadata["fold"].append(999)
     state = restored.to_state()
     assert state["metadata"]["fold"] == [1, 2]
-    state["preprocessor"]["means"][0] = 999
+    state["preprocessor"]["fill_values"][0] = 999
     assert restored.predict_proba(samples) == expected_probabilities
     assert state["feature_columns"] == FEATURE_COLUMNS
     assert state["class_labels"] == [0, 1]
 
 
-def test_load_does_not_fit_or_add_smoothing(tmp_path, monkeypatch):
+def test_load_does_not_fit_again(tmp_path, monkeypatch):
     matrix, labels = training_example()
     pipeline = WaterPipeline().fit(matrix, labels)
     checksum = save_pipeline(pipeline, tmp_path / "model.json")
@@ -69,8 +68,8 @@ def test_load_does_not_fit_or_add_smoothing(tmp_path, monkeypatch):
     def forbid_fit(*args, **kwargs):
         raise AssertionError("Không được fit khi load hoặc predict.")
 
-    monkeypatch.setattr(Preprocessor, "fit", forbid_fit)
-    monkeypatch.setattr(GaussianNaiveBayes, "fit", forbid_fit)
+    monkeypatch.setattr(Discretizer, "fit", forbid_fit)
+    monkeypatch.setattr(NaiveBayes, "fit", forbid_fit)
     restored = load_pipeline(tmp_path / "model.json", checksum)
     assert restored.model.to_state() == before
     assert restored.predict([matrix[0]]) == [0]
@@ -94,7 +93,7 @@ def test_invalid_width_unfitted_and_failed_refit():
 
 
 @pytest.mark.parametrize("key, value", [
-    ("schema_version", True), ("schema_version", 2),
+    ("schema_version", True), ("schema_version", 3), ("algorithm", "unknown"),
     ("feature_columns", list(reversed(FEATURE_COLUMNS))),
     ("feature_columns", FEATURE_COLUMNS[:-1]),
     ("class_labels", [1, 0]), ("class_labels", [False, True]),
@@ -120,16 +119,15 @@ def test_missing_extra_keys_and_dimensions():
         WaterPipeline.from_state(missing)
     # State con riêng lẻ hợp lệ nhưng không khớp nghiệp vụ 9 cột.
     bad_preprocessor = copy.deepcopy(state)
-    bad_preprocessor["preprocessor"] = Preprocessor().fit([[1], [2]]).to_state()
+    bad_preprocessor["preprocessor"] = Discretizer().fit([[1], [2]]).to_state()
     with pytest.raises(ValueError):
         WaterPipeline.from_state(bad_preprocessor)
     bad_model = copy.deepcopy(state)
-    bad_model["model"] = GaussianNaiveBayes().fit([[1], [2], [8], [9]], [0, 0, 1, 1]).to_state()
+    bad_model["model"] = NaiveBayes().fit([[0], [0], [1], [1]], [0, 0, 1, 1], [2]).to_state()
     with pytest.raises(ValueError):
         WaterPipeline.from_state(bad_model)
     mismatched = copy.deepcopy(state)
-    shifted = [[value + 100 if value is not None else None for value in row] for row in matrix]
-    mismatched["preprocessor"] = Preprocessor().fit(shifted).to_state()
+    mismatched["preprocessor"]["cut_points"][0] = []
     with pytest.raises(ValueError):
         WaterPipeline.from_state(mismatched)
 
@@ -216,6 +214,6 @@ def test_invalid_paths_and_sha256_known_answer(tmp_path):
 def test_written_json_contains_only_finite_values(tmp_path):
     matrix, labels = training_example()
     path = tmp_path / "model.json"
-    save_pipeline(WaterPipeline(standardize=True).fit(matrix, labels), path)
+    save_pipeline(WaterPipeline().fit(matrix, labels), path)
     state = json.loads(path.read_text(encoding="utf-8"))
     assert json.dumps(state, allow_nan=False)
