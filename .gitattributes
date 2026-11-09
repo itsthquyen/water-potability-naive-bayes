@@ -3,6 +3,7 @@
 *.md text eol=lf
 *.txt text eol=lf
 *.ipynb text eol=lf
+*.pdf binary
 
 # Giữ nguyên bytes dữ liệu và kết quả để SHA-256 không đổi khi clone Windows.
 /data/raw/*.csv -text
