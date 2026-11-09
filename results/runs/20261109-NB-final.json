@@ -1,0 +1,60 @@
+{
+  "run_id": "20261109-NB-final",
+  "stage": "evaluated",
+  "model_sha256": "b717708f822b5eabc16bd68ba33d30a303ab79ba4e139e09fcb01042df98350f",
+  "model_path": "artifacts/20261109-NB-final/pipeline.json",
+  "files": {
+    "results/metrics/20261109-NB-final/cv_results.json": "621993ebf87a7af268790f85c7a46cd21e4b88a93f5ec609cd0b6028ca0a18ca",
+    "results/figures/20261109-NB-final/boxplots.png": "e41819e5a1dec8b2458ef8ef82d6f4a535f0a31e4f388d3706036a9e5b8b38cb",
+    "results/figures/20261109-NB-final/class_counts.png": "f7a7902a0eb1509c6ff1c0f8355d03e5e828967eb510750b10c25c1fafa5d7f6",
+    "results/figures/20261109-NB-final/eda_manifest.json": "e9a88158a1da1fff4a0ac1ae9d4c6e552271475143e061240d549cb1c6b68a07",
+    "results/figures/20261109-NB-final/histogram_Chloramines.png": "a87f94695cf1a00edd517e5572322d234cbb52f764d67be64db73a50f857f042",
+    "results/figures/20261109-NB-final/histogram_Conductivity.png": "d840c529ddc79313bbd9004b2d4d31f767c6cef95a1fc92efcb1c29c60128b85",
+    "results/figures/20261109-NB-final/histogram_Hardness.png": "82e2a3930213ea445dccb43944dd0ac05b6a60ed0dbd85bd913675c46720ac2c",
+    "results/figures/20261109-NB-final/histogram_Organic_carbon.png": "f407df104170d4d5b88a3cceade3aa7facab3abf45b5dd932b4fd1dc1f35bb38",
+    "results/figures/20261109-NB-final/histogram_ph.png": "b5ae18f377c11d9c0c909802de49128c829b7df3eba4c59bc2ce64a12b722c93",
+    "results/figures/20261109-NB-final/histogram_Solids.png": "1f4f516cabc981e9bcdf8e9c0f473159f3cbe6fc7146c0b945435ca0900316bc",
+    "results/figures/20261109-NB-final/histogram_Sulfate.png": "9aa50327898676aa7d93aced82758410169af1b2636e30acb7976ccf5291777a",
+    "results/figures/20261109-NB-final/histogram_Trihalomethanes.png": "c12e1a7b804f2675c3bff9ed124c25b1dafa4533c40b8587f16cba1522e914b7",
+    "results/figures/20261109-NB-final/histogram_Turbidity.png": "b677112dc84bec42146a6d6b0d3301830ab933061e01eeef354599cef8711981",
+    "results/figures/20261109-NB-final/missing_counts.png": "c6bd012a5c7807bcc8850489fde8fa213802647e4bd4adbc96d7c05bfd20fabe",
+    "results/figures/20261109-NB-final/pearson.png": "0e4402bb50ed9fba488f11d8745c6ac6205a3ac3bb99c49454ed2cdca50e89e4",
+    "artifacts/20261109-NB-final/pipeline.json": "b717708f822b5eabc16bd68ba33d30a303ab79ba4e139e09fcb01042df98350f",
+    "artifacts/20261109-NB-final/pipeline.json.sha256": "1269ba6548f9d1a9469816bd71c21c71e4fe93b484977407fc17bb8f86da3c30",
+    "results/figures/20261109-NB-final/confusion_matrix.png": "dfa2f8285ccfc251ce47c61528a85b4d877e59fe87b018479fdd6ce1da925187",
+    "results/figures/20261109-NB-final/evaluation_manifest.json": "52002b2b92a990b03182dc3bb24704bd83ff647c0b1c8153cdc5549b48e00248",
+    "results/figures/20261109-NB-final/roc.png": "033b002effec2dd27ad1b8b4e651a6d2d00f194a5e36476e01e80ee8f2d11639",
+    "results/metrics/20261109-NB-final/baseline_test_metrics.json": "531b40d9eee1c809feda1b39b9046692f6f810e53803ee77a837c0269c18590e",
+    "results/metrics/20261109-NB-final/error_analysis.json": "7bf894265b0d2af8d7e961baa518e2b215b57fcc3e59ab5627fcd2e60b1fdd4f",
+    "results/metrics/20261109-NB-final/test_metrics.json": "0085e288ca4922870d4ca0248efb271e62a146e991dfabab4ccc53b368a4d773",
+    "results/metrics/20261109-NB-final/test_predictions.csv": "80e4d9a2a7046c07a3678a22599650d06a3e8ad9b9cf92779499b4c667def777"
+  },
+  "csv_sha256": "904004bde729bfe3d2e195f46343bceead09e32a0eb95bb8184e7e20e029b2bf",
+  "data_manifest_sha256": "1e222d410868a14b1b42742935336414448d7c144ed42e8ded88c5385358f2b1",
+  "configuration": {
+    "algorithm": "naive_bayes_frequency",
+    "max_bins": 3,
+    "missing": "median",
+    "smoothing": false
+  },
+  "baseline_prior_1": 0.3900763358778626,
+  "environment": {
+    "python": "3.12.14",
+    "packages": {
+      "numpy": "2.5.4",
+      "pandas": "3.1.0",
+      "matplotlib": "3.11.2",
+      "streamlit": "1.66.1",
+      "pytest": "9.1.1",
+      "nbformat": "5.11.1",
+      "nbclient": "0.11.0"
+    },
+    "commit": "f2fff40858e0f35f97a278c337a091e87b5fe53a",
+    "dirty": true
+  },
+  "verification": "Automated tests must pass before final evaluation; not a final signed acceptance.",
+  "created_at": "2026-11-09T01:21:42.364350+00:00",
+  "evaluation_checkpoint_sha256": "7179ee08edd1f2d5c94dd8e5f2ecebe9bd57145edc32493a0827f8aafc4d3cf3",
+  "verification_confirmed": true,
+  "acceptance_status": "development_evaluation_not_final_signed_submission"
+}
