@@ -1,5 +1,25 @@
 # Tái tạo hình Weka cho báo cáo
 
+## Thực nghiệm sáu thuật toán
+
+Chạy `rtk proxy .venv/Scripts/python.exe -X utf8 report/weka/run_six_weka.py`
+sau khi đã chạy `src.six_experiments`. Lệnh dùng lần chạy
+`20261124-six-v1`, tải gói giáo dục ID3 từ SourceForge chính thức của Weka,
+biên dịch hai tệp Java và chạy Weka đã cài trên máy. Tùy chọn `--run-id`
+và `--weka-home` cho phép dùng lần chạy hoặc thư mục cài khác.
+
+`DirectFrequencyNB.java` tự tính tần suất trực tiếp trên thuộc tính danh
+nghĩa. `SixModelEvidence.java` chạy bộ lọc ReplaceMissingValues,
+Discretize và sáu bộ phân lớp. Đầu ra có log, CSV dự đoán và chín ảnh
+panel Weka. ID3 không gán được 53 mẫu; CSV giữ nhãn trống và summary có
+cột unclassified, không tự chuyển các dòng này thành lớp 0.
+
+Weka thực hành điền mean khác Python median. Bảng bộ phân lớp đối chiếu
+dùng ARFF đã biến đổi bằng tham số train của Python. J48/Logistic/SMO có
+cấu hình và cách tối ưu riêng, được giải thích trong báo cáo.
+
+## Hồ sơ hình của phiên bản cũ
+
 Weka dùng các panel **Explorer → Preprocess** và **Visualize** để mở tệp
 ARFF và xuất ảnh. Model, cách điền thiếu, phép chia, các chỉ số và các
 điểm ROC đến từ mã Python tự cài. Không dùng classifier, bộ lọc hay hàm
