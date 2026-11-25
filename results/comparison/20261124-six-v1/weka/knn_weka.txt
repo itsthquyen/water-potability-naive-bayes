@@ -1,0 +1,30 @@
+=== Weka 3.8.7 - knn ===
+
+Scheme: weka.classifiers.lazy.IBk
+Options: -K 5 -W 0 -A "weka.core.neighboursearch.LinearNNSearch -A \"weka.core.EuclideanDistance -D -R first-last\""
+Train: 2620
+Test: 656
+Fit seconds: 0.0024091
+
+
+Correctly Classified Instances         425               64.7866 %
+Incorrectly Classified Instances       231               35.2134 %
+Kappa statistic                          0.2246
+Mean absolute error                      0.411 
+Root mean squared error                  0.4814
+Relative absolute error                 86.3624 %
+Root relative squared error             98.6771 %
+Total Number of Instances              656     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0,793    0,578    0,682      0,793    0,733      0,230    0,652     0,706     0
+                 0,422    0,208    0,565      0,422    0,483      0,230    0,652     0,517     1
+Weighted Avg.    0,648    0,433    0,636      0,648    0,635      0,230    0,652     0,632     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 317  83 |   a = 0
+ 148 108 |   b = 1

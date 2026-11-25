@@ -3,7 +3,7 @@
 import math
 import pytest
 
-from src.comparison_models import NumericPreprocessor, DecisionTree, entropy
+from src.comparison_models import NumericPreprocessor, DecisionTree, entropy, KNearestNeighbors
 
 
 def test_numeric_fit_does_not_read_validation():
@@ -27,3 +27,12 @@ def test_entropy_and_both_tree_criteria():
         assert tree.root["gain"] == 1
         assert tree.predict_with_scores(X) == (y, [0, 0, 1, 1])
         assert tree.predict_with_scores([[2, 0]]) == ([0], [0.5])
+
+
+def test_knn_distances_and_votes_are_hand_calculated():
+    model = KNearestNeighbors(3).fit([[0], [2], [5], [8]], [0, 1, 1, 0])
+    assert model.predict_with_scores([[3]]) == ([1], [2 / 3])
+    tie = KNearestNeighbors(2).fit([[0], [2]], [0, 1])
+    assert tie.predict_with_scores([[1]]) == ([0], [0.5])
+    with pytest.raises(ValueError):
+        KNearestNeighbors(5).fit([[1]], [0])
