@@ -1,0 +1,30 @@
+=== Weka 3.8.7 - logistic ===
+
+Scheme: weka.classifiers.functions.Logistic
+Options: -R 0.001 -M 400 -num-decimal-places 4
+Train: 2620
+Test: 656
+Fit seconds: 0.0493274
+
+
+Correctly Classified Instances         400               60.9756 %
+Incorrectly Classified Instances       256               39.0244 %
+Kappa statistic                          0     
+Mean absolute error                      0.4746
+Root mean squared error                  0.4875
+Relative absolute error                 99.7363 %
+Root relative squared error             99.9354 %
+Total Number of Instances              656     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 1,000    1,000    0,610      1,000    0,758      ?        0,518     0,607     0
+                 0,000    0,000    ?          0,000    ?          ?        0,518     0,441     1
+Weighted Avg.    0,610    0,610    ?          0,610    ?          ?        0,518     0,542     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 400   0 |   a = 0
+ 256   0 |   b = 1

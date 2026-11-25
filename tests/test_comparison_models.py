@@ -3,7 +3,7 @@
 import math
 import pytest
 
-from src.comparison_models import NumericPreprocessor, DecisionTree, entropy, KNearestNeighbors
+from src.comparison_models import NumericPreprocessor, DecisionTree, entropy, KNearestNeighbors, LogisticRegression
 
 
 def test_numeric_fit_does_not_read_validation():
@@ -36,3 +36,10 @@ def test_knn_distances_and_votes_are_hand_calculated():
     assert tie.predict_with_scores([[1]]) == ([0], [0.5])
     with pytest.raises(ValueError):
         KNearestNeighbors(5).fit([[1]], [0])
+
+
+def test_one_logistic_step_matches_gradient_at_origin():
+    model = LogisticRegression(epochs=1, learning_rate=1, l2=0).fit([[-1], [1]], [0, 1])
+    assert model.weights == [0.5] and model.bias == 0
+    assert model.predict_with_scores([[-1], [1]])[0] == [0, 1]
+    assert model.predict_with_scores([[1]])[1][0] == pytest.approx(1 / (1 + math.exp(-0.5)))
