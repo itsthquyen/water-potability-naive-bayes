@@ -4,6 +4,7 @@
 *.txt text eol=lf
 *.ipynb text eol=lf
 *.pdf binary
+*.docx binary
 
 # Giữ nguyên bytes dữ liệu và kết quả để SHA-256 không đổi khi clone Windows.
 /data/raw/*.csv -text
@@ -11,3 +12,5 @@
 /data/*.json -text
 /artifacts/** -text whitespace=cr-at-eol
 /results/** -text whitespace=cr-at-eol
+# Native Weka logs contain aligned trailing spaces; preserve their exact bytes.
+/results/comparison/**/weka/*_weka.txt -text -whitespace
