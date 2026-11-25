@@ -30,6 +30,9 @@ Các bản này cùng tệp roster thành viên được lưu cục bộ. Bản 
 [PDF công khai](output/pdf/BaiTapLon-cong-khai.pdf) và
 [Word công khai](output/docx/BaiTapLon-cong-khai.docx). Trình dựng nằm ở
 `report/build_six_report.py`, nhận `--template`, `--students` và `--public`.
+Bản căn chỉnh ngày 25/11/2026 có 44 trang, mục lục tự động, danh mục 20 bảng
+và 17 hình. Sau khi dựng Word, cập nhật các trường bằng `Ctrl+A`, `F9` rồi
+lưu và xuất PDF để số trang và danh mục khớp với bố cục mới.
 Bộ lọc Weka
 thực hành dùng mean, Python dùng median; bảng đối chiếu bộ phân lớp Weka
 dùng ARFF theo cùng thống kê train của Python và công bố rõ cấu hình.

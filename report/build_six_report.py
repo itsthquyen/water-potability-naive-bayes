@@ -8,11 +8,14 @@ from hashlib import sha256
 import json
 from math import prod
 from pathlib import Path
+import re
 import sys
 
 from docx import Document
+from docx.enum.style import WD_STYLE_TYPE
+from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
 from docx.enum.section import WD_SECTION_START
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT, WD_TAB_LEADER
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
@@ -25,6 +28,31 @@ from src.eda import summarize_features
 from src.six_experiments import ALGORITHMS, NAMES, RUN_ID
 
 FOLDER = ROOT / "results" / "comparison" / RUN_ID
+REPORT_TITLE = ("Phân loại chất lượng nước uống được hay không uống được "
+                "bằng thuật toán Naive Bayes và so sánh với các thuật toán khác")
+LECTURER = "TS. Trần Mạnh Tuần"
+TABLE_CAPTIONS = (
+    "Các bước thực hiện đề tài",
+    "Trích năm mẫu đầu của dữ liệu thô",
+    "Quy mô dữ liệu và số ô thiếu trước tiền xử lý",
+    "Số mẫu qua các bước kiểm tra và chia dữ liệu",
+    "Trung vị và ngưỡng chia khoảng học từ development",
+    "Trung bình và độ lệch chuẩn học từ development",
+    "Thống kê các chỉ tiêu trên development",
+    "Nguồn tài liệu và vai trò của sáu thuật toán",
+    "Các đại lượng trong công thức Naive Bayes",
+    "Trình tự huấn luyện và dự đoán bằng Naive Bayes",
+    "Ví dụ tính tay xác suất cho hai thuộc tính",
+    "Bảng đếm Naive Bayes cho mẫu có ID dòng 27",
+    "Phân bố hai lớp trong development và test",
+    "Các chỉ số đánh giá mô hình phân loại",
+    "Kết quả kiểm định chéo năm fold của sáu thuật toán",
+    "Balanced Accuracy và AUC của Naive Bayes và KNN theo fold",
+    "So sánh sáu mô hình Python trên cùng tập test",
+    "Phân tích các dạng sai số của Naive Bayes",
+    "Đối chiếu kết quả Python và Weka",
+    "Các tình huống kiểm thử ứng dụng dự đoán",
+)
 
 
 def read(path):
@@ -41,6 +69,8 @@ def percent(value):
 
 def font(run, size=13, bold=False, italic=False):
     run.font.name = "Times New Roman"
+    for script in ("ascii", "hAnsi", "eastAsia", "cs"):
+        run._r.get_or_add_rPr().rFonts.set(qn("w:" + script), "Times New Roman")
     run.font.size = Pt(size)
     run.bold, run.italic = bold, italic
     run.font.color.rgb = RGBColor(0, 0, 0)
@@ -62,54 +92,120 @@ def build(template, students, public=False):
     X_dev = [X[i] for i in dev_ids]
     stats = summarize_features(X_dev, FEATURE_COLUMNS)
     doc = Document(template)
-    original_paragraphs = list(doc.paragraphs)
-    cover = [deepcopy(p._p) for p in original_paragraphs[:44]]
+    # Giữ nguyên nhóm hình khung bìa và biểu trưng của tài liệu mẫu.
+    cover = deepcopy(doc.paragraphs[0]._p)
     cover_section = deepcopy(doc.sections[0]._sectPr)
     for child in list(doc.element.body):
         doc.element.body.remove(child)
-    for node in cover:
-        for old_section in node.xpath("./w:pPr/w:sectPr"):
-            old_section.getparent().remove(old_section)
-        doc.element.body.append(node)
+    for old_section in cover.xpath("./w:pPr/w:sectPr"):
+        old_section.getparent().remove(old_section)
+    doc.element.body.append(cover)
     doc.element.body.append(cover_section)
-    replacements = {15: "Phân loại chất lượng nước uống được hay không uống được",
-                    16: "bằng thuật toán Naive Bayes và so sánh năm thuật toán học máy",
-                    25: "Nhóm sinh viên thực hiện: Nhóm 11 — 65CNTT",
-                    26: "", 27: "", 28: ""}
-    for i, (name, student_id) in enumerate(students, 26):
-        replacements[i] = f"{i - 25}. {name} - {student_id}"
-    for i, text in replacements.items():
-        paragraph = doc.paragraphs[i]
-        paragraph.clear()
-        run = paragraph.add_run(text)
-        font(run, bold=i in (15, 16))
-    for index, paragraph in enumerate(doc.paragraphs):
-        paragraph.paragraph_format.first_line_indent = Cm(0)
-        if not paragraph.text.strip():
-            spacing = 19 if 2 <= index <= 10 else 15 if 29 <= index <= 42 else 11
-            paragraph.paragraph_format.line_spacing = Pt(spacing)
-            paragraph.paragraph_format.space_before = Pt(0)
-            paragraph.paragraph_format.space_after = Pt(0)
+
+    def cover_paragraph(text, size=13, bold=False, before=0, after=0, left=0, style=None):
+        p = doc.add_paragraph(style=style)
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT if left else WD_ALIGN_PARAGRAPH.CENTER
+        fmt = p.paragraph_format
+        fmt.left_indent, fmt.right_indent, fmt.first_line_indent = Cm(left), Cm(0), Cm(0)
+        fmt.space_before, fmt.space_after = Pt(before), Pt(after)
+        fmt.line_spacing = 1.15
+        fmt.keep_together = True
+        font(p.add_run(text), size, bold)
+        return p
+
+    school = doc.paragraphs[0]
+    for run in school.runs:
+        if run.text:
+            run.text = ""
+    school.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    school.paragraph_format.left_indent = Cm(0)
+    school.paragraph_format.right_indent = Cm(0)
+    school.paragraph_format.first_line_indent = Cm(0)
+    school.paragraph_format.space_before = Pt(0)
+    school.paragraph_format.space_after = Pt(3)
+    school.paragraph_format.line_spacing = 1.15
+    font(school.add_run("TRƯỜNG ĐẠI HỌC THỦY LỢI"), 14, True)
+    cover_paragraph("KHOA CÔNG NGHỆ THÔNG TIN", 14, True)
+    cover_paragraph("BÀI TẬP LỚN", 16, True, before=175)
+    cover_paragraph("HỌC PHẦN KHAI PHÁ DỮ LIỆU", 13, True, before=5)
+    cover_paragraph("Đề tài", 13, True, before=14, after=7)
+    cover_paragraph(REPORT_TITLE.replace(" bằng thuật toán", "\nbằng thuật toán", 1),
+                    14, True, style="Title")
+    cover_paragraph("Giảng viên hướng dẫn: " + LECTURER, before=36, left=2.4)
+    cover_paragraph("Nhóm thực hiện: Nhóm 11", bold=True, before=12, left=2.4)
+    cover_paragraph("Lớp: 65CNTT", after=6, left=2.4)
+    for index, (name, student_id) in enumerate(students, 1):
+        cover_paragraph(f"{index}. {name} - {student_id}", before=3, left=2.4)
+    cover_paragraph("HÀ NỘI, 2026", 13, True, before=170 if students else 222)
     section = doc.add_section(WD_SECTION_START.NEW_PAGE)
     section.left_margin = Cm(2.5)
     section.right_margin = section.top_margin = section.bottom_margin = Cm(2)
     section.different_first_page_header_footer = False
-    for numbering in section._sectPr.findall(qn("w:pgNumType")):
-        section._sectPr.remove(numbering)
-    for name, size in (("Normal", 13), ("Heading 1", 14), ("Heading 2", 13), ("Heading 3", 13)):
-        style = doc.styles[name]
+    numbering = section._sectPr.find(qn("w:pgNumType"))
+    if numbering is None:
+        numbering = OxmlElement("w:pgNumType")
+        section._sectPr.append(numbering)
+    numbering.set(qn("w:start"), "1")
+    for name, size in (("Normal", 13), ("Heading 1", 14), ("Heading 2", 13),
+                       ("Heading 3", 13), ("Heading 4", 13), ("Title", 14), ("Caption", 11.5)):
+        style = (doc.styles[name] if name in doc.styles
+                 else doc.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH))
+        if name == "Caption":
+            style.base_style = doc.styles["Normal"]
         style.font.name = "Times New Roman"
         style.font.size = Pt(size)
         style.font.color.rgb = RGBColor(0, 0, 0)
-        style.font.bold = name != "Normal"
-        style.paragraph_format.line_spacing = 1.08
-        style.paragraph_format.space_after = Pt(5)
+        style.font.bold = name not in ("Normal", "Caption")
+        style.font.italic = name in ("Heading 4", "Caption")
+        style.paragraph_format.line_spacing = 1.15
+        style.paragraph_format.space_after = Pt(6)
+        style.paragraph_format.widow_control = True
+        fonts = style.element.get_or_add_rPr().rFonts
+        for attribute in list(fonts.attrib):
+            if "theme" in attribute.lower():
+                del fonts.attrib[attribute]
+        for script in ("ascii", "hAnsi", "eastAsia", "cs"):
+            fonts.set(qn("w:" + script), "Times New Roman")
     doc.styles["Normal"].paragraph_format.first_line_indent = Cm(0.8)
+    for name in ("Heading 1", "Heading 2", "Heading 3", "Heading 4"):
+        doc.styles[name].paragraph_format.space_before = Pt(12)
+        doc.styles[name].paragraph_format.keep_with_next = True
+    doc.styles["Title"].paragraph_format.first_line_indent = Cm(0)
+    front_style = doc.styles.add_style("Front Matter Title", WD_STYLE_TYPE.PARAGRAPH)
+    front_style.base_style = doc.styles["Heading 1"]
+    front_style.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    outline = OxmlElement("w:outlineLvl")
+    outline.set(qn("w:val"), "9")
+    front_style.element.get_or_add_pPr().append(outline)
+    for name, indent in (("TOC 1", 0), ("TOC 2", 12), ("TOC 3", 24), ("Table of Figures", 0)):
+        style = (doc.styles[name] if name in doc.styles
+                 else doc.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH))
+        style.base_style = doc.styles["Normal"]
+        style.font.name = "Times New Roman"
+        style.font.size = Pt(12 if name == "Table of Figures" else 11.5)
+        style.font.bold = name == "TOC 1"
+        style.font.color.rgb = RGBColor(0, 0, 0)
+        fmt = style.paragraph_format
+        fmt.first_line_indent, fmt.left_indent, fmt.right_indent = Pt(0), Pt(indent), Pt(0)
+        fmt.space_before, fmt.space_after = Pt(0), Pt(4 if name == "Table of Figures" else 0)
+        fmt.line_spacing = 1
+        fmt.tab_stops.clear_all()
+        fmt.tab_stops.add_tab_stop(Cm(16.5), WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.DOTS)
+    for footer_paragraph in section.footer.paragraphs:
+        footer_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        footer_paragraph.paragraph_format.first_line_indent = Cm(0)
+        for run in footer_paragraph.runs:
+            font(run, 11)
     doc.core_properties.author = ", ".join(name for name, _ in students) or "Nhóm 11"
-    doc.core_properties.title = "Phân loại chất lượng nước bằng Naive Bayes và so sánh năm thuật toán"
+    doc.core_properties.title = REPORT_TITLE
     doc.core_properties.subject = "Bài tập lớn Khai phá dữ liệu — Nhóm 11 — 65CNTT"
     doc.core_properties.comments = ""
     doc.core_properties.last_modified_by = "Nhóm 11"
+    update_fields = doc.settings.element.find(qn("w:updateFields"))
+    if update_fields is None:
+        update_fields = OxmlElement("w:updateFields")
+        doc.settings.element.append(update_fields)
+    update_fields.set(qn("w:val"), "true")
 
     def para(text, bold=False):
         p = doc.add_paragraph()
@@ -122,7 +218,8 @@ def build(template, students, public=False):
         p.paragraph_format.page_break_before = new_page
         p.paragraph_format.keep_with_next = True
         p.paragraph_format.first_line_indent = Cm(0)
-        font(p.add_run(text), 14 if level == 1 else 13, True)
+        p.paragraph_format.keep_together = True
+        font(p.add_run(text), 14 if level == 1 else 13, True, level == 4)
         return p
 
     def pseudocode(lines):
@@ -140,13 +237,60 @@ def build(template, students, public=False):
     def page(title, chapter=None):
         if chapter:
             heading(chapter, 1, True)
-            heading(title)
-        else:
-            heading(title, 2, True)
+        parents = {
+            "1.1. Kiểm tra dữ liệu trên Python": "1. Tiền xử lý dữ liệu",
+            "1.2.1. Dữ liệu trước xử lý trên Weka": "1.4. Tiền xử lý dữ liệu trên Weka",
+            "2.1. Thống kê và chất lượng dữ liệu": "2. Phân tích dữ liệu",
+            "3.1. Lựa chọn sáu thuật toán học máy": "3. Xây dựng sáu thuật toán học máy",
+            "3.2.1. Cơ sở lý thuyết Naive Bayes": "3.2. Thuật toán Naive Bayes",
+            "7.1. Kết quả Naive Bayes trên Weka": "7. Thực nghiệm trên Weka",
+        }
+        replacements = {
+            "1.1.1. Điền thiếu và chia khoảng cho Naive Bayes": "1.2. Điền thiếu và chia khoảng cho Naive Bayes",
+            "1.1.2. Chuẩn hóa cho các mô hình số": "1.3. Chuẩn hóa cho các mô hình số",
+            "1.2.1. Dữ liệu trước xử lý trên Weka": "1.4.1. Dữ liệu trước xử lý trên Weka",
+            "1.2.2. Xử lý thiếu bằng Weka": "1.4.2. Xử lý thiếu bằng Weka",
+            "1.2.3. Rời rạc hóa bằng Weka": "1.4.3. Rời rạc hóa bằng Weka",
+        }
+        if title in parents:
+            parent = parents[title]
+            heading(parent, min(4, len(re.match(r"[\d.]+", parent)[0].strip(".").split(".")) + 1),
+                    parent == "3.2. Thuật toán Naive Bayes")
+        title = replacements.get(title, title)
+        depth = len(re.match(r"[\d.]+", title)[0].strip(".").split("."))
+        # Mỗi thuật toán đối chiếu là một khối đủ lớn cho một trang lý thuyết.
+        algorithm_page = any(title.startswith(prefix) for prefix in
+                             ("3.2.2.", "3.2.3.", "3.2.4.", "3.3.", "3.4.", "3.5.", "3.6.", "3.7."))
+        heading(title, min(4, depth + 1), algorithm_page)
+
+    def sequence_caption(label, index, text, above=False):
+        p = doc.add_paragraph(style="Caption")
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.first_line_indent = Cm(0)
+        p.paragraph_format.space_before = Pt(7 if above else 3)
+        p.paragraph_format.space_after = Pt(4 if above else 8)
+        p.paragraph_format.keep_with_next = above
+        p.paragraph_format.keep_together = True
+        font(p.add_run(label + " "), 11.5, italic=True)
+        field = OxmlElement("w:fldSimple")
+        field.set(qn("w:instr"), f" SEQ {label} \\* ARABIC ")
+        r, value = OxmlElement("w:r"), OxmlElement("w:t")
+        value.text = str(index)
+        r.append(value)
+        field.append(r)
+        p._p.append(field)
+        font(p.add_run(". " + text.rstrip(".")), 11.5, italic=True)
+        return p
+
+    table_index = 0
 
     def table(headers, rows, widths=None):
+        nonlocal table_index
+        sequence_caption("Bảng", table_index + 1, TABLE_CAPTIONS[table_index], above=True)
+        table_index += 1
         t = doc.add_table(rows=1, cols=len(headers))
         t.autofit = False
+        t.alignment = WD_TABLE_ALIGNMENT.CENTER
         for index, label in enumerate(headers):
             t.rows[0].cells[index].text = str(label)
         for values in rows:
@@ -155,29 +299,45 @@ def build(template, students, public=False):
                 cells[i].text = str(value)
         for i, row in enumerate(t.rows):
             for j, cell in enumerate(row.cells):
+                cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
                 if widths:
                     cell.width = Cm(widths[j])
                 properties = cell._tc.get_or_add_tcPr()
                 margins = OxmlElement("w:tcMar")
                 for side in ("top", "left", "bottom", "right"):
-                    el = OxmlElement("w:" + side); el.set(qn("w:w"), "70"); el.set(qn("w:type"), "dxa"); margins.append(el)
+                    el = OxmlElement("w:" + side); el.set(qn("w:w"), "100"); el.set(qn("w:type"), "dxa"); margins.append(el)
                 properties.append(margins)
                 borders = OxmlElement("w:tcBorders")
                 for side in ("top", "left", "bottom", "right"):
-                    el = OxmlElement("w:" + side); el.set(qn("w:val"), "single"); el.set(qn("w:sz"), "4"); el.set(qn("w:color"), "444444"); borders.append(el)
+                    el = OxmlElement("w:" + side); el.set(qn("w:val"), "single"); el.set(qn("w:sz"), "4"); el.set(qn("w:color"), "D9D9D9"); borders.append(el)
                 properties.append(borders)
+                if i == 0:
+                    shade = OxmlElement("w:shd")
+                    shade.set(qn("w:fill"), "E8EDF2")
+                    properties.append(shade)
                 for p in cell.paragraphs:
                     p.paragraph_format.first_line_indent = Cm(0)
-                    p.paragraph_format.space_after = Pt(1)
-                    p.paragraph_format.line_spacing = 1
+                    p.paragraph_format.space_after = Pt(2)
+                    p.paragraph_format.space_before = Pt(2)
+                    p.paragraph_format.line_spacing = 1.05
+                    p.alignment = (WD_ALIGN_PARAGRAPH.CENTER if i == 0 or re.fullmatch(r"[-+0-9.,/%± ()]+|N/A", p.text)
+                                   else WD_ALIGN_PARAGRAPH.LEFT)
                     for run in p.runs:
                         font(run, 10.5 if len(headers) > 5 else 11.5, i == 0)
             row._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
+            if i < len(t.rows) - 1:
+                for cell in row.cells:
+                    for paragraph in cell.paragraphs:
+                        paragraph.paragraph_format.keep_with_next = True
         t.rows[0]._tr.get_or_add_trPr().append(OxmlElement("w:tblHeader"))
         if widths:
             for col, width in zip(t.columns, widths):
                 col.width = Cm(width)
-        doc.add_paragraph().paragraph_format.space_after = Pt(0)
+        spacer = doc.add_paragraph()
+        spacer.paragraph_format.space_after = Pt(0)
+        spacer.paragraph_format.space_before = Pt(0)
+        spacer.paragraph_format.line_spacing = Pt(3)
+        font(spacer.add_run(""), 3)
         return t
 
     figure_index = 0
@@ -185,6 +345,10 @@ def build(template, students, public=False):
     def figure(path, caption, width=15.5, max_height=11):
         nonlocal figure_index
         from PIL import Image
+        # Giữ đoạn giới thiệu với ảnh; tránh tiêu đề và lời dẫn ở trang trước.
+        if doc.paragraphs and doc.paragraphs[-1].text.strip():
+            doc.paragraphs[-1].paragraph_format.keep_with_next = True
+            doc.paragraphs[-1].paragraph_format.keep_together = True
         with Image.open(path) as im:
             width = min(width, max_height * im.width / im.height)
         p = doc.add_paragraph()
@@ -193,19 +357,22 @@ def build(template, students, public=False):
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.add_run().add_picture(str(path), width=Cm(width))
         figure_index += 1
+        sequence_caption("Hình", figure_index, caption)
+
+    def contents(title, instruction, new_page=False):
+        p = doc.add_paragraph(style="Front Matter Title")
+        p.paragraph_format.page_break_before = new_page
+        p.paragraph_format.first_line_indent = Cm(0)
+        font(p.add_run(title), 14, True)
         p = doc.add_paragraph()
         p.paragraph_format.first_line_indent = Cm(0)
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        font(p.add_run(f"Hình {figure_index}. {caption}"), 11.5, italic=True)
+        field = OxmlElement("w:fldSimple")
+        field.set(qn("w:instr"), instruction)
+        p._p.append(field)
 
-    toc_title = para("MỤC LỤC", True)
-    toc_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    toc_title.paragraph_format.first_line_indent = Cm(0)
-    p = doc.add_paragraph()
-    p.paragraph_format.first_line_indent = Cm(0)
-    field = OxmlElement("w:fldSimple")
-    field.set(qn("w:instr"), 'TOC \\o "1-2" \\h \\z \\u')
-    p._p.append(field)
+    contents("MỤC LỤC", 'TOC \\o "1-3" \\h \\z')
+    contents("DANH MỤC BẢNG", 'TOC \\h \\z \\c "Bảng"', True)
+    contents("DANH MỤC HÌNH", 'TOC \\h \\z \\c "Hình"', True)
     heading("LỜI MỞ ĐẦU", 1, True)
     para("Phân loại mẫu nước theo các chỉ tiêu hóa lý là bài toán học có giám sát với dữ liệu số, giá trị thiếu và hai lớp có số lượng khác nhau. Đề tài giúp nhóm vận dụng định lý Bayes để xây dựng một mô hình có thể giải thích bằng số đếm và kiểm tra từng bước tính toán.")
     para("Nhóm chọn Naive Bayes làm thuật toán chính. Từ các bài giảng phân lớp và giáo trình được cung cấp, nhóm lựa chọn ID3, C4.5, KNN và Logistic Regression để đối chiếu, đồng thời bổ sung SVM tuyến tính. Sáu thuật toán được thực nghiệm trên cùng các mẫu phát triển, năm fold và tập kiểm tra, nhằm làm rõ thế mạnh và giới hạn của từng cách biểu diễn dữ liệu.")
@@ -236,7 +403,7 @@ def build(template, students, public=False):
     para("Nguồn là bộ Water Quality do Aditya Kadiwal công bố trên Kaggle, phiên bản 3 [4]. Nhóm tải lại từ đường dẫn của nhà phát hành ngày 24/11/2026 và đối chiếu nguyên byte với CSV đã lưu. Tệp có 3.276 mẫu và 10 cột, trong đó Potability là nhãn.")
     para("Dữ liệu thô trong dự án là bản CSV do nguồn công bố, trước khi áp dụng các bước điền thiếu, chuẩn hóa hoặc rời rạc hóa của nhóm. Bảng dưới trích các cột của năm dòng đầu; ô trống được ghi là thiếu. Các giá trị được làm tròn chỉ khi trình bày.")
     table(["Dòng", "pH", "Hardness", "Sulfate", "THM", "Nhãn"], [
-        (i, *("Thiếu" if X[i][j] is None else number(X[i][j],2) for j in (0,1,4,7)),y[i]) for i in range(5)], [1.1,2.2,3.1,3.1,3.1,1.7])
+        (i, *("Thiếu" if X[i][j] is None else number(X[i][j],2) for j in (0,1,4,7)),y[i]) for i in range(5)], [1.6,2.2,3.1,3.1,3.1,1.7])
     table(["Đại lượng", "Giá trị"],[("Số mẫu",3276),("Số thuộc tính đầu vào",9),("Số lớp",2),("Lớp 0",1998),("Lớp 1",1278),("pH thiếu",491),("Sulfate thiếu",781),("Trihalomethanes thiếu",162)], [8.5,6.8])
     para("Tỷ lệ lớp 0 là 60,99% và lớp 1 là 39,01% trên toàn CSV. Nếu chỉ đánh giá bằng accuracy, mô hình luôn đoán lớp 0 vẫn có điểm khá cao. Vì vậy, phần thực nghiệm bổ sung recall từng lớp, Balanced Accuracy, macro-F1 và ROC-AUC.")
 
@@ -498,8 +665,12 @@ return int(2 * votes > 5), votes / 5""")
         "[4] Aditya Kadiwal. Water Quality, Kaggle, phiên bản 3, water_potability.csv. https://www.kaggle.com/datasets/adityakadiwal/water-potability . Bản tải đối chiếu ngày 24/11/2026.",
         "[5] University of Waikato. Weka Knowledge Explorer và tài liệu API Weka 3.8 về J48, IBk, Logistic, SMO, ReplaceMissingValues và Discretize. https://ml.cms.waikato.ac.nz/weka/gui_explorer.html và https://weka.sourceforge.io/doc.stable-3-8/ . Truy cập 24/11/2026.",
         "[6] Weka team. simpleEducationalLearningSchemes 1.0.1, ID3 educational implementation. https://weka.sourceforge.io/packageMetaData/simpleEducationalLearningSchemes/1.0.1.html . Truy cập 24/11/2026."]:
-        para(text)
+        reference = para(text)
+        reference.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        reference.paragraph_format.left_indent = Cm(0.75)
+        reference.paragraph_format.first_line_indent = Cm(-0.75)
     # Xóa quan hệ ảnh thân báo cáo mẫu đã được thay thế, giữ logo/bìa đang dùng.
+    assert table_index == len(TABLE_CAPTIONS)
     used_relationships=set(doc.element.xpath('//@r:embed')) | set(doc.element.xpath('//@r:id'))
     for identifier, rel in list(doc.part.rels.items()):
         if "image" in rel.reltype and identifier not in used_relationships:
