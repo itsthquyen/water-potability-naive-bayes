@@ -1,5 +1,41 @@
 # Phân loại nước uống được hay không bằng Naive Bayes
 
+## Bản mở rộng sáu thuật toán ngày 24/11/2026
+
+Naive Bayes là thuật toán chính. ID3, C4.5 theo gain ratio, KNN, Logistic
+Regression và SVM tuyến tính được tự cài để đối chiếu. Các thuật toán được
+chọn từ bài giảng và giáo trình trước, SVM bổ sung từ nguồn học máy đại học.
+Xem [kế hoạch hiện hành](DOCS/KE_HOACH_NAIVE_BAYES_CHAT_LUONG_NUOC.md).
+
+```powershell
+rtk proxy .venv/Scripts/python.exe -X utf8 -m src.six_experiments --run-id NEW-SIX-RUN
+rtk proxy .venv/Scripts/python.exe -X utf8 report/weka/run_six_weka.py --run-id NEW-SIX-RUN
+rtk proxy .venv/Scripts/python.exe -X utf8 -m streamlit run app/comparison_app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+Web mặc định nạp `results/comparison/20261124-six-v1`, có nhập tay, CSV và
+bảng kết quả. Mô hình, thống kê train, dự đoán, biểu đồ, log Weka và manifest
+được lưu trong thư mục lần chạy. Cấu hình cố định, cùng 5 fold, cùng 656 mẫu
+test lịch sử. Test này từng được xem trong phiên bản cũ, không phải đánh giá
+ngoài độc lập. Không ghi đè lần chạy đã có.
+
+Naive Bayes đạt accuracy 60,37%, BA 51,61%, AUC 0,5218. KNN đạt accuracy
+64,79%, BA 60,72%, AUC 0,6518. C4.5 tự cài giới hạn ở cây danh nghĩa chưa
+cắt tỉa. SVM trả biên quyết định, không gọi biên là xác suất uống được.
+ID3 chính thức của Weka không gán nhãn 53/656 mẫu; báo cáo giữ đủ mẫu số.
+
+Bản Word và PDF nộp mới ở `output/docx/BaiTapLon.docx` và
+`output/pdf/BaiTapLon.pdf`, theo mẫu `BTL_KPDL_Nhom8_66TTNT2.docx` được cung cấp.
+Các bản này cùng tệp roster thành viên được lưu cục bộ. Bản chia sẻ là
+[PDF công khai](output/pdf/BaiTapLon-cong-khai.pdf) và
+[Word công khai](output/docx/BaiTapLon-cong-khai.docx). Trình dựng nằm ở
+`report/build_six_report.py`, nhận `--template`, `--students` và `--public`.
+Bộ lọc Weka
+thực hành dùng mean, Python dùng median; bảng đối chiếu bộ phân lớp Weka
+dùng ARFF theo cùng thống kê train của Python và công bố rõ cấu hình.
+
+## Hồ sơ phiên bản Naive Bayes trước khi mở rộng
+
 Bài tập lớn Khai phá dữ liệu của **Quyền, Lộc, Séc**. Bản hiện tại là
 **Naive Bayes đếm tần suất theo giáo trình**, tự viết bằng Python. Đầu vào
 gồm 9 chỉ tiêu đo; đầu ra là nhãn `Potability`: `0` = không uống được,

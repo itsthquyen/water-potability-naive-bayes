@@ -8,7 +8,8 @@
 - Áp dụng toàn repository, mọi agent/subagent/worker và mọi thay đổi sau này.
 - Đọc mục 0 của [kế hoạch](DOCS/KE_HOACH_NAIVE_BAYES_CHAT_LUONG_NUOC.md) trước khi làm; khi giao việc, đưa yêu cầu này vào brief.
 - Dự án đã có bản triển khai; chỉ mở rộng chức năng chính khi người dùng yêu cầu.
-- Dự án dùng Naive Bayes đếm tần suất sau khi rời rạc hóa để phân loại nhãn `Potability`. Không dùng Gaussian hoặc smoothing trong bản hiện hành. Demo Streamlit chạy cục bộ.
+- Naive Bayes đếm tần suất là thuật toán chính. Theo yêu cầu ngày 24/11/2026, bổ sung ID3, C4.5, KNN, Logistic Regression và SVM tuyến tính tự cài để so sánh. Demo Streamlit chạy cục bộ.
+- Dùng Weka thực hiện tiền xử lý và chạy các mô hình tham chiếu. Ghi cấu hình và khác biệt so với Python, giữ kết quả hai môi trường riêng. Mã Python vẫn tự cài phần học máy.
 - Ưu tiên yêu cầu hiện hành của người dùng so với nội dung cũ trong tài liệu dự án. Các quy tắc tham khảo từ dự án khác chỉ được áp dụng sau khi điều chỉnh cho phạm vi này, không tự đưa công nghệ hoặc cấu hình của dự án khác vào đây.
 
 ## RTK — bắt buộc cho lệnh shell

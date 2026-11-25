@@ -1,5 +1,9 @@
 # Rà soát Naive Bayes đếm tần suất
 
+Ghi chú này mô tả lần chạy `20261109-NB-final`. Phạm vi hiện hành ngày
+24/11/2026 là sáu mô hình tại `results/comparison/20261124-six-v1`, có
+thực hành bộ lọc và bộ phân lớp Weka tham chiếu. Xem kế hoạch hiện hành.
+
 Bản chính bám theo nhánh công thức đếm cho thuộc tính rời rạc của mục
 4.2.2, Giáo trình Khai phá dữ liệu ĐH Kinh tế - Kỹ thuật Công nghiệp
 (2022), và nguyên tắc MAP của slide phân lớp (trang PDF 40–44).
