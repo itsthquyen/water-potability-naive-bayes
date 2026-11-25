@@ -45,3 +45,4 @@ Thumbs.db
 /report/weka/evidence/*.arff
 /report/students.local.json
 /output/pdf/BaiTapLon.pdf
+/output/docx/BaiTapLon.docx
