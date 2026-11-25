@@ -243,7 +243,6 @@ def build(template, students, public=False):
             "2.1. Thống kê và chất lượng dữ liệu": "2. Phân tích dữ liệu",
             "3.1. Lựa chọn sáu thuật toán học máy": "3. Xây dựng sáu thuật toán học máy",
             "3.2.1. Cơ sở lý thuyết Naive Bayes": "3.2. Thuật toán Naive Bayes",
-            "7.1. Kết quả Naive Bayes trên Weka": "7. Thực nghiệm trên Weka",
         }
         replacements = {
             "1.1.1. Điền thiếu và chia khoảng cho Naive Bayes": "1.2. Điền thiếu và chia khoảng cho Naive Bayes",
@@ -374,18 +373,18 @@ def build(template, students, public=False):
     contents("DANH MỤC BẢNG", 'TOC \\h \\z \\c "Bảng"', True)
     contents("DANH MỤC HÌNH", 'TOC \\h \\z \\c "Hình"', True)
     heading("LỜI MỞ ĐẦU", 1, True)
-    para("Phân loại mẫu nước theo các chỉ tiêu hóa lý là bài toán học có giám sát với dữ liệu số, giá trị thiếu và hai lớp có số lượng khác nhau. Đề tài giúp nhóm vận dụng định lý Bayes để xây dựng một mô hình có thể giải thích bằng số đếm và kiểm tra từng bước tính toán.")
-    para("Nhóm chọn Naive Bayes làm thuật toán chính. Từ các bài giảng phân lớp và giáo trình được cung cấp, nhóm lựa chọn ID3, C4.5, KNN và Logistic Regression để đối chiếu, đồng thời bổ sung SVM tuyến tính. Sáu thuật toán được thực nghiệm trên cùng các mẫu phát triển, năm fold và tập kiểm tra, nhằm làm rõ thế mạnh và giới hạn của từng cách biểu diễn dữ liệu.")
-    para("Báo cáo trình bày dữ liệu thô, quy trình tiền xử lý trên Python và Weka, cơ sở lý thuyết, thực nghiệm có số liệu đánh giá và ứng dụng dự đoán. Phần Naive Bayes gồm công thức, ví dụ tính tay và một mẫu test được tính đủ chín thuộc tính. Các số liệu được lấy từ lần chạy đã lưu, kèm dự đoán từng mẫu để kiểm chứng.")
-    para("Kết quả thực nghiệm cho thấy Naive Bayes đếm tần suất còn khó nhận diện lớp uống được. KNN có kết quả tốt nhất trong sáu cấu hình cố định trên tập test của bài tập. Nhóm phân tích sự khác nhau này, thay vì chỉ dựa vào accuracy để đánh giá chất lượng mô hình.")
+    para("Bài tập lớn nghiên cứu việc phân loại mẫu nước thành hai lớp uống được và không uống được từ chín chỉ tiêu hóa lý. Dữ liệu có giá trị thiếu và số mẫu giữa hai lớp chênh lệch, nên cần xử lý dữ liệu và lựa chọn cách đánh giá phù hợp trước khi so sánh các mô hình.")
+    para("Nhóm chọn Naive Bayes làm thuật toán chính và xây dựng chương trình theo công thức đếm tần suất. Năm thuật toán dùng để so sánh gồm ID3, C4.5, KNN, Logistic Regression và SVM tuyến tính. Việc lựa chọn dựa trên các bài giảng, giáo trình của học phần và tài liệu học máy được dẫn trong báo cáo.")
+    para("Các thuật toán được cài đặt bằng Python, thực nghiệm trên cùng cách chia dữ liệu và đối chiếu với Weka. Riêng Naive Bayes được trình bày từ công thức đến bảng đếm, kèm ví dụ tính tay và phép tính cho một mẫu trong tập kiểm tra. Ứng dụng web sử dụng lại các mô hình đã huấn luyện để dự đoán khi nhập số đo hoặc tải tệp CSV.")
+    para("Phần đánh giá chú trọng khả năng nhận diện lớp uống được. Bên cạnh accuracy, báo cáo sử dụng recall từng lớp, Balanced Accuracy, macro-F1 và ROC-AUC để phân tích những trường hợp dự đoán sai và so sánh Naive Bayes với năm mô hình còn lại.")
 
     page("1. Lý do chọn đề tài", "I. Mô tả bài toán")
-    para("Bài toán phân loại nước cho phép kết nối kiến thức khai phá dữ liệu với một tập dữ liệu có cấu trúc rõ ràng. Mỗi mẫu được mô tả bằng chín chỉ tiêu số; nhãn đích biểu thị khả năng uống được theo cách gán nhãn của nguồn công bố. Các thách thức cụ thể gồm dữ liệu thiếu, thang đo khác nhau, quan hệ giữa các thuộc tính và tỷ lệ lớp không cân bằng.")
-    para("Naive Bayes phù hợp cho mục tiêu học tập vì các đại lượng trong mô hình có thể giải thích bằng tần suất. Sau khi chia mỗi chỉ tiêu thành khoảng, nhóm có thể đếm số mẫu của từng lớp, đếm mỗi giá trị thuộc tính trong lớp và nhân các xác suất có điều kiện để ra quyết định. Việc tự cài giúp phân biệt lỗi cài đặt với hạn chế của giả định mô hình.")
+    para("Đề tài sử dụng bộ dữ liệu Water Quality, trong đó mỗi mẫu có chín chỉ tiêu số và một nhãn Potability. Đây là bài toán phù hợp để thực hành phân lớp vì phải xử lý giá trị thiếu, các thang đo khác nhau và sự chênh lệch số mẫu giữa hai lớp.")
+    para("Với Naive Bayes, quá trình học có thể theo dõi qua số mẫu của từng lớp và tần suất từng giá trị thuộc tính trong lớp. Sau khi rời rạc hóa các chỉ tiêu số, chương trình tính xác suất có điều kiện, nhân với xác suất tiên nghiệm và chọn lớp có điểm lớn hơn. Cách triển khai này giúp đối chiếu trực tiếp công thức với mã nguồn.")
     heading("2. Tổng quan bài toán")
     para("Đầu vào là vector chín thuộc tính theo thứ tự ph, Hardness, Solids, Chloramines, Sulfate, Conductivity, Organic_carbon, Trihalomethanes và Turbidity. Đầu ra là Potability, với lớp 0 mang nhãn không uống được và lớp 1 mang nhãn uống được. Nhãn thật chỉ tham gia huấn luyện và đánh giá, không tham gia vector đầu vào.")
-    para("Mục tiêu chính là kiểm chứng bộ phân lớp Naive Bayes tự cài. Mục tiêu đối chiếu là xem năm cách phân lớp khác có cải thiện khả năng nhận diện lớp 1 và thứ hạng ROC-AUC hay không. Web cuối cùng sử dụng lại trạng thái đã học để dự đoán một mẫu hoặc nhiều mẫu từ CSV.")
-    para("Trong phạm vi bài tập, dự đoán là dự đoán nhãn của bộ dữ liệu. CSV công bố không cung cấp đủ metadata về lấy mẫu và kiểm nghiệm để suy rộng thành chứng nhận chất lượng nước. Giới hạn này được giữ xuyên suốt khi diễn giải đầu ra của ứng dụng.")
+    para("Mục tiêu của đề tài là xây dựng Naive Bayes và đánh giá khả năng dự đoán nhãn Potability. Năm thuật toán còn lại được dùng để so sánh trên cùng tập kiểm tra, đặc biệt ở recall của lớp 1 và ROC-AUC. Sản phẩm ứng dụng là một trang web dự đoán cho một mẫu nhập tay hoặc nhiều mẫu trong tệp CSV.")
+    para("Đầu ra của mô hình là nhãn theo bộ dữ liệu công bố. Nguồn CSV chưa cung cấp đầy đủ địa điểm, thời gian lấy mẫu và quy trình kiểm nghiệm, vì vậy kết quả dự đoán trong bài tập chưa thể dùng để chứng nhận chất lượng nước uống.")
 
     page("3. Quy trình thực hiện")
     table(["Bước", "Hoạt động", "Đầu ra"], [
@@ -396,37 +395,37 @@ def build(template, students, public=False):
         (5,"Học lại development và đánh giá test","Dự đoán, ma trận, bảng so sánh, ROC"),
         (6,"Thực hành và đối chiếu Weka","Log, dự đoán và ảnh panel Weka"),
         (7,"Phát triển ứng dụng","Web dự đoán và xuất CSV")], [1.3,8,6])
-    para("Các bước được sắp theo ranh giới dữ liệu. Trước hết chia mẫu để tránh cho giá trị ở test ảnh hưởng đến trung vị hoặc điểm cắt. Trong kiểm định chéo, mỗi lượt lại học tiền xử lý từ phần train của lượt đó. Sau kiểm định, mô hình cuối học từ toàn development và dùng một lần cấu hình cố định để đánh giá trên test.")
-    para("Bộ dữ liệu kiểm tra đã xuất hiện trong phiên bản trước của đề tài. Do đó, báo cáo gọi đây là phép đối chiếu trên holdout lịch sử, không coi là kiểm chứng trên dữ liệu ngoài độc lập. Nhóm giữ cấu hình định trước và không thay seed hoặc chọn ngưỡng dựa vào kết quả test.")
+    para("Dữ liệu được chia thành tập phát triển (development) và tập kiểm tra (test). Tập phát triển dùng cho huấn luyện và kiểm định chéo năm phần. Ở mỗi lượt, trung vị, tham số chuẩn hóa và điểm cắt chỉ được học từ phần huấn luyện. Sau đó mô hình được huấn luyện lại trên toàn bộ tập phát triển và đánh giá trên tập kiểm tra.")
+    para("Tập kiểm tra này đã được sử dụng trong phiên bản trước của đề tài, nên kết quả hiện tại là phép đánh giá trên một tập đã từng được xem, không phải dữ liệu ngoài độc lập. Các mô hình sử dụng cấu hình đã chốt; tập kiểm tra không được dùng để lựa chọn tham số hoặc ngưỡng phân lớp.")
 
     page("4. Phân tích dữ liệu thô")
-    para("Nguồn là bộ Water Quality do Aditya Kadiwal công bố trên Kaggle, phiên bản 3 [4]. Nhóm tải lại từ đường dẫn của nhà phát hành ngày 24/11/2026 và đối chiếu nguyên byte với CSV đã lưu. Tệp có 3.276 mẫu và 10 cột, trong đó Potability là nhãn.")
-    para("Dữ liệu thô trong dự án là bản CSV do nguồn công bố, trước khi áp dụng các bước điền thiếu, chuẩn hóa hoặc rời rạc hóa của nhóm. Bảng dưới trích các cột của năm dòng đầu; ô trống được ghi là thiếu. Các giá trị được làm tròn chỉ khi trình bày.")
+    para("Bộ Water Quality do Aditya Kadiwal công bố trên Kaggle, phiên bản 3 [4]. Bản tải lại ngày 24/11/2026 có nội dung trùng khớp theo byte với CSV đang lưu trong dự án. Dữ liệu gồm 3.276 mẫu, chín thuộc tính đầu vào và cột nhãn Potability.")
+    para("CSV gốc được giữ nguyên, bao gồm cả các ô thiếu. Những bước điền thiếu, chuẩn hóa và chia khoảng được thực hiện sau khi chia tập dữ liệu. Bảng 2 trích năm dòng đầu của CSV; giá trị số chỉ được làm tròn khi trình bày.")
     table(["Dòng", "pH", "Hardness", "Sulfate", "THM", "Nhãn"], [
         (i, *("Thiếu" if X[i][j] is None else number(X[i][j],2) for j in (0,1,4,7)),y[i]) for i in range(5)], [1.6,2.2,3.1,3.1,3.1,1.7])
     table(["Đại lượng", "Giá trị"],[("Số mẫu",3276),("Số thuộc tính đầu vào",9),("Số lớp",2),("Lớp 0",1998),("Lớp 1",1278),("pH thiếu",491),("Sulfate thiếu",781),("Trihalomethanes thiếu",162)], [8.5,6.8])
-    para("Tỷ lệ lớp 0 là 60,99% và lớp 1 là 39,01% trên toàn CSV. Nếu chỉ đánh giá bằng accuracy, mô hình luôn đoán lớp 0 vẫn có điểm khá cao. Vì vậy, phần thực nghiệm bổ sung recall từng lớp, Balanced Accuracy, macro-F1 và ROC-AUC.")
+    para("Lớp 0 chiếm 60,99% và lớp 1 chiếm 39,01% toàn bộ dữ liệu. Do đó, một mô hình luôn chọn lớp 0 cũng đạt accuracy khoảng 61%. Việc so sánh cần xét thêm recall của lớp 1 và các chỉ số đánh giá cả hai lớp.")
 
     page("1.1. Kiểm tra dữ liệu trên Python", "II. Quy trình khai phá dữ liệu")
-    para("Trước khi học, nhóm kiểm tra đủ tên cột, thứ tự cột và nhãn hợp lệ. Các giá trị số phải hữu hạn. Ô rỗng hoặc NaN được biểu diễn nội bộ bằng None để phân biệt với số 0 thực sự. Chuỗi không chuyển thành số được và số vô hạn bị báo lỗi, không tự biến thành ô thiếu.")
+    para("Dữ liệu được kiểm tra tên cột, thứ tự thuộc tính, kiểu số và nhãn 0/1. Ô rỗng hoặc NaN được biểu diễn bằng None; số 0 vẫn được giữ là một giá trị quan sát. Chuỗi không chuyển được thành số và giá trị vô hạn được ghi nhận là lỗi đầu vào.")
     para("Khóa nhận diện trùng gồm chín giá trị đầu vào sau khi chuẩn hóa kiểu biểu diễn thiếu. Nếu hai hàng có cùng đầu vào và cùng nhãn, giữ hàng đầu để tránh một mẫu xuất hiện ở cả train và test. Nếu trùng đầu vào nhưng nhãn khác nhau, dừng để kiểm tra mâu thuẫn. Với CSV hiện tại, không phát hiện dòng lỗi hoặc nhóm trùng nên giữ 3.276 mẫu.")
     table(["Bước", "Số mẫu trước", "Số mẫu sau"],[("Đọc CSV",3276,3276),("Kiểm tra kiểu và nhãn",3276,3276),("Kiểm tra trùng",3276,3276),("Chia development/test",3276,"2.620 / 656")], [7.3,4,4])
-    para("Nhóm giữ cả chín chỉ tiêu vì chúng là các cột mô tả mẫu được nguồn cung cấp. Potability được tách ra làm nhãn. ID dòng chỉ dùng để nối kết quả với dữ liệu gốc. Không phát sinh một thuộc tính mới từ nhãn hoặc từ kết quả kiểm tra để tăng điểm dự đoán.")
-    para("Đối với ngoại lệ, nhóm dùng IQR và histogram để mô tả, không xóa quan sát chỉ vì nằm xa trung vị. Thiếu thông tin quy trình đo khiến một số đo cực trị chưa đủ để kết luận là lỗi. Cách giữ lại này được áp dụng nhất quán cho mọi mô hình.")
+    para("Cả chín chỉ tiêu được giữ làm thuộc tính đầu vào. Potability được tách thành nhãn, còn ID dòng chỉ dùng để đối chiếu mẫu gốc với kết quả dự đoán. Hai cột này không tham gia tính toán đặc trưng.")
+    para("Các giá trị ngoại lệ được quan sát qua khoảng tứ phân vị (IQR) và biểu đồ phân bố. Báo cáo giữ lại các mẫu này vì chưa có thông tin đo đạc đủ để xác định chúng là lỗi. Quy tắc xử lý được áp dụng như nhau cho sáu thuật toán.")
 
     page("1.1.1. Điền thiếu và chia khoảng cho Naive Bayes")
-    para("Với từng cột trong train, nhóm sắp tăng dần các ô quan sát. Nếu có n giá trị, trung vị là phần tử giữa khi n lẻ và trung bình hai phần tử giữa khi n chẵn. Các ô thiếu ở train, validation hoặc test đều dùng cùng trung vị đã học từ train tương ứng.")
+    para("Trung vị của mỗi cột được tính từ các giá trị quan sát trong tập huấn luyện. Với n giá trị đã sắp tăng dần, trung vị là phần tử giữa nếu n lẻ hoặc trung bình hai phần tử giữa nếu n chẵn. Trung vị này được dùng để điền ô thiếu ở cả phần huấn luyện, phần kiểm định và tập kiểm tra tương ứng.")
     para("Để dùng công thức Naive Bayes đếm tần suất, nhóm chuyển các chỉ tiêu số sang tối đa ba khoảng. Hai vị trí chia là kết quả làm tròn lên của n/3 và 2n/3, trên các ô quan sát trước điền. Nếu hai giá trị kề vị trí chia khác nhau, lấy trung điểm làm ngưỡng. Nếu bằng nhau, bỏ điểm cắt để cùng một số luôn nhận cùng mã.")
     table(["Chỉ tiêu", "Trung vị", "Ngưỡng 1", "Ngưỡng 2"],[
         (name,number(median),*(number(cut) for cut in cuts)) for name,median,cuts in zip(FEATURE_COLUMNS,params["nominal"]["fill_values"],params["nominal"]["cut_points"])], [4.8,3.5,3.5,3.5])
-    para("Với hai ngưỡng t1 < t2, mã 0 ứng với x ≤ t1, mã 1 ứng với t1 < x ≤ t2 và mã 2 ứng với x > t2. Cột hằng có một mã. Cột toàn thiếu trong train khiến lượt học dừng. ID3 và C4.5 tự cài cũng nhận cùng biểu diễn danh nghĩa này để việc so sánh ba mô hình kiểm soát được phần chia khoảng.")
+    para("Với hai ngưỡng t1 < t2, giá trị được gán mã 0 khi x ≤ t1, mã 1 khi t1 < x ≤ t2 và mã 2 khi x > t2. Cột hằng chỉ có một mã; nếu một cột không có giá trị quan sát trong tập huấn luyện thì chương trình dừng. ID3 và C4.5 sử dụng cùng bộ mã khoảng với Naive Bayes.")
 
     page("1.1.2. Chuẩn hóa cho các mô hình số")
-    para("KNN tính khoảng cách giữa các mẫu nên chỉ tiêu có trị số lớn có thể chi phối khoảng cách nếu giữ nguyên thang. Logistic Regression và SVM tối ưu hệ số cũng chịu ảnh hưởng của thang đo. Vì vậy, ba mô hình này dùng dữ liệu điền trung vị rồi chuẩn hóa z-score.")
-    para("Trên train đã điền thiếu, mean là tổng giá trị chia số mẫu. Phương sai tổng thể bằng tổng bình phương độ lệch so với mean chia số mẫu. Độ lệch chuẩn là căn bậc hai phương sai. Biến đổi z = (x − mean)/std. Cột có std bằng 0 dùng scale 1. Mã tự viết các bước cộng, chia và căn; không gọi hàm thống kê học máy có sẵn.")
-    table(["Chỉ tiêu", "Mean train", "Std train"],[(name,number(mean),number(scale)) for name,mean,scale in zip(FEATURE_COLUMNS,params["numeric"]["means"],params["numeric"]["scales"])],[6.3,4.5,4.5])
-    para("Ví dụ, một giá trị đúng mean của cột được đổi thành 0. Khi nhận mẫu mới ngoài min/max train, web vẫn tính được z-score và áp dụng mô hình, nhưng giá trị đó có thể thuộc vùng ít được đại diện trong dữ liệu học. Việc chuẩn hóa giữ thứ tự chín cột và không sử dụng nhãn.")
-    para("Những thống kê trong bảng thuộc lần học cuối trên 2.620 mẫu development. Trong mỗi lượt CV, mean/std và trung vị được tính lại từ bốn fold train; bảng cuối không được dùng để chuẩn bị trước dữ liệu validation của các lượt đó.")
+    para("Nếu giữ nguyên thang đo, các cột có trị số lớn như Solids có thể chi phối khoảng cách trong KNN. Thang đo cũng ảnh hưởng đến việc cập nhật hệ số của Logistic Regression và SVM. Ba mô hình này sử dụng dữ liệu đã điền trung vị và chuẩn hóa z-score.")
+    para("Trên tập huấn luyện đã điền thiếu, giá trị trung bình (mean) bằng tổng các giá trị chia số mẫu. Phương sai tổng thể bằng tổng bình phương độ lệch so với mean chia số mẫu; độ lệch chuẩn (std) là căn bậc hai của phương sai. Giá trị chuẩn hóa được tính bằng z = (x − mean)/std. Với cột có std bằng 0, chương trình dùng hệ số chia bằng 1.")
+    table(["Chỉ tiêu", "Trung bình", "Độ lệch chuẩn"],[(name,number(mean),number(scale)) for name,mean,scale in zip(FEATURE_COLUMNS,params["numeric"]["means"],params["numeric"]["scales"])],[6.3,4.5,4.5])
+    para("Một giá trị bằng mean được biến đổi thành 0. Đối với mẫu mới nằm ngoài khoảng min/max của dữ liệu huấn luyện, chương trình vẫn tính z-score theo các tham số đã lưu. Tuy nhiên, vùng giá trị này có thể ít được đại diện trong tập huấn luyện.")
+    para("Bảng 6 trình bày tham số của lần huấn luyện cuối trên 2.620 mẫu development. Trong kiểm định chéo, mỗi lượt tính lại trung vị, mean và std từ bốn phần huấn luyện; phần còn lại chỉ dùng để đánh giá.")
 
     for title, filename, caption, text in [
         ("1.2.1. Dữ liệu trước xử lý trên Weka", "01-weka-raw.png", "Sulfate trên development trước tiền xử lý trong Weka.",
@@ -438,39 +437,39 @@ def build(template, students, public=False):
         page(title)
         para(text)
         figure(FOLDER/"weka"/filename,caption)
-        para("Phần này minh họa bộ lọc Weka thật [5]. ReplaceMissingValues của Weka dùng mean, còn pipeline Python của nhóm dùng median. Weka học ngưỡng sau bước điền, còn Python học điểm cắt từ các ô quan sát trước điền. Vì vậy hai trạng thái đã xử lý có thể khác nhau.")
-        para("Các hình minh họa chỉ dùng development. Bảng đánh giá các bộ phân lớp Weka ở phần III dùng các ARFF theo cùng ID test và được biến đổi bằng tham số train của Python, nhằm kiểm soát khác biệt đầu vào. Nhóm không lấy tệp đã lọc toàn bộ CSV làm đầu vào cho cross-validation.")
+    para("Ba thao tác trên được thực hiện trong Weka Explorer với tập development [5]. ReplaceMissingValues điền bằng giá trị trung bình, còn chương trình Python điền bằng trung vị. Weka chia khoảng sau khi điền thiếu; Python tính điểm cắt từ các giá trị quan sát trước bước điền. Vì vậy, dữ liệu sau xử lý của hai quy trình có thể khác nhau.")
+    para("Để so sánh riêng các bộ phân lớp ở phần III, Weka sử dụng tệp ARFF đã biến đổi theo tham số của Python và giữ cùng danh sách ID huấn luyện, kiểm tra. Các tệp lọc minh họa ở phần này không được dùng thay đầu vào của phép kiểm định chéo.")
 
     page("2.1. Thống kê và chất lượng dữ liệu")
     figure(FOLDER/"figures"/"class_and_missing.png", "Phân bố lớp và giá trị thiếu trên development.")
     table(["Cột", "Quan sát", "Thiếu", "Min", "Trung vị", "Max"],[(name,stats[name]["count"],stats[name]["missing"],number(stats[name]["min"],2),number(stats[name]["median"],2),number(stats[name]["max"],2)) for name in FEATURE_COLUMNS],[4,1.7,1.4,2.7,2.8,2.7])
-    para("Sulfate thiếu nhiều nhất, tiếp đến pH và Trihalomethanes. Khi thay giá trị thiếu bằng trung vị, khoảng giữa của các cột này có thể tăng số mẫu đáng kể. Vì vậy, ba khoảng gần cân bằng theo ô quan sát không có nghĩa là số mẫu sau điền cân bằng hoàn toàn.")
-    para("Bảng dùng các giá trị quan sát trong development trước điền. Min/max và tỷ lệ thiếu mô tả chất lượng dữ liệu, không được biến thành ngưỡng đạt chuẩn nước uống khi chưa có metadata đo và quy trình gán nhãn.")
+    para("Sulfate có nhiều ô thiếu nhất, tiếp theo là pH và Trihalomethanes. Điền trung vị làm tăng số mẫu ở khoảng chứa trung vị của từng cột. Vì vậy, các khoảng được chia gần cân bằng trên giá trị quan sát có thể có số mẫu khác nhau sau bước điền thiếu.")
+    para("Bảng 7 được tính từ các giá trị quan sát trong development trước khi điền thiếu. Min/max trong bảng là phạm vi của dữ liệu nghiên cứu, không phải giới hạn cho phép của các chỉ tiêu chất lượng nước.")
 
     page("2.2. Phân bố các chỉ tiêu và tương quan")
     figure(FOLDER/"figures"/"histograms.png", "Histogram các chỉ tiêu số trên development.",max_height=10)
-    para("Hình cho thấy các chỉ tiêu có thang đo và hình dạng phân bố khác nhau. Việc chia khoảng giảm số mức cần ước lượng trong Naive Bayes, nhưng làm mất sự khác nhau giữa các số đo cùng khoảng. Ngược lại, KNN và hai mô hình tuyến tính giữ độ lớn tương đối qua dữ liệu đã chuẩn hóa.")
+    para("Các biểu đồ ở Hình 5 cho thấy chín chỉ tiêu có phạm vi giá trị khác nhau. Naive Bayes, ID3 và C4.5 dùng mã khoảng nên các số đo trong cùng một khoảng được xem là giống nhau. KNN, Logistic Regression và SVM giữ giá trị số sau chuẩn hóa. Khác biệt này cần được xét khi so sánh kết quả.")
     figure(FOLDER/"figures"/"correlation.png", "Tương quan Pearson tính theo các cặp ô quan sát.",width=10,max_height=7)
-    para("Pearson được tính từ các cặp ô không thiếu. Một hệ số nhỏ chỉ mô tả liên hệ tuyến tính giữa hai cột; nó không chứng minh độc lập có điều kiện theo lớp. Do đó, biểu đồ tương quan hỗ trợ phân tích dữ liệu và không được dùng làm bằng chứng rằng giả định Naive Bayes hoàn toàn thỏa mãn.")
+    para("Hệ số Pearson được tính trên các cặp giá trị không thiếu. Biểu đồ cho biết mức liên hệ tuyến tính giữa từng cặp thuộc tính. Tương quan nhỏ giữa hai cột chưa đủ để kết luận chúng độc lập khi biết lớp, nên Hình 6 chỉ được dùng để mô tả dữ liệu.")
 
     page("3.1. Lựa chọn sáu thuật toán học máy")
-    table(["Thuật toán", "Nguồn ưu tiên", "Vai trò"],[("Naive Bayes","Bài 5 trang 40–45; giáo trình 4.2","Chính"),("ID3","Bài 5 trang 25–33; giáo trình 4.3","Đối chiếu"),("C4.5","Bài 5 trang 34","Đối chiếu"),("KNN","Bài 5 trang 46–49; giáo trình 4.4","Đối chiếu"),("Logistic Regression","Giáo trình mục 4.5.4","Đối chiếu"),("SVM tuyến tính","Tài liệu học máy Cornell [3]","Bổ sung")],[4.5,7.3,3.5])
+    table(["Thuật toán", "Tài liệu lý thuyết", "Vai trò"],[("Naive Bayes","Bài 5 trang 40–45; giáo trình 4.2","Chính"),("ID3","Bài 5 trang 25–33; giáo trình 4.3","Đối chiếu"),("C4.5","Bài 5 trang 34","Đối chiếu"),("KNN","Bài 5 trang 46–49; giáo trình 4.4","Đối chiếu"),("Logistic Regression","Giáo trình mục 4.5.4","Đối chiếu"),("SVM tuyến tính","Tài liệu học máy Cornell [3]","Bổ sung")],[4.5,7.3,3.5])
     para("Các bộ phân lớp được lựa chọn để có những cách suy luận khác nhau trên cùng nhãn nhị phân. Naive Bayes dùng xác suất sinh dữ liệu theo lớp. ID3 và C4.5 chia không gian theo thuộc tính. KNN quyết định theo các mẫu gần nhau. Logistic Regression và SVM tuyến tính xây dựng một mặt phân cách trong không gian đã chuẩn hóa.")
-    para("Đề tài triển khai tường minh các công thức và quy tắc quyết định bằng Python. Các phần đọc file, trình bày đồ thị và giao diện sử dụng thư viện nền. Các mô hình Weka là phần tham chiếu riêng, có thể khác cách xử lý nhánh chưa thấy, cắt tỉa, tối ưu và điểm đầu ra. Báo cáo công bố khác biệt thay vì gộp kết quả của hai môi trường.")
-    para("C4.5 tự cài trong bài tập tập trung vào lõi gain ratio trên dữ liệu danh nghĩa đã chia khoảng và giữ cây chưa cắt tỉa. Đây là phạm vi triển khai cụ thể. Bảng Weka dùng J48 chưa cắt tỉa để so sánh một cấu hình gần với phạm vi đó.")
+    para("Mã Python tự cài đặt bước huấn luyện và dự đoán của sáu thuật toán. Thư viện được sử dụng cho đọc ghi tệp, vẽ biểu đồ, kiểm thử và giao diện. Weka được dùng làm môi trường đối chiếu; cấu hình và kết quả của Weka được trình bày riêng với Python.")
+    para("Phần C4.5 triển khai tiêu chí gain ratio trên dữ liệu danh nghĩa đã chia khoảng, với cây chưa cắt tỉa. Cấu hình J48 chưa cắt tỉa trong Weka được dùng để đối chiếu với phạm vi triển khai này.")
 
     page("3.2.1. Cơ sở lý thuyết Naive Bayes")
     para("Gọi C là lớp, nhận 0 hoặc 1, và x = (x1,…,x9) là vector mã khoảng. Theo định lý Bayes, P(C=c | x) = P(C=c)P(x | C=c)/P(x), với P(x) > 0. Khi so sánh hai lớp, mẫu số P(x) chung có thể bỏ khỏi bước chọn nhãn.")
     para("Naive Bayes giả định các thuộc tính độc lập với nhau khi đã biết lớp [1, 2]. Khi đó, P(x | C=c) được thay bằng tích của chín xác suất P(Aj=xj | C=c). Điểm lớp là Sc = P(C=c) × tích_j P(Aj=xj | C=c). Mô hình chọn lớp có điểm lớn hơn và chuẩn hóa hai điểm để hiển thị hậu nghiệm.")
-    table(["Đại lượng", "Ước lượng từ train"],[("N","Tổng số mẫu train"),("nc","Số mẫu thuộc lớp c"),("nc,j,v","Số mẫu lớp c có cột j mang mã v"),("P(C=c)","nc / N"),("P(Aj=v | C=c)","nc,j,v / nc"),("P(C=c | x)","Sc / (S0 + S1), khi tổng dương")],[5.4,9.9])
+    table(["Đại lượng", "Ước lượng từ tập huấn luyện"],[("N","Tổng số mẫu huấn luyện"),("nc","Số mẫu thuộc lớp c"),("nc,j,v","Số mẫu lớp c có cột j mang mã v"),("P(C=c)","nc / N"),("P(Aj=v | C=c)","nc,j,v / nc"),("P(C=c | x)","Sc / (S0 + S1), khi tổng dương")],[5.4,9.9])
     para("Tần suất 0 được giữ nguyên. Nếu một thừa số của lớp bằng 0, điểm lớp đó bằng 0. Nếu cả hai điểm đều bằng 0, hậu nghiệm không xác định và chương trình báo lỗi dòng đó. Nếu hai điểm dương bằng nhau, quy ước chọn lớp 0. Trong lần chạy này, tất cả 656 mẫu test đều có thể dự đoán.")
     para("Naive Bayes cần ước lượng từng thuộc tính trong mỗi lớp, thay vì đếm tất cả tổ hợp chín thuộc tính cùng lúc. Điều này giúp giảm số lượng bảng tần suất cần học. Đổi lại, các quan hệ giữa thuộc tính trong cùng lớp và thông tin bị mất khi chia khoảng có thể làm điểm hậu nghiệm thiếu chính xác.")
 
     page("3.2.2. Xây dựng thuật toán Naive Bayes")
-    para("Ở bước fit, mỗi hàng mã khoảng làm tăng nc của lớp đúng một lần. Sau đó chương trình đi qua chín cột và tăng ô đếm tương ứng [lớp][cột][mã]. Tổng đếm của mỗi cột trong một lớp phải bằng số mẫu lớp. Mã lưu trung vị, ngưỡng, thứ tự cột và bảng đếm cùng mô hình.")
+    para("Ở bước huấn luyện, mỗi mẫu làm tăng nc của lớp tương ứng một đơn vị. Chương trình duyệt qua chín thuộc tính và cập nhật ô đếm [lớp][cột][mã]. Với mỗi cột, tổng các ô đếm trong một lớp bằng số mẫu của lớp đó. Trung vị, ngưỡng chia khoảng, thứ tự cột và bảng đếm được lưu cùng mô hình.")
     table(["Bước", "Nội dung thực hiện"],[(1,"Kiểm tra X, y và miền mã của từng cột"),(2,"Khởi tạo hai số đếm lớp và các ô tần suất"),(3,"Duyệt các hàng train, cập nhật lớp và từng thuộc tính"),(4,"Với mẫu mới, biến đổi bằng thống kê train đã lưu"),(5,"Nhân prior và chín thừa số của mỗi lớp"),(6,"So sánh hai điểm rồi chuẩn hóa hậu nghiệm")],[1.6,13.7])
     para("Để tránh nhân những số thực rất nhỏ ở bước so sánh, chương trình giữ Sc = ac/bc. Tử ac bắt đầu bằng nc rồi nhân các số đếm của mẫu. Mẫu bc bằng N × nc^d với d=9 và được tính một lần khi fit hoặc nạp model. So sánh a0b1 với a1b0 tương đương so sánh S0 với S1 vì các mẫu số đều dương.")
-    para("Sau khi quy đồng, p1 = a1b0/(a0b1+a1b0) và p0 = 1 − p1 theo cùng công thức. Quy đồng là phương pháp số học để tính đúng mô hình đã chọn, giữ được nhãn khi các xác suất hiển thị bị làm tròn. JSON lưu số đếm, không lưu mô hình thư viện.")
+    para("Sau khi quy đồng, p1 = a1b0/(a0b1+a1b0) và p0 = 1 − p1. Cách tính bằng số nguyên giúp so sánh hai điểm trước khi chuyển sang số thực để hiển thị xác suất. Mô hình lưu các số đếm trong tệp JSON để có thể nạp lại và dự đoán.")
     para("Độ phức tạp lập bảng đếm là O(Nd), sau chi phí sắp xếp học điểm cắt O(dN log N). Với hai lớp và ba mã mỗi cột, bảng đếm có tối đa 54 ô. Mỗi mẫu dự đoán đọc 18 ô đếm, vì phải xét chín thuộc tính ở hai lớp.")
     pseudocode("""for row, label in training:
     class_counts[label] += 1
@@ -485,7 +484,7 @@ probability_1 = score_1 / (score_0 + score_1)""")
     table(["Thừa số", "Lớp 0", "Lớp 1"],[("Prior","3/5","2/5"),("P(A=1 | C)","1/3","2/2"),("P(B=0 | C)","2/3","1/2"),("Điểm S","2/15","1/5"),("Hậu nghiệm","0,4","0,6")],[5.3,5,5])
     para("Tổng hai điểm là 2/15 + 1/5 = 1/3. Do đó P(0|x)=(2/15)/(1/3)=0,4 và P(1|x)=(1/5)/(1/3)=0,6. Bộ phân lớp chọn lớp 1. Mẫu số của xác suất điều kiện ở từng lớp lần lượt là 3 và 2, không dùng tổng 5 làm mẫu số cho các xác suất này.")
     para("Nếu x=(0,1), lớp 1 có tần suất A=0 bằng 0 nên S1=0, trong khi S0 dương. Kết quả là lớp 0 với hậu nghiệm [1,0]. Trong một bộ dữ liệu mà mỗi lớp đều có ít nhất một thừa số bằng 0 cho cùng mẫu, tổng hai điểm bằng 0 và mẫu không có hậu nghiệm theo mô hình.")
-    para("Các kiểm thử kiểm tra đáp án phân số độc lập, tổng đếm từng cột, cách xử lý hòa và tần suất 0. Thêm các trường hợp điểm cắt, giá trị thiếu, cột hằng và nạp lại mô hình để kiểm tra đường tính từ đầu vào đến dự đoán.")
+    para("Kết quả của ví dụ được dùng làm đáp án kiểm thử cho xác suất và nhãn dự đoán. Các trường hợp khác được kiểm tra gồm tần suất bằng 0, hai điểm bằng nhau, giá trị thiếu, cột hằng, điểm cắt trùng và dự đoán sau khi lưu rồi nạp mô hình.")
 
     nb=read(FOLDER/"models"/"naive_bayes.json")
     row_id=27
@@ -496,11 +495,11 @@ probability_1 = score_1 / (score_0 + score_1)""")
     counts=[[nb["model"]["feature_counts"][c][j][v] for j,v in enumerate(codes)] for c in (0,1)]
     totals=nb["model"]["class_counts"]
     scores=[Fraction(totals[c],sum(totals))*prod(Fraction(v,totals[c]) for v in counts[c]) for c in (0,1)]
-    page("3.2.4. Đối chiếu một mẫu nước thực tế")
-    para("Mẫu test có ID dòng 27 thiếu pH. Pipeline điền pH bằng trung vị 7,0402 từ development. Từng số đo được mã hóa bằng điểm cắt đã học, rồi tra bảng tần suất như dưới đây. Bảng làm tròn số đo để đọc; mô hình dùng giá trị đầy đủ.")
+    page("3.2.4. Tính toán cho một mẫu trong tập kiểm tra")
+    para("Mẫu trong tập kiểm tra có ID dòng 27 bị thiếu pH. Giá trị này được điền bằng trung vị 7,0402 học từ development. Sau đó, chín chỉ tiêu được gán mã khoảng và tra bảng tần suất. Các số đo trong Bảng 12 được làm tròn khi trình bày; phép tính sử dụng giá trị đầy đủ.")
     table(["Chỉ tiêu","Giá trị dùng","Mã","Đếm lớp 0","Đếm lớp 1"],[(name,number(nb["preprocessor"]["fill_values"][j] if X[row_id][j] is None else X[row_id][j]),codes[j],counts[0][j],counts[1][j]) for j,name in enumerate(FEATURE_COLUMNS)],[4.4,3.5,1.3,3,3.1])
     para(f"Prior lớp 0 là {totals[0]}/2620 và prior lớp 1 là {totals[1]}/2620. Với từng lớp, nhân prior với chín phân số lấy số đếm ở bảng chia cho số mẫu lớp đó. Kết quả S0 ≈ {number(float(scores[0]),9)} và S1 ≈ {number(float(scores[1]),9)}.")
-    para(f"Sau chuẩn hóa, p0 ≈ {number(float(scores[0]/sum(scores)),6)} và p1 ≈ {number(float(scores[1]/sum(scores)),6)}. Do p1 lớn hơn p0, mô hình dự đoán 1. Nhãn thật của dòng là 0 nên đây là FP. Ví dụ thể hiện một đường tính đúng vẫn có thể cho dự đoán sai do hạn chế của mô hình và dữ liệu.")
+    para(f"Sau chuẩn hóa, p0 ≈ {number(float(scores[0]/sum(scores)),6)} và p1 ≈ {number(float(scores[1]/sum(scores)),6)}. Mô hình chọn lớp 1 vì p1 lớn hơn p0. Nhãn gốc của dòng 27 là 0, nên mẫu này được tính vào số dự đoán dương sai (FP).")
 
     page("3.3. Thuật toán ID3")
     para("ID3 xây dựng cây quyết định từ trên xuống, chọn thuộc tính có độ lợi thông tin lớn nhất tại mỗi nút [1, 2]. Với tỷ lệ lớp pc, entropy H(S)=−tổng_c pc log2(pc). Giá trị 0 không tham gia log. Nếu nút chỉ có một lớp thì entropy bằng 0.")
@@ -508,7 +507,7 @@ probability_1 = score_1 / (score_0 + score_1)""")
     para("Trong ví dụ bốn mẫu (A,B,y)=(0,0,0),(0,1,0),(1,0,1),(1,1,1), entropy ban đầu bằng 1. Chia theo A tạo hai nút thuần nên entropy sau chia bằng 0 và gain bằng 1. Chia theo B tạo hai nhóm đều chứa cả hai lớp, gain bằng 0. Vì vậy A được chọn làm nút gốc.")
     para("Mã tự cài nhận cùng chín mã khoảng như Naive Bayes. Một thuộc tính được bỏ khỏi danh sách ở đường đi sau khi đã dùng. Cây dừng khi nút thuần, hết thuộc tính hoặc các thuộc tính còn lại không tạo được ít nhất hai nhóm. Lá lưu số đếm hai lớp để lấy nhãn đa số và điểm lớp 1.")
     para("Khi mẫu mới đi đến một mã chưa xuất hiện tại nút, bản Python dùng phân bố của nút đang xét. Cơ chế này giúp mọi mẫu có kết quả dự đoán nhưng có thể khác ID3 giáo dục của Weka. Phần III ghi nhận cụ thể sai khác và số mẫu Weka không gán được nhãn.")
-    para("Cây chưa cắt tỉa có thể mô tả chi tiết các kết hợp mã trong train. Việc chia khoảng cũng làm mất chi tiết số đo. Vì vậy, cần đọc kết quả CV và test để đánh giá mức tổng quát hóa, thay vì coi cây học được nhiều nhánh là dấu hiệu chất lượng tốt hơn.")
+    para("Cây chưa cắt tỉa có thể tạo nhiều nhánh để mô tả các mẫu huấn luyện. Số nhánh lớn không bảo đảm dự đoán tốt trên dữ liệu mới. Khả năng tổng quát hóa của cây được đánh giá bằng kiểm định chéo và kết quả trên tập kiểm tra.")
     pseudocode("""grow(rows, attributes):
     if pure(rows) or attributes is empty: return leaf(counts)
     best = attribute_with_largest_information_gain(rows)
@@ -520,7 +519,7 @@ probability_1 = score_1 / (score_0 + score_1)""")
     para("C4.5 phát triển từ cây quyết định dùng gain, bổ sung tỷ lệ độ lợi thông tin để giảm thiên lệch về phép chia có nhiều nhánh. SplitInfo(A)=−tổng_v (|Sv|/|S|)log2(|Sv|/|S|). GainRatio(A)=Gain(A)/SplitInfo(A), với SplitInfo dương.")
     para("Bản tự cài trước hết tính gain của các phép chia hợp lệ tại nút, rồi lấy gain trung bình. Chỉ xét thuộc tính có gain dương và không thấp hơn trung bình, sau đó chọn gain ratio lớn nhất. Điều kiện này tránh chọn một phép chia có SplitInfo rất nhỏ nhưng gain thực tế quá ít.")
     para("Với ví dụ ID3 ở trên, SplitInfo của A bằng 1 và gain bằng 1 nên gain ratio bằng 1. Thuộc tính B có gain 0 nên bị loại. Cả hai tiêu chí chọn A ở ví dụ đơn giản, nhưng trên dữ liệu có phân bố nhóm khác nhau chúng có thể chọn các cột khác nhau.")
-    para("Phạm vi bài tập là cây danh nghĩa chưa cắt tỉa trên chín mã khoảng đã học từ train. Mỗi thuộc tính dùng một lần trên một đường đi, lá lưu phân bố lớp và nhánh chưa gặp dùng phân bố nút. Phạm vi này không triển khai toàn bộ xử lý thuộc tính liên tục, missing phân nhánh trọng số hoặc cắt tỉa của các bản C4.5 đầy đủ.")
+    para("Bản C4.5 trong bài tập xây dựng cây danh nghĩa chưa cắt tỉa. Mỗi thuộc tính được dùng tối đa một lần trên một đường đi. Lá lưu phân bố lớp; khi gặp nhánh chưa có trong tập huấn luyện, chương trình dùng phân bố tại nút. Các chức năng xử lý trực tiếp thuộc tính liên tục, chia trọng số cho giá trị thiếu và cắt tỉa của C4.5 đầy đủ chưa được triển khai.")
     para("Weka dùng J48 chưa cắt tỉa, đặt minNumObj=1 và collapseTree=False trên cùng ARFF danh nghĩa. Dù gần với phạm vi đó, J48 vẫn có chi tiết lựa chọn phép chia và xử lý dự đoán riêng. Báo cáo giữ hai kết quả để nhìn rõ ảnh hưởng của cài đặt và cấu hình.")
     pseudocode("""for attribute in valid_splits:
     gain = entropy_before - weighted_entropy_after
@@ -535,7 +534,7 @@ best = attribute_with_largest_ratio(eligible)""")
     para("Bình phương khoảng cách d²(x,z)=tổng_j (xj−zj)² đủ để xếp hạng vì căn bậc hai bảo toàn thứ tự. Khi hòa khoảng cách, chương trình xét chỉ số mẫu train để kết quả xác định. Điểm lớp 1 là số phiếu lớp 1 chia k, còn nhãn là lớp có nhiều phiếu hơn.")
     para("Ví dụ một chiều đã chuẩn hóa gồm các điểm 0,2,5,8 với nhãn 0,1,1,0. Với mẫu 3 và k=3, các khoảng cách bình phương lần lượt là 9,1,4,25. Ba láng giềng gần nhất là 2,5,0, cho hai phiếu lớp 1 và một phiếu lớp 0. Mẫu được dự đoán là 1 với điểm 2/3.")
     para("Ưu điểm của KNN là có thể tận dụng cấu trúc cục bộ không tuyến tính. Hạn chế là mỗi lần dự đoán phải so với nhiều mẫu train và chất lượng phụ thuộc vào cách đo khoảng cách. Chuẩn hóa train-only giúp hạn chế cột Solids hoặc Conductivity chi phối các cột có trị số nhỏ hơn.")
-    para("Thời gian học của KNN chủ yếu là lưu dữ liệu; thời gian dự đoán mới chứa phần tính khoảng cách. Vì vậy, khi so chi phí giữa các mô hình, nhóm ghi riêng fit và predict để tránh kết luận KNN nhanh chỉ từ thời gian fit.")
+    para("KNN lưu các mẫu đã xử lý ở bước huấn luyện và tính khoảng cách khi có yêu cầu dự đoán. Vì vậy, chi phí dự đoán tăng theo số mẫu huấn luyện. Thời gian huấn luyện và thời gian dự đoán được ghi riêng trong kết quả thực nghiệm.")
     pseudocode("""distances = []
 for index, train_row in enumerate(train):
     d2 = sum((x[j] - train_row[j])**2 for j in columns)
@@ -549,7 +548,7 @@ return int(2 * votes > 5), votes / 5""")
     para("Hàm mục tiêu là cross-entropy trung bình cộng với L2: J=−mean[y log(p)+(1−y)log(1−p)] + λ||w||²/2. Gradient theo wj là mean[(p−y)xj]+λwj. Gradient theo b là mean[p−y]. Bias không bị phạt L2.")
     para("Mã khởi tạo w=0, b=0, tính gradient trên toàn bộ train ở mỗi epoch rồi cập nhật đồng thời w và b. Cấu hình định trước là 400 epoch, learning rate 0,1, λ=0,001. Ngưỡng nhãn là p1 > 0,5; hòa chọn 0. Không thử lại tham số dựa vào test.")
     para("Ví dụ hai mẫu x=−1,y=0 và x=1,y=1. Ở khởi tạo p=0,5 cho cả hai, gradient w bằng −0,5 và gradient b bằng 0. Nếu learning rate=1 và λ=0, sau một bước w=0,5,b=0. Đây là đáp án tính tay dùng trong kiểm thử bước cập nhật.")
-    para("Trong kết quả hiện tại, Logistic dự đoán toàn bộ test là lớp 0. Điều đó phản ánh ngưỡng quyết định và khả năng tách tuyến tính của cấu hình đã dùng. Nó vẫn có các điểm xác suất khác nhau nên ROC-AUC không nhất thiết bằng 0,5. Báo cáo phân biệt rõ nhãn tại một ngưỡng với thứ hạng trên nhiều ngưỡng.")
+    para("Ở cấu hình đang xét, Logistic Regression dự đoán toàn bộ tập kiểm tra là lớp 0. Xác suất đầu ra vẫn khác nhau giữa các mẫu, nên ROC-AUC có thể khác 0,5 dù nhãn dự đoán chỉ thuộc một lớp. Kết quả này chỉ phản ánh cấu hình đã chạy, chưa đủ để kết luận về mọi cấu hình của Logistic Regression.")
     pseudocode("""for epoch in range(400):
     gradient_w, gradient_b = zeros(), 0
     for x, y in train:
@@ -578,24 +577,25 @@ return int(2 * votes > 5), votes / 5""")
 
     page("1. Thiết kế đánh giá", "III. Thực nghiệm và phân tích kết quả")
     table(["Phần dữ liệu","Lớp 0","Lớp 1","Tổng"],[("Development",1598,1022,2620),("Test",400,256,656),("Toàn bộ",1998,1278,3276)],[6.3,3,3,3])
-    para("Sáu thuật toán dùng cùng danh sách ID của năm lượt kiểm định trong development. Mỗi mẫu development xuất hiện đúng một lần ở validation. Pipeline mới ở từng fold học lại tiền xử lý để ngăn giá trị validation đi vào thống kê train.")
+    para("Sáu thuật toán sử dụng cùng năm phần dữ liệu trong development. Mỗi lượt dùng bốn phần để huấn luyện và một phần để kiểm định (validation); mỗi mẫu xuất hiện đúng một lần ở phần kiểm định. Tiền xử lý và mô hình được học lại ở từng lượt.")
     table(["Chỉ số","Cách tính"],[("Accuracy","(TP+TN)/N"),("Precision lớp 1","TP/(TP+FP)"),("Recall lớp 1","TP/(TP+FN)"),("F1 lớp 1","2TP/(2TP+FP+FN)"),("Balanced Accuracy","(Recall lớp 0 + Recall lớp 1)/2"),("Macro-F1","(F1 lớp 0 + F1 lớp 1)/2"),("ROC-AUC","Diện tích dưới đường TPR theo FPR")],[5.4,9.9])
-    para("Nhãn 1 được chọn làm dương. Ma trận dùng hàng là nhãn thật, cột là nhãn dự đoán theo thứ tự [0,1]. Chỉ số có mẫu số 0 được ghi N/A. Baseline luôn chọn lớp đa số trong train chỉ là mốc tham chiếu thêm và không tính vào sáu thuật toán.")
-    para("Các cấu hình cố định được công bố trước khi chạy. Những kết quả ở đây mô tả sáu cấu hình đã triển khai, không khẳng định thuật toán nào luôn tốt nhất sau khi tối ưu mọi tham số. Độ lệch chuẩn qua năm fold mô tả dao động của phép chia, không phải khoảng tin cậy.")
+    para("Nhãn 1 được chọn làm lớp dương. Trong ma trận nhầm lẫn, hàng là nhãn thực tế và cột là nhãn dự đoán, theo thứ tự [0,1]. Chỉ số có mẫu số bằng 0 được ghi N/A. Mô hình luôn chọn lớp đa số của tập huấn luyện được dùng làm mốc so sánh bổ sung.")
+    para("Trong các bảng kết quả, BA là Balanced Accuracy, AUC là diện tích dưới đường ROC, TB là trung bình và SD là độ lệch chuẩn qua năm lượt kiểm định. Precision, recall và F1 của lớp 1 được tính với nhãn uống được là lớp dương.")
+    para("Các tham số được chốt trước khi chạy thực nghiệm. Kết quả so sánh trong báo cáo ứng với những cấu hình này, chưa bao gồm việc tìm tham số tối ưu cho từng thuật toán. Độ lệch chuẩn qua năm lượt kiểm định mô tả mức dao động theo cách chia dữ liệu.")
 
     page("2. Kết quả kiểm định chéo năm fold")
     table(["Thuật toán","Accuracy TB","BA TB ± SD","Macro-F1 TB","AUC TB"],[
         (NAMES[a],percent(results[a]["cv"]["accuracy"]["mean"]),number(results[a]["cv"]["balanced_accuracy"]["mean"])+" ± "+number(results[a]["cv"]["balanced_accuracy"]["std"]),number(results[a]["cv"]["macro_f1"]["mean"]),number(results[a]["cv"]["roc_auc"]["mean"])) for a in ALGORITHMS],[4.1,2.7,3.4,2.7,2.4])
     table(["Fold","BA Naive Bayes","BA KNN","AUC Naive Bayes","AUC KNN"],[(i+1,number(results["naive_bayes"]["folds"][i]["balanced_accuracy"]),number(results["knn"]["folds"][i]["balanced_accuracy"]),number(results["naive_bayes"]["folds"][i]["roc_auc"]),number(results["knn"]["folds"][i]["roc_auc"])) for i in range(5)],[1.3,3.5,3.5,3.5,3.5])
-    para("KNN có BA trung bình cao nhất trong sáu cấu hình. ID3 và C4.5 cũng cao hơn NB theo BA ở CV, cho thấy việc kết hợp các mã bằng cây có thể tận dụng quan hệ mà tích xác suất độc lập bỏ qua. Tuy nhiên, mức BA của các phương pháp vẫn thấp, nên kết quả cần được đọc cùng test.")
-    para("AUC trung bình của NB cao hơn BA của nó về trị số nhưng hai chỉ số có ý nghĩa khác nhau. AUC đo thứ hạng qua các mức điểm, còn BA đo nhãn ở ngưỡng hiện hành. Không so trực tiếp trị số AUC và BA để nói một chỉ số tốt hơn chỉ số kia.")
+    para("Trong Bảng 15, KNN có BA trung bình cao nhất, đạt 0,5685. ID3 đạt 0,5614 và C4.5 đạt 0,5581, đều cao hơn mức 0,5200 của Naive Bayes. Đây là kết quả kiểm định trong development; phần tiếp theo sử dụng tập kiểm tra để xem các mô hình có duy trì được mức chênh lệch này hay không.")
+    para("Với Naive Bayes, BA giữa các lượt nằm trong khoảng từ 0,5101 đến 0,5331; AUC từ 0,5242 đến 0,6013. BA được tính từ nhãn tại ngưỡng phân lớp đã chọn, còn AUC đánh giá thứ tự các mẫu theo điểm đầu ra. Hai chỉ số này bổ sung cho nhau khi đọc kết quả.")
 
     page("3. Kết quả kiểm tra và so sánh sáu mô hình")
     table(["Thuật toán","Accuracy","BA","Macro-F1","Recall 1","AUC"],[
         (NAMES[a],percent(results[a]["test"]["accuracy"]),percent(results[a]["test"]["balanced_accuracy"]),number(results[a]["test"]["macro_f1"]),percent(results[a]["test"]["per_class"][1]["recall"]),number(results[a]["test"]["roc_auc"])) for a in ALGORITHMS],[4.1,2.3,2.3,2.3,2.3,2])
     figure(FOLDER/"figures"/"comparison.png", "Accuracy và Balanced Accuracy trên cùng 656 mẫu test.")
-    para("KNN đạt accuracy 64,79%, cao hơn mốc đa số 60,98% khoảng 3,81 điểm phần trăm. BA của KNN là 60,72% và nhận đúng 108/256 mẫu lớp 1. NB đạt accuracy 60,37%, BA 51,61% và chỉ nhận đúng 30/256 mẫu lớp 1. Chênh lệch cho thấy cách khai thác lân cận hữu ích hơn công thức tần suất độc lập ở cấu hình này.")
-    para("Logistic và SVM Python dự đoán toàn lớp 0 nên accuracy bằng mốc đa số. ID3 và C4.5 nhận ra nhiều mẫu lớp 1 hơn NB, nhưng tạo nhiều FP hơn, khiến accuracy thấp hơn. Kết luận cần dựa vào mục tiêu và đánh đổi giữa hai dạng lỗi.")
+    para("KNN đạt accuracy 64,79%, cao hơn mốc luôn đoán lớp 0 là 60,98% khoảng 3,81 điểm phần trăm. KNN nhận đúng 108/256 mẫu lớp 1 và có BA 60,72%. Naive Bayes đạt accuracy 60,37%, BA 51,61% và nhận đúng 30/256 mẫu lớp 1. Với tập dữ liệu và cách tiền xử lý đang dùng, KNN cho kết quả tốt hơn Naive Bayes ở các chỉ số này.")
+    para("Logistic Regression và SVM Python dự đoán toàn bộ mẫu là lớp 0, nên accuracy bằng mốc đa số và recall lớp 1 bằng 0. ID3 và C4.5 nhận diện được nhiều mẫu lớp 1 hơn Naive Bayes, nhưng cũng gán nhầm nhiều mẫu lớp 0 sang lớp 1. Số lỗi tăng làm accuracy của hai cây quyết định thấp hơn Naive Bayes.")
 
     page("4. Ma trận nhầm lẫn")
     figure(FOLDER/"figures"/"confusions.png", "Sáu ma trận nhầm lẫn, hàng là thật và cột là dự đoán.",max_height=13)
@@ -610,53 +610,60 @@ return int(2 * votes > 5), votes / 5""")
     page("6. Phân tích kết quả của Naive Bayes")
     metric=results["naive_bayes"]["test"]
     table(["Cách đọc lỗi","Phép tính","Kết quả"],[("Mẫu lớp 0 bị gán nhầm 1","34/400","8,50%"),("Dự đoán 1 bị sai","34/64","53,125%"),("Mẫu lớp 1 bị bỏ sót","226/256","88,28%"),("Mẫu lớp 1 được nhận đúng","30/256","11,72%")],[7.3,4,4])
-    para("Các mẫu số ở bảng trả lời những câu hỏi khác nhau. Trong 400 mẫu thật lớp 0, NB gán nhầm 34 mẫu thành 1. Nhưng trong 64 lần NB dự đoán lớp 1, có 34 lần sai. Vì vậy, cả khi dự đoán uống được, mô hình vẫn cần được diễn giải với mức chính xác dương thấp.")
-    para("Có ba cơ chế có thể góp phần vào kết quả. Thứ nhất, mỗi khoảng số gom các giá trị khác nhau nên mất chi tiết có ích. Thứ hai, điền trung vị tạo thêm khối lượng ở khoảng giữa, nhất là Sulfate và pH. Thứ ba, giả định độc lập có điều kiện không mô hình hóa được tương tác giữa các chỉ tiêu. Đây là các giới hạn của thiết kế, chưa phải chứng minh nhân quả cho từng lỗi.")
-    para("So sánh trên cùng biểu diễn danh nghĩa cho thấy cây có thể nhận ra thêm lớp 1, dù làm tăng FP. So với biểu diễn liên tục chuẩn hóa của KNN, NB còn mất thông tin trong khoảng. Vì vậy, chênh lệch KNN–NB bao gồm cả mô hình và biểu diễn tiền xử lý. Báo cáo công khai yếu tố này để tránh gán toàn bộ khác biệt cho một công thức học.")
-    para("Một kết quả thấp vẫn có giá trị học thuật khi đường tính đúng và phân tích đầy đủ. Thực nghiệm không đặt mục tiêu đạt một mức accuracy bằng cách thay seed, xóa mẫu khó hoặc gộp thêm dữ liệu không rõ nguồn gốc.")
+    para("Trong 400 mẫu thực tế thuộc lớp 0, Naive Bayes gán nhầm 34 mẫu sang lớp 1, tương ứng 8,50%. Nếu xét riêng 64 mẫu được dự đoán là lớp 1 thì có 34 mẫu sai. Hai tỷ lệ có mẫu số khác nhau và lần lượt mô tả tỷ lệ báo dương sai trên lớp 0 và tỷ lệ dự đoán sai trong nhóm được gán nhãn uống được.")
+    para("Việc chia khoảng làm mất khác biệt giữa các số đo nằm trong cùng một khoảng. Bước điền trung vị còn tập trung thêm mẫu ở khoảng giữa, nhất là với Sulfate và pH có nhiều ô thiếu. Bên cạnh đó, Naive Bayes không mô hình hóa tương tác giữa các chỉ tiêu trong cùng lớp. Những đặc điểm này là hạn chế của cách biểu diễn và giả định mô hình; thực nghiệm hiện tại chưa tách riêng mức ảnh hưởng của từng yếu tố.")
+    para("ID3 và C4.5 sử dụng cùng mã khoảng với Naive Bayes nhưng có recall lớp 1 cao hơn, đồng thời có nhiều FP hơn. KNN sử dụng giá trị số đã chuẩn hóa nên khác cả mô hình lẫn cách biểu diễn đầu vào. Do đó, chênh lệch giữa KNN và Naive Bayes không thể quy hoàn toàn cho thuật toán phân lớp.")
+    para("Accuracy của Naive Bayes thấp hơn mốc đa số, trong khi recall lớp 1 chỉ đạt 11,72%. Kết quả cho thấy cấu hình này chưa đáp ứng tốt việc nhận diện mẫu uống được. Các cải tiến về biểu diễn thuộc tính hoặc tham số cần được đánh giá trong development trước khi thử trên một tập kiểm tra độc lập.")
 
+    heading("7. Thực nghiệm trên Weka", 2, True)
+    para("Các bộ phân lớp trong Weka được học trên 2.620 mẫu và đánh giá trên 656 mẫu kiểm tra, theo cùng ID với Python. Kết quả được lấy từ lớp Evaluation của Weka và đối chiếu với tệp dự đoán từng mẫu. Các hình sau chụp màn hình Classify với chế độ Supplied test set.")
     for a in ALGORITHMS:
         page("7."+str(ALGORITHMS.index(a)+1)+". Kết quả "+NAMES[a]+" trên Weka")
-        figure(FOLDER/"weka"/f"result-{a}.png", f"Panel Classify của Weka hiển thị kết quả {NAMES[a]}.",max_height=12)
-        para(f"Tập học gồm 2.620 mẫu và test gồm 656 mẫu theo cùng ID của Python. Accuracy Weka là {percent(weka[a]['accuracy'])}. Có {weka[a]['unclassified']} mẫu không được gán nhãn. Kết quả được lấy từ lớp Evaluation của Weka và đối chiếu với dự đoán từng mẫu đã xuất.")
+        figure(FOLDER/"weka"/f"result-{a}.png", f"Kết quả {NAMES[a]} trong Weka Explorer.",max_height=12)
+        matrix = weka[a]["matrix_with_unclassified"]
+        correct = matrix[0][0] + matrix[1][1]
+        unclassified = weka[a]["unclassified"]
+        para(f"{NAMES[a]} phân loại đúng {correct}/656 mẫu, đạt accuracy {percent(weka[a]['accuracy'])}. "
+             + (f"Có {unclassified} mẫu không được gán nhãn." if unclassified
+                else "Tất cả mẫu kiểm tra đều được gán nhãn."))
         explanations={
-            "naive_bayes":"Bộ phân lớp DirectFrequencyNB được viết cho Weka để dùng đúng tần suất trực tiếp và không cộng giả mẫu. Đầu vào là các mã khoảng Python đã học trên development. Nhãn và hậu nghiệm của cả 656 mẫu khớp bản Python trong sai số số học đã kiểm tra. NB mặc định của Weka có cơ chế ước lượng khác nên không dùng thay số liệu này.",
-            "id3":"ID3 lấy từ gói simpleEducationalLearningSchemes chính thức của Weka. Khi gặp nhánh chưa có mẫu học, phiên bản giáo dục có thể trả phân bố rỗng và không gán nhãn. Có 53 mẫu như vậy, gồm 28 mẫu lớp 0 và 25 mẫu lớp 1. Accuracy dùng toàn bộ 656 mẫu làm mẫu số, không bỏ các mẫu chưa gán để làm tăng điểm.",
-            "c45":"Weka dùng J48 với cây chưa cắt tỉa, minNumObj=1 và collapseTree=False. Bản Python dùng gain ratio trên các thuộc tính đã mã hóa. Các chi tiết lựa chọn và dự đoán của J48 vẫn có thể khác. Điểm accuracy bằng nhau chưa chứng minh mọi nhãn hoặc mọi nhánh đều giống nhau.",
-            "knn":"Weka dùng IBk k=5, khoảng cách Euclid và tắt normalize nội bộ vì đầu vào đã được chuẩn hóa bằng thống kê train. Nhãn trên test khớp Python. Weka có quy tắc trả phân bố và xử lý hòa khoảng cách riêng, nên điểm xác suất có thể khác dù nhãn và accuracy trùng.",
-            "logistic":"Weka Logistic dùng ridge=0,001 và tối đa 400 lượt tối ưu. Cơ chế tối ưu và cách quy mô hóa penalty khác với gradient toàn tập của Python. Cả hai đều dự đoán toàn bộ test là lớp 0 ở cấu hình này. Không xem cùng giá trị ridge và λ là bằng chứng hai hàm mục tiêu hoàn toàn trùng.",
-            "svm":"Weka SMO dùng kernel đa thức bậc 1 tương ứng kernel tuyến tính, C=1 và không chuẩn hóa nội bộ. Bản Python tối ưu hinge loss với SGD và λ=0,01. Hai cách đặt regularization và tối ưu không tương đương trực tiếp. Bản SMO chưa hiệu chỉnh xác suất nên điểm phân bố của nó không được so với biên Python như cùng một loại xác suất."
+            "naive_bayes":"Bộ phân lớp DirectFrequencyNB sử dụng phép đếm tần suất trực tiếp, không làm trơn. Đầu vào là các mã khoảng học từ development của Python. Nhãn của 656 mẫu trùng với kết quả Python; xác suất hậu nghiệm cũng khớp trong sai số số học. Bộ NaiveBayes mặc định của Weka dùng cách ước lượng khác nên phép đối chiếu này sử dụng DirectFrequencyNB.",
+            "id3":"ID3 được lấy từ gói simpleEducationalLearningSchemes của Weka [6]. Khi gặp nhánh chưa có mẫu huấn luyện, phiên bản này có thể trả phân bố rỗng. Trong 53 mẫu chưa được gán nhãn có 28 mẫu lớp 0 và 25 mẫu lớp 1. Accuracy được tính trên toàn bộ 656 mẫu, bao gồm các trường hợp chưa gán nhãn.",
+            "c45":"Cấu hình J48 dùng cây chưa cắt tỉa, minNumObj=1 và collapseTree=False. Python sử dụng gain ratio trên cùng thuộc tính danh nghĩa. Hai mô hình có accuracy bằng nhau trong lần chạy này; tuy nhiên, cùng accuracy chưa bảo đảm cây và nhãn dự đoán của từng mẫu hoàn toàn trùng nhau.",
+            "knn":"IBk dùng k=5 và khoảng cách Euclid. Chức năng chuẩn hóa trong Weka được tắt vì đầu vào đã được chuẩn hóa theo tham số huấn luyện. Nhãn dự đoán trùng với Python trên tập kiểm tra. Quy tắc trả phân bố và xử lý các láng giềng đồng khoảng cách của Weka có thể làm điểm đầu ra khác nhau dù nhãn trùng nhau.",
+            "logistic":"Logistic của Weka đặt ridge=0,001 và tối đa 400 lượt tối ưu. Cả Weka và Python đều dự đoán toàn bộ tập kiểm tra là lớp 0. Hai chương trình khác cách tối ưu và cách tính hệ số điều chuẩn, nên ridge của Weka và λ trong mã Python không được xem là hai tham số tương đương chỉ vì có cùng trị số.",
+            "svm":"SMO dùng kernel đa thức bậc 1, tương ứng kernel tuyến tính, với C=1 và tắt chuẩn hóa nội bộ. Python tối ưu hinge loss bằng SGD với λ=0,01. Cách điều chuẩn và tối ưu của hai cấu hình khác nhau. SMO trong thí nghiệm chưa hiệu chỉnh xác suất; phân bố đầu ra của Weka và biên quyết định của Python được xem xét riêng."
         }
         para(explanations[a])
 
     page("8. So sánh Python với Weka")
     table(["Thuật toán","Accuracy Python","Accuracy Weka","Chưa gán Weka"],[(NAMES[a],percent(results[a]["test"]["accuracy"]),percent(weka[a]["accuracy"]),weka[a]["unclassified"]) for a in ALGORITHMS],[4.5,3.9,3.9,3])
     para("NB có cùng công thức, cùng bảng biểu diễn và cho cùng dự đoán. KNN có cùng k, khoảng cách và mẫu học nên cho cùng nhãn. C4.5 và Logistic bằng accuracy trong lần chạy này, nhưng điều đó không đủ để khẳng định cài đặt hoặc toàn bộ điểm đầu ra trùng nhau.")
-    para("ID3 Python dùng phân bố tại nút khi thiếu nhánh, còn Weka ID3 giáo dục không gán 53 mẫu. SVM khác đáng kể vì cách đặt regularization và tối ưu khác nhau. Các khác biệt có nguyên nhân được xác định trong cấu hình, không được che bằng cách trộn số liệu Weka vào bảng kết quả Python.")
-    para("Các mô hình tham chiếu dùng ARFF đã được biến đổi từ development train của Python. Thí nghiệm bộ lọc Weka ở phần II có mục đích trình bày quá trình thao tác riêng. Sự tách bạch này cho phép đánh giá phần bộ phân lớp trong Weka mà không để khác biệt mean–median trở thành một yếu tố ẩn.")
+    para("ID3 Python dùng phân bố tại nút khi thiếu nhánh, còn ID3 của Weka không gán nhãn cho 53 mẫu. SVM có kết quả chênh lệch lớn giữa hai môi trường, cùng với sự khác nhau về tham số điều chuẩn và phương pháp tối ưu. Vì vậy, kết quả Weka được dùng để đối chiếu từng cấu hình và không thay thế số liệu Python.")
+    para("Trong phép so sánh bộ phân lớp, Weka sử dụng ARFF đã biến đổi theo tham số học từ development của Python. Các thao tác bộ lọc ở phần II được trình bày riêng để mô tả cách dùng Weka. Nhờ dùng cùng đầu vào trong phép đối chiếu, khác biệt giữa điền trung bình và điền trung vị không ảnh hưởng đến bảng so sánh bộ phân lớp.")
 
     page("1. Mục tiêu và luồng sử dụng", "IV. Phát triển ứng dụng dự đoán")
     para("Ứng dụng Streamlit chạy cục bộ tại http://127.0.0.1:8501. Trang chính ghi rõ Naive Bayes là phương pháp chính và có ba tab cho nhập một mẫu, dự đoán CSV và xem kết quả thực nghiệm. Giao diện dùng tiếng Việt và giữ chín tên cột theo dữ liệu để tránh nhầm thứ tự.")
-    para("Người dùng nhập các chỉ tiêu hoặc giữ ví dụ trung vị train đang hiển thị. Ô thiếu có thể để trống. Sau khi nhấn Dự đoán và so sánh, web kiểm dữ liệu, dùng lại tiền xử lý đã học và trả nhãn của NB trước. Bảng phía dưới hiển thị thêm năm phương pháp đối chiếu và loại điểm đầu ra của từng mô hình.")
-    figure(FOLDER/"web-metrics.png", "Web đang chạy với tab kết quả thực nghiệm.",max_height=15)
-    para("Các số liệu trong tab thực nghiệm được đọc từ lần chạy 20261124-six-v1 có manifest. Trang không huấn luyện khi người dùng bấm dự đoán. Điều này giữ kết quả có thể lặp lại và tránh làm đầu vào mới ảnh hưởng trạng thái đã học.")
+    para("Người dùng nhập số đo cho các chỉ tiêu; ô thiếu có thể để trống. Giao diện có sẵn ví dụ lấy từ trung vị của tập huấn luyện. Sau khi nhấn Dự đoán và so sánh, ứng dụng kiểm tra dữ liệu, áp dụng các tham số đã học và hiển thị kết quả Naive Bayes. Bảng bên dưới trình bày thêm năm mô hình đối chiếu và loại điểm đầu ra của từng mô hình.")
+    figure(FOLDER/"web-metrics.png", "Giao diện tab Kết quả thực nghiệm.",max_height=15)
+    para("Tab kết quả thực nghiệm đọc số liệu và mô hình đã lưu từ lần chạy 20261124-six-v1. Khi người dùng yêu cầu dự đoán, ứng dụng chỉ kiểm tra đầu vào, áp dụng tiền xử lý và tính đầu ra; quá trình này không huấn luyện lại mô hình.")
 
     page("2. Kết quả dự đoán và xử lý dữ liệu CSV")
-    figure(FOLDER/"web-prediction.png", "Kết quả dự đoán thật của sáu mô hình trên web.",max_height=15)
+    figure(FOLDER/"web-prediction.png", "Kết quả dự đoán của sáu mô hình trên ứng dụng.",max_height=15)
     para("Bảng phân biệt điểm xác suất ước lượng của NB, cây, KNN và Logistic với biên quyết định của SVM. Biên SVM có thể âm hoặc dương và không nằm trong [0,1]. Người dùng có thể tải kết quả CSV để giữ mã dòng, mã mẫu, nhãn, điểm và lỗi.")
     para("CSV phải có chín tên cột và mã hóa UTF-8. Cột sample_id được giữ để đối chiếu. Nếu có Potability trong tệp dự đoán, nhãn đó không đi vào vector đầu vào. Dòng lỗi vẫn có bản ghi lỗi theo từng mô hình và không được trình bày như một dự đoán hợp lệ.")
 
     page("3. Kiểm thử ứng dụng và khả năng mở rộng")
     table(["Tình huống kiểm tra","Kết quả mong đợi"],[("Nhập một mẫu hợp lệ","Hiển thị NB và đủ năm mô hình đối chiếu"),("CSV nhiều dòng","Giữ thứ tự, ID mẫu, kết quả đủ sáu mô hình"),("Có ô thiếu","Dùng trung vị train đã lưu"),("Chuỗi không phải số","Báo lỗi dòng và không tự gán nhãn"),("Tất cả chỉ tiêu trống","Từ chối dự đoán"),("Model bị thay đổi byte","Dừng nạp khi hash không khớp"),("Nhấn dự đoán nhiều lần","Dùng cùng trạng thái đã học")],[7.3,8])
-    para("Ứng dụng đã được kiểm tra qua AppTest và qua giao diện trình duyệt đang chạy. Lượt nhập một mẫu hiển thị đủ sáu dòng, cho phép tải CSV và đối chiếu các số liệu trong tab thực nghiệm. Mã kiểm thử thuật toán gồm entropy, lựa chọn nút, khoảng cách, gradient Logistic một bước, cập nhật hinge loss và lưu/nạp pipeline.")
-    para("Giới hạn hiện tại gồm nguồn dữ liệu chưa có metadata đo đầy đủ, một phép chia holdout lịch sử và các cấu hình cố định. Ứng dụng phù hợp để minh họa cách vận hành mô hình trong bài tập. Muốn sử dụng trên dữ liệu thực tế, cần kiểm chứng đầu vào, nhãn và kết quả trên một tập mẫu độc lập có nguồn gốc rõ ràng.")
-    para("Các hướng phát triển hợp lý gồm thu thập dữ liệu có quy trình gán nhãn rõ ràng, kiểm tra biểu diễn thuộc tính bằng CV và đánh giá độ hiệu chỉnh xác suất. Mỗi thay đổi cần chốt trên development và giữ dữ liệu ngoài cho đánh giá cuối, thay vì điều chỉnh theo các mẫu đã xem.")
+    para("Các chức năng được kiểm tra bằng AppTest và thao tác trên trình duyệt. Với một mẫu hợp lệ, giao diện hiển thị kết quả của cả sáu mô hình và cho phép tải tệp CSV. Bảng 20 liệt kê các tình huống và kết quả mong đợi khi kiểm tra ứng dụng.")
+    para("Ứng dụng hiện phục vụ thực hành phân lớp trong bài tập. Dữ liệu chưa có đầy đủ thông tin lấy mẫu và kiểm nghiệm; tập kiểm tra cũng đã từng được sử dụng ở phiên bản trước. Vì vậy, cần có dữ liệu độc lập và nhãn được xác định rõ trước khi đánh giá khả năng sử dụng ngoài phạm vi bài tập.")
+    para("Hướng phát triển tiếp theo là bổ sung dữ liệu có nguồn và quy trình gán nhãn rõ ràng, thử cách biểu diễn thuộc tính khác trong kiểm định chéo, đồng thời đánh giá độ hiệu chỉnh của xác suất. Cấu hình được lựa chọn từ development cần được giữ nguyên khi đánh giá trên tập dữ liệu mới.")
 
     heading("KẾT LUẬN",1,True)
-    para("Nhóm đã thực hiện quy trình phân loại Potability từ CSV thô, phân tích dữ liệu, tiền xử lý trên Python và Weka, tự cài sáu thuật toán và xây dựng web dự đoán. Naive Bayes giữ vai trò chính, được giải thích bằng công thức, ví dụ nhỏ và bảng đếm đủ chín thuộc tính trên mẫu nước thật.")
-    para("Trên cùng 656 mẫu kiểm tra, NB đạt accuracy 60,37%, BA 51,61% và ROC-AUC 0,5218. KNN đạt kết quả cao nhất trong sáu cấu hình với accuracy 64,79%, BA 60,72% và AUC 0,6518. Kết quả giúp làm rõ rằng một cài đặt đúng vẫn có thể phân loại kém nếu giả định và cách biểu diễn chưa phù hợp với cấu trúc dữ liệu.")
-    para("Thực nghiệm Weka xác nhận công thức NB tự cài cho cùng dự đoán trên biểu diễn tương ứng. Đồng thời, ID3 và SVM minh họa ảnh hưởng của xử lý nhánh thiếu và cấu hình tối ưu đến kết quả. Các mẫu chưa gán nhãn của Weka được ghi đầy đủ và không bị bỏ để nâng chỉ số.")
-    para("Nhóm kết luận rằng dữ liệu, biểu diễn, quy tắc đánh giá và cách đọc lỗi phải được xem cùng với accuracy. Phạm vi hiện tại là bài tập dự đoán nhãn theo bộ dữ liệu công bố, chưa đủ để kết luận an toàn nước ngoài thực tế.")
+    para("Nhóm đã xây dựng quy trình phân loại Potability từ CSV gốc, gồm kiểm tra và tiền xử lý dữ liệu, cài đặt sáu thuật toán, thực nghiệm với Weka và phát triển ứng dụng web. Naive Bayes là thuật toán chính, được trình bày bằng công thức, ví dụ tính tay và bảng đếm cho một mẫu trong tập kiểm tra.")
+    para("Trên 656 mẫu kiểm tra, Naive Bayes đạt accuracy 60,37%, BA 51,61% và ROC-AUC 0,5218. KNN có kết quả cao nhất trong sáu cấu hình, với accuracy 64,79%, BA 60,72% và AUC 0,6518. Điểm hạn chế nổi bật của Naive Bayes là chỉ nhận đúng 30/256 mẫu uống được, dù accuracy trên toàn tập đạt hơn 60%.")
+    para("Bộ phân lớp Naive Bayes đếm tần suất trên Weka cho cùng nhãn dự đoán với Python trên 656 mẫu. Kết quả ID3 và SVM khác giữa hai môi trường do cách xử lý nhánh chưa gặp, tham số và cơ chế tối ưu. Riêng 53 mẫu không được ID3 của Weka gán nhãn vẫn được giữ trong mẫu số đánh giá.")
+    para("Kết quả hiện tại cho thấy cần cải thiện khả năng nhận diện lớp 1 của Naive Bayes. Việc bổ sung dữ liệu hoặc thay đổi tiền xử lý phải được kiểm tra bằng thực nghiệm trên dữ liệu có nguồn gốc phù hợp. Ứng dụng chỉ dự đoán nhãn theo bộ dữ liệu nghiên cứu và chưa thay thế được việc kiểm nghiệm chất lượng nước.")
     heading("TÀI LIỆU THAM KHẢO",1,True)
     for text in [
         "[1] Trần Mạnh Tuấn. Bài giảng Khai phá dữ liệu, Bài 2 Tiền xử lý dữ liệu và Bài 5 Phân lớp dữ liệu. Khoa Công nghệ thông tin, Trường Đại học Thủy Lợi. Bản bài giảng được cung cấp trong học phần.",
