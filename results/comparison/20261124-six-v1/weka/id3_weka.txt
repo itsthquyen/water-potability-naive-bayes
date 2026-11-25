@@ -1,0 +1,31 @@
+=== Weka 3.8.7 - id3 ===
+
+Scheme: weka.classifiers.trees.Id3
+Options: 
+Train: 2620
+Test: 656
+Fit seconds: 0.040111
+
+
+Correctly Classified Instances         336               51.2195 %
+Incorrectly Classified Instances       267               40.7012 %
+Kappa statistic                          0.0776
+Mean absolute error                      0.4483
+Root mean squared error                  0.6641
+Relative absolute error                102.8255 %
+Root relative squared error            142.4702 %
+UnClassified Instances                  53                8.0793 %
+Total Number of Instances              656     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0,616    0,537    0,649      0,616    0,632      0,078    0,541     0,632     0
+                 0,463    0,384    0,428      0,463    0,445      0,078    0,527     0,404     1
+Weighted Avg.    0,557    0,478    0,564      0,557    0,560      0,078    0,536     0,544     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 229 143 |   a = 0
+ 124 107 |   b = 1
