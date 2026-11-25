@@ -1,0 +1,14 @@
+{
+  "verified_on": "2026-11-24",
+  "source_url": "https://www.kaggle.com/api/v1/datasets/download/adityakadiwal/water-potability?datasetVersionNumber=3",
+  "raw_csv_sha256": "904004bde729bfe3d2e195f46343bceead09e32a0eb95bb8184e7e20e029b2bf",
+  "fresh_download_matches_existing": true,
+  "rows": 3276,
+  "missing": {
+    "ph": 491,
+    "Sulfate": 781,
+    "Trihalomethanes": 162
+  },
+  "model_tests_passed": 305,
+  "evaluation": "Fixed settings; historical holdout reused"
+}
