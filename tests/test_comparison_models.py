@@ -21,7 +21,7 @@ def test_entropy_and_both_tree_criteria():
     assert entropy([2, 2]) == 1
     assert entropy([0, 4]) == 0
     X, y = [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 0, 1, 1]
-    for criterion in ("gain",):
+    for criterion in ("gain", "gain_ratio"):
         tree = DecisionTree(criterion).fit(X, y)
         assert tree.root["column"] == 0
         assert tree.root["gain"] == 1

@@ -87,7 +87,7 @@ class DecisionTree:
     """
 
     def __init__(self, criterion="gain"):
-        if criterion not in ("gain",):
+        if criterion not in ("gain", "gain_ratio"):
             raise ValueError("Tiêu chí phải là gain hoặc gain_ratio.")
         self.criterion = criterion
 
@@ -119,7 +119,14 @@ class DecisionTree:
                 candidates.append((column, gain, gain / split_info, groups))
             if not candidates:
                 return node
-            best = max(candidates, key=lambda item: (item[1], -item[0]))
+            if self.criterion == "gain_ratio":
+                average = sum(item[1] for item in candidates) / len(candidates)
+                candidates = [item for item in candidates if item[1] > 1e-12 and item[1] + 1e-12 >= average]
+                if not candidates:
+                    return node
+                best = max(candidates, key=lambda item: (item[2], -item[0]))
+            else:
+                best = max(candidates, key=lambda item: (item[1], -item[0]))
             column, gain, ratio, groups = best
             remaining = [value for value in columns if value != column]
             node.update(column=column, gain=gain, gain_ratio=ratio,
