@@ -2,11 +2,8 @@
 
 import pytest
 
-from src.config import FEATURE_COLUMNS
 from src.discretization import Discretizer
-from src.naive_bayes import NaiveBayes
-from src.pipeline import WaterPipeline
-from src.predict import predict_records
+from src.algorithms.naive_bayes import NaiveBayes
 
 
 def test_hand_calculated_counts_and_posterior():
@@ -53,17 +50,8 @@ def test_midpoint_rounds_once_for_subnormal_median_and_avoids_overflow():
     assert state["fill_values"] == [2 * smallest, float.fromhex("0x1.8p+1023")]
 
 
-def test_unclassifiable_record_does_not_block_other_rows():
-    pipeline = WaterPipeline().fit([[0] * 9, [10] * 9], [0, 1])
-    mixed = dict(zip(FEATURE_COLUMNS, [0, 10] + [0] * 7))
-    results = predict_records([mixed, dict.fromkeys(FEATURE_COLUMNS, 10)], pipeline)
-    assert "cả hai điểm" in results[0]["error"] and results[0]["predicted_label"] is None
-    assert results[1]["predicted_label"] == 1
 
-
-def test_invalid_count_and_legacy_gaussian_artifact_are_rejected():
+def test_invalid_count_state_is_rejected():
     with pytest.raises(ValueError, match="Bảng đếm"):
         NaiveBayes.from_state({"category_sizes": [2], "class_counts": [1, 1],
                                "feature_counts": [[[1, 0]], [[1, 1]]]})
-    with pytest.raises(ValueError, match="Model Gaussian cũ"):
-        WaterPipeline.from_state({"schema_version": 1})

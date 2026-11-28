@@ -69,3 +69,11 @@ def test_cli_never_overwrites_existing_or_protected_files(tmp_path, monkeypatch,
         main()
     assert error.value.code == 2
     assert (tmp_path / destination).read_text(encoding="utf-8") == "original"
+
+
+def test_unclassifiable_record_does_not_block_other_rows():
+    pipeline = WaterPipeline().fit([[0] * 9, [10] * 9], [0, 1])
+    mixed = dict(zip(FEATURE_COLUMNS, [0, 10] + [0] * 7))
+    results = predict_records([mixed, dict.fromkeys(FEATURE_COLUMNS, 10)], pipeline)
+    assert "cả hai điểm" in results[0]["error"] and results[0]["predicted_label"] is None
+    assert results[1]["predicted_label"] == 1

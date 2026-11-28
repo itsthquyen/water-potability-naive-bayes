@@ -3,20 +3,24 @@
 import math
 import pytest
 
-from src.comparison_models import DecisionTree, KNearestNeighbors, LogisticRegression, LinearSVM, NumericPreprocessor, entropy
+from src.algorithms.id3 import ID3
+from src.algorithms.knn import KNearestNeighbors
+from src.algorithms.logistic import LogisticRegression
+from src.algorithms.svm import LinearSVM
+from src.algorithms.common import entropy
+from src.preprocessing import NumericPreprocessor
 from src.six_experiments import ComparisonPipeline, ALGORITHMS
 
 
-def test_entropy_and_both_tree_criteria():
+def test_entropy_and_id3_information_gain():
     assert entropy([2, 2]) == 1
     assert entropy([0, 4]) == 0
     X, y = [[0, 0], [0, 1], [1, 0], [1, 1]], [0, 0, 1, 1]
-    for criterion in ("gain", "gain_ratio"):
-        tree = DecisionTree(criterion).fit(X, y)
-        assert tree.root["column"] == 0
-        assert tree.root["gain"] == 1
-        assert tree.predict_with_scores(X) == (y, [0, 0, 1, 1])
-        assert tree.predict_with_scores([[2, 0]]) == ([0], [0.5])
+    tree = ID3().fit(X, y)
+    assert tree.root["column"] == 0
+    assert tree.root["gain"] == 1
+    assert tree.predict_with_scores(X) == (y, [0, 0, 1, 1])
+    assert tree.predict_with_scores([[2, 0]]) == ([0], [0.5])
 
 
 def test_knn_distances_and_votes_are_hand_calculated():

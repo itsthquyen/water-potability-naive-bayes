@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .config import CLASS_LABELS, FEATURE_COLUMNS, MODEL_ALGORITHM
 from .discretization import Discretizer
-from .naive_bayes import NaiveBayes
+from .algorithms.naive_bayes import NaiveBayes
 from .preprocessing import _validate_matrix
 
 

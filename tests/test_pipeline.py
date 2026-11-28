@@ -8,7 +8,7 @@ import pytest
 
 from src.config import FEATURE_COLUMNS
 from src.discretization import Discretizer
-from src.naive_bayes import NaiveBayes
+from src.algorithms.naive_bayes import NaiveBayes
 from src.pipeline import WaterPipeline, load_pipeline, save_pipeline, sha256_file
 
 
@@ -217,3 +217,8 @@ def test_written_json_contains_only_finite_values(tmp_path):
     save_pipeline(WaterPipeline().fit(matrix, labels), path)
     state = json.loads(path.read_text(encoding="utf-8"))
     assert json.dumps(state, allow_nan=False)
+
+
+def test_legacy_gaussian_artifact_is_rejected():
+    with pytest.raises(ValueError, match="Model Gaussian cũ"):
+        WaterPipeline.from_state({"schema_version": 1})
