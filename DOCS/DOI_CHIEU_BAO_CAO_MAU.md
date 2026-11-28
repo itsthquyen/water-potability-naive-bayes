@@ -19,24 +19,24 @@ toán phân lớp nước và sáu thuật toán theo yêu cầu hiện hành.
 | Phân tích dữ liệu | Phần II.2; thống kê, histogram, tương quan và phân bố lớp |
 | Sáu thuật toán | Phần II.3; Naive Bayes chính, năm thuật toán đối chiếu; công thức, giả mã và ví dụ |
 | Thực nghiệm và phân tích kết quả | Phần III; năm fold, test, baseline, ma trận, ROC, lỗi và đối chiếu Weka |
-| Ứng dụng có đầu ra | Phần IV; ảnh nhập một mẫu, dự đoán sáu mô hình, CSV, đánh giá và dữ liệu gốc |
+| Ứng dụng có đầu ra | Phần IV theo commit 7df6fb7; năm tab, nhập một mẫu, đồng thuận, CSV, đánh giá, ROC, dữ liệu gốc và cẩm nang |
 | Tài liệu tham khảo | Dạng `[1]. …`; giáo trình và bài giảng ghi chung, không liệt kê bài hoặc trang |
 | Chú thích | Nằm dưới bảng hoặc dưới ảnh, cùng trang với đối tượng |
 
 ## Kiểm chứng bản bàn giao
 
-- PDF riêng và công khai cùng 54 trang, 21 bảng, 26 hình. Phần thân hai
+- PDF riêng và công khai cùng 57 trang, 21 bảng, 29 hình. Phần thân hai
   bản giống nhau về nội dung và ảnh render; bản riêng có thông tin thành viên.
 - Đã xem toàn bộ trang render. Thu gọn bảng phụ lục để tiêu đề, dữ liệu,
   chú thích và ghi nguồn nằm cùng trang ngang A4; tên Potability không bị ngắt.
-- 94 mục trong mục lục/danh mục trỏ đúng nội dung và số trang.
-- Giữ nguyên 19 bảng có số liệu của bản trước; bảng nguồn lý thuyết được
-  viết gọn và thêm một bảng dữ liệu thô. Sáu mã nguồn thuật toán và 56 tệp
+- 100 mục trong mục lục/danh mục được kiểm tra nội dung và số trang.
+- Giữ nguyên toàn bộ 21 bảng so với bản 5373e1b. Sáu mã nguồn thuật toán và 56 tệp
   của lần thực nghiệm cố định vẫn khớp checksum.
 - CSV 3.276 dòng, 10 cột giữ nguyên ô thiếu và độ chính xác. Đã tải từ web
   và so sánh nguyên byte với CSV nguồn; CSV trong ZIP cũng khớp.
-- Toàn bộ 306 kiểm thử đạt. Kiểm tra trực tiếp trên trình duyệt gồm dự đoán
-  một mẫu, CSV ba mẫu, bảng so sánh và tải dữ liệu gốc. Có sáu cảnh báo
+- Toàn bộ 307 kiểm thử đạt. Kiểm tra trực tiếp trên trình duyệt gồm dự đoán
+  một mẫu, nạp hai preset, nạp trung vị, CSV ba mẫu, bảng so sánh, ROC,
+  cẩm nang và tải dữ liệu gốc. Có tám cảnh báo
   deprecation từ phần biểu đồ Streamlit/pandas, không có kiểm thử thất bại.
 
 Những giới hạn thực nghiệm vẫn được nêu trong báo cáo: tập test đã từng
@@ -47,3 +47,8 @@ Không bổ sung số liệu hoặc ảnh giả để làm đẹp kết quả.
 Lời mở đầu, lý do chọn đề tài và tổng quan được viết theo mạch trình bày
 của mẫu: bối cảnh, mục tiêu của nhóm, dữ liệu và các nội dung thực hiện.
 Lời cảm ơn nằm sau kết luận, ngay trước tài liệu tham khảo.
+
+Phần IV mô tả đúng giao diện của commit 7df6fb7, tách dữ liệu thử và tỷ lệ
+đồng thuận khỏi đánh giá mô hình. Các ngưỡng gắn WHO và tên preset được
+ghi nhận là giới hạn của giao diện; không dùng chúng để thay nhãn hoặc
+thay các kết quả thực nghiệm. Mã giao diện vừa pull được giữ nguyên.

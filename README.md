@@ -13,11 +13,16 @@ rtk proxy .venv/Scripts/python.exe -X utf8 report/weka/run_six_weka.py --run-id 
 rtk proxy .venv/Scripts/python.exe -X utf8 -m streamlit run app/comparison_app.py --server.address 127.0.0.1 --server.port 8501
 ```
 
-Web mặc định nạp `results/comparison/20261124-six-v1`, có bốn tab: nhập một
-mẫu, dự đoán CSV, so sánh thực nghiệm và dữ liệu gốc. Có nút nạp mẫu minh
-họa, xóa đầu vào, tải CSV mẫu và tải toàn bộ dữ liệu gốc. Giao diện nền sáng,
-tô nổi bật Naive Bayes, phân biệt điểm xác suất với biên SVM và ẩn kết quả
-cũ khi thay đầu vào. Mô hình, thống kê train, dự đoán, biểu đồ, log Weka và manifest
+Web mặc định nạp `results/comparison/20261124-six-v1`, có năm tab: nhập một
+mẫu, dự đoán CSV, so sánh thực nghiệm, dữ liệu gốc và cẩm nang chỉ tiêu.
+Bản giao diện `7df6fb7` thêm mẫu nạp nhanh, bảng đồng thuận, thống kê tỷ lệ
+nhãn trong CSV và các tab ROC, ma trận nhầm lẫn, EDA. Naive Bayes vẫn là
+kết quả chính; mức đồng thuận không thay nhãn và không phải accuracy.
+Tên preset và các ngưỡng gắn WHO trên giao diện chưa xác nhận chất lượng
+nước. Báo cáo nêu rõ giới hạn và đối chiếu nguồn chuyên môn.
+Có nút nạp trung vị, xóa đầu vào, tải CSV mẫu và tải toàn bộ dữ liệu gốc.
+Giao diện phân biệt điểm xác suất với biên SVM và ẩn kết quả cũ khi thay
+đầu vào. Mô hình, thống kê train, dự đoán, biểu đồ, log Weka và manifest
 được lưu trong thư mục lần chạy. Cấu hình cố định, cùng 5 fold, cùng 656 mẫu
 test lịch sử. Test này từng được xem trong phiên bản cũ, không phải đánh giá
 ngoài độc lập. Không ghi đè lần chạy đã có.
@@ -36,9 +41,10 @@ Các bản này cùng tệp roster thành viên được lưu cục bộ. Bản 
 Bản bổ sung ngày 28/11/2026 có lời cảm ơn, chú thích dưới bảng/hình, tài
 liệu tham khảo dạng `[1]. …`, phụ lục dữ liệu thô đủ mười cột và ảnh thao
 tác Weka/web. Ảnh bổ sung và checksum nằm trong
-[hồ sơ minh chứng](report/evidence/20261128/README.md).
-Bản PDF đã kiểm tra gồm 54 trang, 21 bảng và 26 hình; mục lục và các danh
-mục có 94 liên kết số trang đã đối chiếu. Xem
+[hồ sơ Weka](report/evidence/20261128/README.md) và
+[ảnh giao diện tại commit 7df6fb7](report/evidence/20261128-7df6fb7/README.md).
+Bản PDF đã kiểm tra gồm 57 trang, 21 bảng và 29 hình; mục lục và các danh
+mục có 100 liên kết số trang đã đối chiếu. Xem
 [đối chiếu với mẫu](DOCS/DOI_CHIEU_BAO_CAO_MAU.md).
 Gói nộp `output/submission/BaiTapLon_Nhom11_20261128.zip` lưu cục bộ, gồm
 Word, PDF có thông tin thành viên, CSV gốc đầy đủ và ảnh thao tác.

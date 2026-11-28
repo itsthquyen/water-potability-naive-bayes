@@ -1,0 +1,28 @@
+{
+  "captured_on": "2026-11-28",
+  "branch": "main",
+  "source_commit": "7df6fb7",
+  "experiment_run": "20261124-six-v1",
+  "files": {
+    "web-csv-detail.jpg": "68f25f2fd93016366219de04949851a7813e03394e902124d09336b8327113f3",
+    "web-csv.jpg": "e1de15b60b01888de626bcdcb6cee5be63ca2192a004772ea9cd4c1b777d0e8d",
+    "web-evaluation.jpg": "e420ced8eeb39107c8e542677f4862651e90b77bb49e7a408f46a728fc19bd48",
+    "web-form.jpg": "069dbe272156b9b784e3f631b87245d20f0444ef48875c05b72cedd96cf00f6d",
+    "web-guide.jpg": "8868a2b50df827db6bd4d370262db4f80db2e9ff36dd9aa6f8204a05e021bb7a",
+    "web-overview.jpg": "d77c3e39f2d8a6742b970181b162d1f9af7211b531b04231aed5d922ba110806",
+    "web-raw-data.jpg": "23cc9fa938be18bb32e504aaa8646a92cfe959ffcb789bb144c37003fb7bcc03",
+    "web-result.jpg": "d4b4454a5820e93f3a483df9aebd108a8b28778e1fa75e29798bab4c0ac470b0",
+    "web-roc.jpg": "6aa518a4eff0aaa617d9b743daefb68d3c7c7643f7f0581bf9ffefbb38b2cca7"
+  },
+  "source_files": {
+    "app/comparison_app.py": "a870492ea38264083a847a9949a6504e7bc83cd83bf4475dbc2140f4fad19cf8",
+    "app/app.py": "ebe37cf5354141e7cfab88ad2b14b12a5e7d5d907a01f88574f48250171f49b0",
+    "src/ui_theme.py": "fa25066e37cab06f7865bf5446cf153e44d5d166dcb0c58962bd037c024090d9",
+    "tests/test_comparison_app.py": "e46d2a185664a74f4e8c6487e713f844671e651aa829118d5455476c618be738"
+  },
+  "reference_urls": [
+    "https://www.who.int/publications/i/item/9789240121225",
+    "https://cdn.who.int/media/docs/default-source/wash-documents/water-safety-and-quality/dwq-guidelines-4/gdwq_4ed_with_third-addenda_chemical-aspects.pdf",
+    "https://cdn.who.int/media/docs/default-source/wash-documents/water-safety-and-quality/chemical-fact-sheets-2022/chloramines-fact-sheet-2022.pdf"
+  ]
+}

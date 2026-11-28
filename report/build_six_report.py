@@ -29,6 +29,7 @@ from src.six_experiments import ALGORITHMS, NAMES, RUN_ID
 
 FOLDER = ROOT / "results" / "comparison" / RUN_ID
 EVIDENCE = ROOT / "report" / "evidence" / "20261128"
+WEB_EVIDENCE = ROOT / "report" / "evidence" / "20261128-7df6fb7"
 REPORT_TITLE = ("Phân loại chất lượng nước uống được hay không uống được "
                 "bằng thuật toán Naive Bayes và so sánh với các thuật toán khác")
 LECTURER = "TS. Trần Mạnh Tuấn"
@@ -84,9 +85,10 @@ def build(template, students, public=False):
     for relative, expected in manifest["files"].items():
         if sha256((FOLDER / relative).read_bytes()).hexdigest() != expected:
             raise ValueError(f"Checksum không khớp {relative}")
-    for filename, expected in read(EVIDENCE / "manifest.json")["files"].items():
-        if sha256((EVIDENCE / filename).read_bytes()).hexdigest() != expected:
-            raise ValueError(f"Ảnh minh chứng bị thay đổi: {filename}")
+    for evidence_folder in (EVIDENCE, WEB_EVIDENCE):
+        for filename, expected in read(evidence_folder / "manifest.json")["files"].items():
+            if sha256((evidence_folder / filename).read_bytes()).hexdigest() != expected:
+                raise ValueError(f"Ảnh minh chứng bị thay đổi: {filename}")
     summary, weka = read(FOLDER / "summary.json"), read(FOLDER / "weka_summary.json")
     params = read(FOLDER / "preprocessing.json")
     results = summary["models"]
@@ -187,7 +189,7 @@ def build(template, students, public=False):
                  else doc.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH))
         style.base_style = doc.styles["Normal"]
         style.font.name = "Times New Roman"
-        style.font.size = Pt(12 if name == "Table of Figures" else 11.5)
+        style.font.size = Pt(12 if name == "Table of Figures" else 11)
         style.font.bold = name == "TOC 1"
         style.font.color.rgb = RGBColor(0, 0, 0)
         fmt = style.paragraph_format
@@ -669,27 +671,46 @@ return int(2 * votes > 5), votes / 5""")
     para("Trong phép so sánh bộ phân lớp, Weka sử dụng ARFF đã biến đổi theo tham số học từ development của Python. Các thao tác bộ lọc ở phần II được trình bày riêng để mô tả cách dùng Weka. Nhờ dùng cùng đầu vào trong phép đối chiếu, khác biệt giữa điền trung bình và điền trung vị không ảnh hưởng đến bảng so sánh bộ phân lớp.")
 
     page("1. Mục tiêu và luồng sử dụng", "IV. Phát triển ứng dụng dự đoán")
-    para("Ứng dụng Streamlit chạy cục bộ tại http://127.0.0.1:8501, gồm bốn tab: Dự đoán một mẫu, Dự đoán CSV, Kết quả thực nghiệm và Dữ liệu gốc. Giao diện dùng nền sáng, chữ xanh đậm và nhóm ô nhập theo ba cột. Các chỉ tiêu có tên tiếng Việt kèm tên cột gốc để người dùng đối chiếu với CSV.")
-    para("Người dùng nhập số đo cho các chỉ tiêu; ô thiếu có thể để trống. Giao diện có sẵn ví dụ lấy từ trung vị của tập huấn luyện. Sau khi nhấn Dự đoán và so sánh, ứng dụng kiểm tra dữ liệu, áp dụng các tham số đã học và hiển thị kết quả Naive Bayes. Bảng bên dưới trình bày thêm năm mô hình đối chiếu và loại điểm đầu ra của từng mô hình.")
-    figure(EVIDENCE / "web-form.jpg", "Biểu mẫu nhập đủ chín chỉ tiêu của mẫu nước.", max_height=14.5)
-    para("Nút Nạp mẫu minh họa đưa các trung vị đã học vào ô nhập; đây là ví dụ thao tác, không phải một mẫu kiểm nghiệm mới. Nút Xóa ô nhập làm trống toàn bộ chỉ tiêu. Khi sửa dữ liệu đầu vào, kết quả cũ được ẩn để tránh đọc nhầm dự đoán của bộ số đo trước đó.")
-    figure(EVIDENCE / "web-evaluation.jpg", "Bảng đánh giá và biểu đồ so sánh trên tab Kết quả thực nghiệm.", max_height=14.5)
-    para("Tab kết quả thực nghiệm đọc số liệu và mô hình đã lưu từ lần chạy 20261124-six-v1. Khi người dùng yêu cầu dự đoán, ứng dụng chỉ kiểm tra đầu vào, áp dụng tiền xử lý và tính đầu ra; quá trình này không huấn luyện lại mô hình.")
+    para("Ứng dụng sử dụng Streamlit và chạy cục bộ tại http://127.0.0.1:8501. Phiên bản được khảo sát tương ứng commit 7df6fb7 trên nhánh main của dự án. Giao diện có năm tab: Dự đoán một mẫu, Dự đoán CSV, Kết quả thực nghiệm, Dữ liệu gốc và Cẩm nang 9 chỉ tiêu nước (WHO). Phần đầu trang giới thiệu đề tài, nhóm thực hiện, số mẫu và các thuật toán. Naive Bayes được đánh dấu là mô hình chính.")
+    para("Bản cập nhật giao diện sử dụng lại các mô hình của lần thực nghiệm 20261124-six-v1. Bộ dữ liệu, phép chia train/test, cấu hình thuật toán và các chỉ số ở phần III giữ nguyên. Khi dự đoán, ứng dụng kiểm tra đầu vào, áp dụng tham số tiền xử lý đã học và gọi mô hình; người dùng không cần huấn luyện lại.")
+    figure(WEB_EVIDENCE / "web-overview.jpg", "Trang ứng dụng với phần giới thiệu và năm tab chức năng.", max_height=13.5)
+    para("Các ô nhập được chia thành ba nhóm: tính chất lý hóa cơ bản; khử trùng và khoáng chất; độc chất vi lượng và độ đục. Mỗi nhóm gồm ba chỉ tiêu, giữ đủ chín cột đầu vào. Người dùng nhập số thập phân bằng dấu chấm và có thể để trống chỉ tiêu chưa có. Tên cột gốc được giữ cùng nhãn tiếng Việt để đối chiếu với CSV.")
+    figure(WEB_EVIDENCE / "web-form.jpg", "Chín ô nhập theo nhóm chỉ tiêu và các nút nạp mẫu thử.", max_height=13.5)
+    para("Nút Nạp mẫu minh họa điền trung vị từ tập huấn luyện. Hai nút Nạp mẫu nước sạch và Nạp mẫu nước ô nhiễm điền các bộ số được cấu hình sẵn trong mã giao diện; chúng là dữ liệu thử thao tác, không có nhãn kiểm nghiệm độc lập. Nút Xóa ô nhập làm trống các chỉ tiêu. Khi đầu vào thay đổi, kết quả trước đó được ẩn để tránh đọc nhầm dự đoán.")
 
-    page("2. Kết quả dự đoán và xử lý dữ liệu CSV")
-    figure(EVIDENCE / "web-result.jpg", "Kết quả sáu mô hình với bộ đầu vào minh họa trên biểu mẫu.", max_height=14.5)
-    para("Với bộ trung vị hiển thị ở biểu mẫu, Naive Bayes dự đoán lớp 0 và cho điểm ước lượng lớp 1 là 24,79%. Kết quả này chỉ minh họa luồng sử dụng ứng dụng. Dòng Naive Bayes được tô xanh nhạt; nhãn không uống được được hiển thị bằng thông báo màu vàng. Bảng phân biệt xác suất ước lượng, hiển thị theo phần trăm, với biên quyết định của SVM. Biên SVM có thể âm hoặc dương và không nằm trong [0,1]. Tệp kết quả CSV giữ mã dòng, mã mẫu, nhãn, điểm chưa làm tròn và lỗi.")
-    para("CSV phải có chín tên cột và mã hóa UTF-8. Cột sample_id được giữ để đối chiếu. Nếu có Potability trong tệp dự đoán, nhãn đó không đi vào vector đầu vào. Dòng lỗi vẫn có bản ghi lỗi theo từng mô hình và không được trình bày như một dự đoán hợp lệ.")
-    para("Trong tab Dự đoán CSV, mở Định dạng tệp và dữ liệu mẫu để tải ví dụ, sau đó chọn Upload và nhấn Dự đoán CSV. Tệp minh họa trích các ID gốc 0, 27 và 100, bỏ cột nhãn và giữ sample_id. Lần thao tác ghi hình xử lý đủ ba dòng, không có lỗi đầu vào, tạo 18 bản ghi kết quả. ID dòng trong bảng là vị trí bắt đầu từ 0 trong tệp tải lên; sample_id trong CSV kết quả dùng để truy ngược dòng dữ liệu gốc.")
-    figure(EVIDENCE / "web-csv.jpg", "Dự đoán CSV ba mẫu: số dòng hợp lệ và kết quả theo từng mô hình.", max_height=14.5)
+    page("2. Dự đoán một mẫu và mức đồng thuận")
+    para("Sau khi nhập số đo, chọn Dự đoán và so sánh. Kết quả Naive Bayes được đặt trong khung nổi bật, dùng màu đỏ cho nhãn 0 và màu xanh cho nhãn 1. Bảng chi tiết bên dưới trình bày đủ sáu thuật toán, nhãn, điểm lớp 1 hoặc biên quyết định, loại điểm và lỗi. Xác suất được hiển thị cả số thập phân và phần trăm; SVM giữ điểm biên có dấu.")
+    figure(WEB_EVIDENCE / "web-result.jpg", "Dự đoán trên bộ trung vị: kết quả Naive Bayes, đồng thuận và bảng sáu mô hình.", max_height=13.5)
+    para("Với bộ trung vị được làm tròn trên biểu mẫu, Naive Bayes dự đoán lớp 0 và cho điểm ước lượng lớp 1 là 0,2479, tương ứng 24,79%. Sáu mô hình đều dự đoán lớp 0. Màn hình ghi mức đồng thuận 100%, được tính bằng số mô hình chọn nhãn chiếm đa số chia số mô hình có kết quả hợp lệ. Chỉ số này mô tả sự giống nhau giữa các đầu ra, không phải accuracy hoặc xác suất dự đoán đúng.")
+    para("Bảng đồng thuận chỉ hỗ trợ quan sát; ứng dụng vẫn giữ Naive Bayes làm kết quả chính, không dùng biểu quyết để thay nhãn của mô hình. Dòng có lỗi không được tự gán nhãn. Các điểm xác suất chưa được hiệu chỉnh, còn biên SVM có thể âm hoặc dương và không nằm trong [0,1]. Tệp tải xuống giữ mã dòng, sample_id, nhãn, điểm chưa làm tròn và thông báo lỗi.")
+    para("Tiêu đề kết quả trên giao diện có dùng cụm từ đạt chuẩn hoặc không đạt chuẩn. Trong phạm vi bài tập, nội dung này được hiểu là nhãn Potability do mô hình dự đoán. Nó không xác nhận mẫu đáp ứng một bộ tiêu chuẩn nước uống. Phần đối chiếu chỉ tiêu bằng ngưỡng cấu hình được trình bày riêng ở mục 5.")
 
-    heading("2.1. Tra cứu và tải dữ liệu gốc", 3)
+    page("3. Dự đoán CSV và tra cứu dữ liệu gốc")
+    para("CSV phải có đủ chín tên cột và mã hóa UTF-8. Người dùng mở Định dạng tệp và dữ liệu mẫu để tải ví dụ, chọn Upload rồi nhấn Dự đoán CSV. Cột sample_id được giữ để đối chiếu; Potability nếu có trong tệp không tham gia vector đầu vào. Mỗi dòng được xử lý bằng cả sáu mô hình. Kết quả lỗi vẫn được lưu theo dòng và thuật toán.")
+    para("Tệp minh họa trích các ID gốc 0, 27 và 100, bỏ cột nhãn và giữ sample_id. Lần kiểm tra trên trình duyệt xử lý ba dòng hợp lệ, không có lỗi đầu vào và tạo 18 bản ghi kết quả. Naive Bayes dự đoán nhãn 1 cho một trong ba mẫu, nên thẻ Tỷ lệ uống được (NB) hiển thị 33,3%. Đây là tỷ lệ nhãn dự đoán trong tệp, không phải độ chính xác trên ba mẫu.")
+    figure(WEB_EVIDENCE / "web-csv.jpg", "Thống kê CSV ba mẫu và tỷ lệ nhãn 1 do Naive Bayes dự đoán.", max_height=13.5)
+    para("ID dòng trong bảng bắt đầu từ 0 theo vị trí ở tệp tải lên. Khi cần truy lại dữ liệu ban đầu, dùng sample_id trong CSV kết quả. Màn hình giới hạn 120 bản ghi kết quả để thuận tiện quan sát; nút Tải toàn bộ kết quả CSV xuất đầy đủ các dòng đã xử lý.")
+    heading("3.1. Tra cứu và tải dữ liệu gốc", 3)
     para("Tab Dữ liệu gốc hiển thị toàn bộ 3.276 bản ghi trước tiền xử lý, gồm chín chỉ tiêu và Potability. Người dùng có thể cuộn bảng để xem đủ các cột, tra cứu những ô thiếu và tải tệp qua nút Tải toàn bộ CSV gốc. Số mẫu hai lớp và số ô thiếu được trình bày ngay trên màn hình. Bảng chỉ làm tròn số khi hiển thị; tệp tải xuống giữ nguyên byte của CSV nguồn.")
-    figure(EVIDENCE / "web-raw-data.jpg", "Tab dữ liệu gốc với thống kê lớp, ô thiếu và chức năng tải CSV nguyên trạng.", max_height=14.5)
+    figure(WEB_EVIDENCE / "web-raw-data.jpg", "Dữ liệu nguyên trạng trên giao diện mới, kèm thống kê và nút tải CSV.", max_height=13.5)
 
-    page("3. Kiểm thử ứng dụng và khả năng mở rộng")
+    page("4. Xem kết quả thực nghiệm trên ứng dụng")
+    para("Tab Kết quả thực nghiệm trình bày các thẻ chỉ số, bảng sáu thuật toán và biểu đồ cột Accuracy, Balanced Accuracy. Những thẻ đầu trang nhấn mạnh cấu hình KNN có điểm cao nhất trong lần chạy và vẫn ghi riêng accuracy của Naive Bayes. Số liệu này được đọc từ hồ sơ đã lưu, không tính từ mẫu người dùng vừa nhập.")
+    figure(WEB_EVIDENCE / "web-evaluation.jpg", "Bảng sáu thuật toán và biểu đồ Accuracy, Balanced Accuracy của lần thực nghiệm đã lưu.", max_height=13.5)
+    para("Bên dưới có bốn tab biểu đồ: Đối chiếu hiệu năng, Đường cong ROC, Ma trận nhầm lẫn và Phân phối dữ liệu (EDA). Các hình sử dụng cùng hồ sơ với phần III, giúp người dùng xem lại kết quả mà không phải mở từng tệp. Biểu đồ đối chiếu hiệu năng hiển thị hai chỉ số Accuracy và Balanced Accuracy; ROC dùng điểm đầu ra, ma trận nhầm lẫn dùng nhãn tại ngưỡng cố định.")
+    figure(WEB_EVIDENCE / "web-roc.jpg", "Tab con Đường cong ROC trong màn hình kết quả thực nghiệm.", max_height=13.5)
+
+    page("5. Cẩm nang chỉ tiêu và giới hạn diễn giải")
+    para("Tab Cẩm nang 9 chỉ tiêu nước (WHO) là phần thông tin được bổ sung trong giao diện. Mỗi chỉ tiêu có một mục mở rộng để xem tên, nhóm, đơn vị và khoảng tham khảo. Sau dự đoán một mẫu, người dùng cũng có thể mở phần đối chiếu chỉ tiêu để so sánh giá trị vừa nhập với các ngưỡng được đặt trong mã. Các ngưỡng hiển thị này không tham gia bước huấn luyện, không thay điểm cắt đã học và không sửa nhãn Naive Bayes.")
+    figure(WEB_EVIDENCE / "web-guide.jpg", "Tab cẩm nang theo trạng thái mã nguồn 7df6fb7; các giới hạn được phân tích trong phần này.", max_height=13.5)
+    para("Cần phân biệt thông tin tham khảo trong giao diện với hướng dẫn chuyên môn. WHO không thiết lập guideline value cho pH, độ cứng, sulfate và tổng chất rắn hòa tan trong bảng 8.8 [7]. Vì vậy, các mốc hiển thị không được xem là bộ ngưỡng sức khỏe WHO áp dụng chung cho các chỉ tiêu này.")
+    para("Factsheet WHO nêu mức 3 mg/L cho monochloramine [7], trong khi giao diện đặt Chloramines ở 4 ppm. Hai tên đại lượng và cách biểu diễn nồng độ chưa được xác minh tương đương trong metadata của CSV. Đơn vị của một số cột dữ liệu cũng chưa được xác nhận đầy đủ, nên việc đối chiếu trực tiếp từng số đo với ngưỡng của giao diện cần được kiểm tra lại.")
+    para("Một giới hạn khác nằm ở tên mẫu thử. Bộ số Nạp mẫu nước sạch có Solids = 8.500, trong khi chính bảng ngưỡng của ứng dụng đặt mức tối đa 1.000 cho cột này. Do đó, tên nút không thể dùng để suy ra nhãn thật hoặc khẳng định tất cả thông số đều nằm trong khoảng cấu hình. Hai preset chỉ giúp kiểm tra việc điền dữ liệu và chạy dự đoán.")
+    para("Trước khi sử dụng phần cẩm nang ngoài mục đích học tập, cần xác minh nguồn cho từng chỉ tiêu, chuẩn hóa đơn vị và sửa cách gọi đạt chuẩn theo đúng phạm vi dữ liệu. Báo cáo đánh giá hiệu quả học máy bằng nhãn Potability và các chỉ số thực nghiệm; không dùng bảng ngưỡng của giao diện làm đáp án đúng cho mô hình.")
+
+    page("6. Kiểm thử ứng dụng và khả năng mở rộng")
     table(["Tình huống kiểm tra","Kết quả mong đợi"],[("Nhập một mẫu hợp lệ","Hiển thị NB và đủ năm mô hình đối chiếu"),("CSV nhiều dòng","Giữ thứ tự, ID mẫu, kết quả đủ sáu mô hình"),("Có ô thiếu","Dùng trung vị train đã lưu"),("Chuỗi không phải số","Báo lỗi dòng và không tự gán nhãn"),("Tất cả chỉ tiêu trống","Từ chối dự đoán"),("Model bị thay đổi byte","Dừng nạp khi hash không khớp"),("Nhấn dự đoán nhiều lần","Dùng cùng trạng thái đã học")],[7.3,8])
-    para("Các chức năng được kiểm tra bằng AppTest và thao tác trên trình duyệt. Với một mẫu hợp lệ, giao diện hiển thị kết quả của cả sáu mô hình và cho phép tải tệp CSV. Bảng 20 liệt kê các tình huống và kết quả mong đợi khi kiểm tra ứng dụng.")
+    para("Các chức năng được kiểm tra bằng AppTest và thao tác trên trình duyệt. Bộ kiểm thử tại phiên bản khảo sát có 307 ca đạt. Với mẫu trung vị, ứng dụng hiển thị đủ sáu kết quả và mức đồng thuận 6/6 cho lớp 0. Đã kiểm tra các nút nạp preset, nạp trung vị, CSV ba mẫu và tải CSV gốc. Tệp dữ liệu tải xuống khớp nguyên byte với nguồn. Bảng 20 liệt kê các tình huống và kết quả mong đợi khi kiểm tra ứng dụng.")
     para("Ứng dụng hiện phục vụ thực hành phân lớp trong bài tập. Dữ liệu chưa có đầy đủ thông tin lấy mẫu và kiểm nghiệm; tập kiểm tra cũng đã từng được sử dụng ở phiên bản trước. Vì vậy, cần có dữ liệu độc lập và nhãn được xác định rõ trước khi đánh giá khả năng sử dụng ngoài phạm vi bài tập.")
     para("Hướng phát triển tiếp theo là bổ sung dữ liệu có nguồn và quy trình gán nhãn rõ ràng, thử cách biểu diễn thuộc tính khác trong kiểm định chéo, đồng thời đánh giá độ hiệu chỉnh của xác suất. Cấu hình được lựa chọn từ development cần được giữ nguyên khi đánh giá trên tập dữ liệu mới.")
 
@@ -711,7 +732,8 @@ return int(2 * votes > 5), votes / 5""")
         "[3]. Cornell University. CS 4780/5780 Machine Learning, Lecture Notes. https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/ . Truy cập 24/11/2026.",
         "[4]. Aditya Kadiwal. Water Quality, Kaggle, phiên bản 3, water_potability.csv. https://www.kaggle.com/datasets/adityakadiwal/water-potability . Bản tải đối chiếu ngày 24/11/2026.",
         "[5]. University of Waikato. Weka Knowledge Explorer và tài liệu API Weka 3.8. https://ml.cms.waikato.ac.nz/weka/gui_explorer.html và https://weka.sourceforge.io/doc.stable-3-8/ . Truy cập 24/11/2026.",
-        "[6]. Weka team. simpleEducationalLearningSchemes 1.0.1. https://weka.sourceforge.io/packageMetaData/simpleEducationalLearningSchemes/1.0.1.html . Truy cập 24/11/2026."]:
+        "[6]. Weka team. simpleEducationalLearningSchemes 1.0.1. https://weka.sourceforge.io/packageMetaData/simpleEducationalLearningSchemes/1.0.1.html . Truy cập 24/11/2026.",
+        "[7]. World Health Organization. Guidelines for drinking-water quality: fourth edition incorporating the first, second and third addenda. 2026. https://www.who.int/publications/i/item/9789240121225 . Truy cập 28/11/2026."]:
         reference = para(text)
         reference.alignment = WD_ALIGN_PARAGRAPH.LEFT
         reference.paragraph_format.left_indent = Cm(0.75)
