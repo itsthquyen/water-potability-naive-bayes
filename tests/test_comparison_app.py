@@ -42,3 +42,18 @@ def test_editing_manual_input_and_reset_discard_old_predictions():
     next(button for button in app.button if button.label == "Dự đoán và so sánh").click().run(timeout=30)
     assert all(row["label"] is None and row["error"] for row in app.session_state["six_manual"])
     assert not app.exception
+
+
+def test_comparison_app_ui_rendering_and_prediction():
+    from streamlit.testing.v1 import AppTest
+
+    app_path = Path(__file__).resolve().parents[1] / "app/comparison_app.py"
+    app = AppTest.from_file(str(app_path), default_timeout=30).run()
+    assert not app.exception
+    assert any("không thay thế kiểm nghiệm" in warning.value for warning in app.warning)
+
+    predict_btn = next((b for b in app.button if "Dự đoán và so sánh" in b.label), None)
+    assert predict_btn is not None
+    predict_btn.click().run()
+    assert not app.exception
+    assert any("Kết quả phân loại" in header.value for header in app.subheader)

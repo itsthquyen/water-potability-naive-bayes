@@ -1,4 +1,4 @@
-"""Demo tiếng Việt chỉ sử dụng pipeline đã học và API dự đoán chung."""
+"""Demo tiếng Việt chỉ sử dụng pipeline đã học và API dự đoán chung với giao diện hiện đại."""
 
 import hashlib
 from html import escape
@@ -11,6 +11,12 @@ import streamlit as st
 
 # Streamlit chạy file theo đường dẫn nên cần gốc project để import src.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from src.ui_theme import (
+    CUSTOM_CSS,
+    WATER_STANDARDS,
+    render_hero_header,
+    render_metric_card,
+)
 from src.config import DEMO_RUN_ID, FEATURE_COLUMNS, POTABILITY_LABEL_NAMES, PROJECT_ROOT
 from src.predict import predict_csv, predict_records, results_to_csv
 
@@ -62,7 +68,7 @@ def verified_run_files(run_id, model_checksum):
 
 def show_experiment(run_id, model_checksum):
     """Hiển thị số liệu đã lưu, không tính lại metric hoặc tạo kết quả giả."""
-    st.subheader("Kết quả thực nghiệm")
+    st.subheader("Kết quả thực nghiệm mô hình")
     try:
         files = verified_run_files(run_id, model_checksum)
         metrics_root = (PROJECT_ROOT / "results" / "metrics" / run_id).resolve()
@@ -75,11 +81,27 @@ def show_experiment(run_id, model_checksum):
         metrics = json.loads(metrics_bytes.decode("utf-8"))
         if not isinstance(metrics, dict) or ("run_id" in metrics and metrics["run_id"] != run_id):
             raise ValueError("Run ID trong metrics không khớp model.")
+        
+        acc = metrics.get("accuracy")
+        bal_acc = metrics.get("balanced_accuracy")
+        f1 = metrics.get("macro_f1")
+        auc = metrics.get("roc_auc")
+        if acc is not None and bal_acc is not None:
+            st.html(f"""
+            <div class="metric-grid">
+                {render_metric_card("Accuracy", f"{acc:.2%}", "Độ chính xác phân loại")}
+                {render_metric_card("Balanced Accuracy", f"{bal_acc:.2%}", "Cân bằng hai lớp")}
+                {render_metric_card("Macro-F1", f"{f1:.4f}" if f1 is not None else "-", "Trung bình F1 các lớp")}
+                {render_metric_card("ROC-AUC", f"{auc:.4f}" if auc is not None else "-", "Diện tích dưới đường ROC")}
+            </div>
+            """)
+
         st.caption("Số liệu đã lưu từ thực nghiệm; không tính lại trên dữ liệu người dùng.")
-        st.json(metrics)
+        with st.expander("Dữ liệu JSON chi tiết của lần chạy"):
+            st.json(metrics)
         figures = [(path, content) for path, content in files.items() if path.suffix.lower() == ".png"]
         if figures:
-            with st.expander("Biểu đồ thực nghiệm và khám phá dữ liệu cùng lần chạy"):
+            with st.expander("Biểu đồ thực nghiệm và khám phá dữ liệu cùng lần chạy", expanded=True):
                 for path, content in sorted(figures):
                     st.image(content, caption=path.stem, width="stretch")
     except FileNotFoundError:
@@ -95,15 +117,50 @@ def show_prediction_results(results, download_key):
             st.error(f"Dòng {result['input_row_id']}: {result['error']}")
         for warning in result["warnings"]:
             st.warning(f"Dòng {result['input_row_id']}: {warning}")
+
     if len(results) == 1 and results[0]["predicted_label"] is not None:
-        label = POTABILITY_LABEL_NAMES[results[0]["predicted_label"]]
+        predicted = results[0]["predicted_label"]
+        label = POTABILITY_LABEL_NAMES[predicted]
         st.success(f"Mô hình dự đoán: {label} theo nhãn dữ liệu.")
+
+        prob_1 = results[0].get("probability_1")
+        is_potable = predicted == 1
+        card_class = "result-hero-potable" if is_potable else "result-hero-non-potable"
+        status_text = (
+            "KẾT QUẢ: ĐẠT TIÊU CHUẨN UỐNG ĐƯỢC (Nhãn 1)"
+            if is_potable
+            else "KẾT QUẢ: KHÔNG ĐẠT TIÊU CHUẨN UỐNG ĐƯỢC (Nhãn 0)"
+        )
+        desc_text = (
+            "Dựa trên 9 chỉ tiêu hóa lý đã nhập, mô hình Naive Bayes phân loại mẫu nước vào nhóm uống được."
+            if is_potable
+            else "Dựa trên 9 chỉ tiêu hóa lý đã nhập, mô hình Naive Bayes phân loại mẫu nước vào nhóm không uống được."
+        )
+        conf_pct = (prob_1 * 100) if prob_1 is not None else (100.0 if is_potable else 0.0)
+        fill_pct = f"{conf_pct:.1f}%" if is_potable else f"{(100.0 - conf_pct):.1f}%"
+        fill_class = "confidence-bar-fill-potable" if is_potable else "confidence-bar-fill-non-potable"
+
+        st.html(f"""
+        <div class="{card_class}">
+            <div class="result-hero-title">{status_text}</div>
+            <div class="result-hero-desc">{desc_text}</div>
+            <div class="confidence-container">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
+                    <span>Xác suất ước lượng lớp 1 (Uống được):</span>
+                    <span>{conf_pct:.2f}%</span>
+                </div>
+                <div class="confidence-bar-bg">
+                    <div class="{fill_class}" style="width: {fill_pct};"></div>
+                </div>
+            </div>
+        </div>
+        """)
+
     st.caption("probability_0/1 là xác suất do mô hình ước lượng, không phải tỷ lệ an toàn thực tế.")
-    # Dùng HTML tĩnh để máy không cần nạp DLL PyArrow khi hiển thị dự đoán.
     display_limit = 100
     fields = ("input_row_id", "sample_id", "predicted_label", "probability_0", "probability_1", "error")
     header = ("Dòng", "ID mẫu", "Nhãn dự đoán", "Xác suất lớp 0", "Xác suất lớp 1", "Lỗi")
-    table = ["<div style='overflow-x:auto'><table><thead><tr>"]
+    table = ["<div class='custom-table-wrapper' style='overflow-x:auto'><table class='custom-table'><thead><tr>"]
     table.extend(f"<th scope='col'>{title}</th>" for title in header)
     table.append("</tr></thead><tbody>")
     for result in results[:display_limit]:
@@ -121,14 +178,22 @@ def show_prediction_results(results, download_key):
     if len(results) > display_limit:
         st.caption(f"Đang xem {display_limit}/{len(results)} dòng. Tệp CSV chứa toàn bộ kết quả.")
     st.download_button(
-        "Tải kết quả CSV", data=results_to_csv(results).encode("utf-8-sig"),
-        file_name="ket_qua_du_doan.csv", mime="text/csv", key=download_key,
+        "Tải kết quả CSV",
+        data=results_to_csv(results).encode("utf-8-sig"),
+        file_name="ket_qua_du_doan.csv",
+        mime="text/csv",
+        key=download_key,
     )
 
 
 def main():
     """Khởi tạo giao diện; thiếu model thì dừng trước mọi lời gọi dự đoán."""
-    st.set_page_config(page_title="Phân loại chất lượng nước", page_icon=None, layout="wide")
+    st.set_page_config(
+        page_title="Phân loại chất lượng nước",
+        page_icon=None,
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
     st.title("Phân loại khả năng uống được của nước")
     st.warning("Demo học thuật; không thay thế kiểm nghiệm chất lượng nước.")
     st.write(
@@ -142,14 +207,21 @@ def main():
 
     with st.sidebar:
         st.header("Model đã học")
-        selected_path = st.text_input("Đường dẫn model", value=f"artifacts/{DEMO_RUN_ID}/pipeline.json", help="Đường dẫn tương đối từ gốc project hoặc đường dẫn cục bộ. Cần file .sha256 đi kèm.")
+        selected_path = st.text_input(
+            "Đường dẫn model",
+            value=f"artifacts/{DEMO_RUN_ID}/pipeline.json",
+            help="Đường dẫn tương đối từ gốc project hoặc đường dẫn cục bộ. Cần file .sha256 đi kèm.",
+        )
         st.caption("Chọn tệp pipeline đã lưu từ thực nghiệm. Không có thao tác huấn luyện trong demo.")
+
     model_path = Path(selected_path).expanduser()
     if not model_path.is_absolute():
         model_path = PROJECT_ROOT / model_path
+
     if not selected_path.strip() or not model_path.is_file():
         st.error("Chưa có model tại đường dẫn đã chọn. Không thể dự đoán; hãy chọn pipeline đã học.")
         return
+
     try:
         model_path = model_path.resolve()
         checksum = hashlib.sha256(model_path.read_bytes()).hexdigest()
@@ -161,29 +233,50 @@ def main():
     except (OSError, ValueError, KeyError, TypeError, ImportError) as error:
         st.error(f"Không thể nạp model đã xác minh: {error}")
         return
+
+    # Chỉ chèn CSS và giao diện cao cấp sau khi đã xác thực model thành công
+    st.html(CUSTOM_CSS)
+
     st.sidebar.write(f"Run ID: {run_id or '(chưa có)'}")
     st.sidebar.caption(f"SHA-256: {checksum}")
     with st.sidebar.expander("Metadata model"):
         st.json(state.get("metadata", {}))
+
     model_identity = (str(model_path), checksum, sidecar_checksum, run_id)
     if st.session_state.get("model_identity") != model_identity:
         st.session_state.pop("manual_results", None)
         st.session_state.pop("csv_results", None)
         st.session_state["model_identity"] = model_identity
 
-    manual_tab, csv_tab, experiment_tab = st.tabs(["Nhập một mẫu", "Dự đoán CSV", "Thực nghiệm"])
+    manual_tab, csv_tab, experiment_tab, guide_tab = st.tabs(
+        ["Nhập một mẫu", "Dự đoán CSV", "Thực nghiệm", "Cẩm nang 9 chỉ tiêu (WHO)"]
+    )
+
     with manual_tab:
         st.caption("Để trống hoặc nhập NaN cho ô thiếu. Dữ liệu được kiểm tra và điền bằng trạng thái đã học; mẫu thiếu cả 9 chỉ tiêu bị từ chối.")
         with st.form("manual_prediction"):
             columns = st.columns(3)
-            record = {feature: columns[index % 3].text_input(feature, value="", key=f"feature_{feature}") for index, feature in enumerate(FEATURE_COLUMNS)}
-            submitted = st.form_submit_button("Dự đoán mẫu")
+            record = {}
+            for index, feature in enumerate(FEATURE_COLUMNS):
+                info = WATER_STANDARDS.get(feature, {})
+                label_text = f"{feature} ({info.get('unit', '')})" if info.get("unit") else feature
+                help_text = f"{info.get('name', feature)}. Chuẩn WHO: {info.get('who_range', '-')}"
+                record[feature] = columns[index % 3].text_input(
+                    label_text,
+                    value="",
+                    key=f"feature_{feature}",
+                    help=help_text,
+                )
+            st.write("")
+            submitted = st.form_submit_button("Dự đoán mẫu", type="primary")
+
         if submitted:
             st.session_state.pop("manual_results", None)
             try:
                 st.session_state["manual_results"] = predict_records([record], pipeline, run_id=run_id)
             except (ValueError, ArithmeticError) as error:
                 st.error(f"Không thể dự đoán: {error}")
+
         if "manual_results" in st.session_state:
             show_prediction_results(st.session_state["manual_results"], "download_manual")
 
@@ -196,17 +289,43 @@ def main():
         if st.session_state.get("upload_identity") != upload_identity:
             st.session_state.pop("csv_results", None)
             st.session_state["upload_identity"] = upload_identity
-        if st.button("Dự đoán CSV", disabled=uploaded is None):
+
+        if st.button("Dự đoán CSV", disabled=uploaded is None, type="primary"):
             st.session_state.pop("csv_results", None)
             try:
                 text = uploaded_bytes.decode("utf-8-sig")
                 st.session_state["csv_results"] = predict_csv(text, pipeline, from_text=True, run_id=run_id)
             except (UnicodeError, ValueError, ArithmeticError) as error:
                 st.error(f"CSV bị từ chối: {error}")
+
         if "csv_results" in st.session_state:
-            show_prediction_results(st.session_state["csv_results"], "download_csv")
+            csv_res = st.session_state["csv_results"]
+            total = len(csv_res)
+            err_count = sum(1 for r in csv_res if r.get("error"))
+            valid_count = total - err_count
+            potable_count = sum(1 for r in csv_res if r.get("predicted_label") == 1)
+
+            st.html(f"""
+            <div class="metric-grid">
+                {render_metric_card("Tổng mẫu tải lên", str(total), "Dòng trong tệp CSV")}
+                {render_metric_card("Mẫu hợp lệ", str(valid_count), f"{valid_count / max(total, 1) * 100:.1f}% tổng số")}
+                {render_metric_card("Mẫu lỗi", str(err_count), "Không đủ dữ liệu")}
+                {render_metric_card("Dự đoán uống được", str(potable_count), f"{potable_count / max(valid_count, 1) * 100:.1f}% mẫu hợp lệ")}
+            </div>
+            """)
+            show_prediction_results(csv_res, "download_csv")
+
     with experiment_tab:
         show_experiment(run_id, checksum)
+
+    with guide_tab:
+        st.subheader("Tiêu chuẩn tham chiếu 9 chỉ số chất lượng nước theo WHO")
+        for col_name in FEATURE_COLUMNS:
+            info = WATER_STANDARDS.get(col_name, {})
+            with st.expander(f"{info.get('name', col_name)} — Ngưỡng WHO: {info.get('who_range', '-')}"):
+                st.markdown(f"**Nhóm chỉ tiêu:** {info.get('category', '-')}")
+                st.markdown(f"**Đơn vị đo:** `{info.get('unit', '')}`")
+                st.markdown(f"**Ý nghĩa môi trường và an toàn sức khỏe:** {info.get('desc', '')}")
 
 
 if __name__ == "__main__":
