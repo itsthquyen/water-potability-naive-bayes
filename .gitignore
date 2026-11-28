@@ -46,5 +46,10 @@ Thumbs.db
 /report/students.local.json
 /output/pdf/BaiTapLon.pdf
 /output/docx/BaiTapLon.docx
+/output/pdf/BaiTapLon-C45.pdf
+/output/docx/BaiTapLon-C45.docx
+~$*
 /output/submission/
 .claude/
+# Gói mã nguồn sinh từ whitelist, không lưu bản sao trùng trong Git.
+/output/source/
