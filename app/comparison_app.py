@@ -373,7 +373,9 @@ def main():
             else:
                 st.error(f"Lỗi: {primary['error']}")
 
-            st.html(render_consensus_board(result))
+            board_html = render_consensus_board(result)
+            if board_html:
+                st.html(board_html)
 
             st.markdown("##### Chi tiết kết quả từng thuật toán:")
             show_results(result, "manual_download")
