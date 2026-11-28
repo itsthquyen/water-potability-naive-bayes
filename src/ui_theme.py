@@ -436,8 +436,8 @@ def render_consensus_board(results):
             Đồng thuận giữa các mô hình học máy: <span style="color: #0284c7;">{majority_text}</span>
         </div>
         <div style="font-size: 13.5px; color: #475569;">
-            Có <strong>{potable_count}/{total_valid}</strong> mô hình dự đoán <em>UỐNG ĐƯỢC</em> và 
-            <strong>{non_potable_count}/{total_valid}</strong> mô hình dự đoán <em>KHÔNG UỐNG ĐƯỢC</em> 
+            Có <strong>{potable_count}/{total_valid}</strong> mô hình dự đoán <em>UỐNG ĐƯỢC</em> và
+            <strong>{non_potable_count}/{total_valid}</strong> mô hình dự đoán <em>KHÔNG UỐNG ĐƯỢC</em>
             (Mức độ đồng thuận: <strong>{consensus_pct:.1f}%</strong>).
         </div>
     </div>
