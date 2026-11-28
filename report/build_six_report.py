@@ -14,7 +14,7 @@ import sys
 from docx import Document
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
-from docx.enum.section import WD_SECTION_START
+from docx.enum.section import WD_ORIENT, WD_SECTION_START
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT, WD_TAB_LEADER
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -28,9 +28,10 @@ from src.eda import summarize_features
 from src.six_experiments import ALGORITHMS, NAMES, RUN_ID
 
 FOLDER = ROOT / "results" / "comparison" / RUN_ID
+EVIDENCE = ROOT / "report" / "evidence" / "20261128"
 REPORT_TITLE = ("Phân loại chất lượng nước uống được hay không uống được "
                 "bằng thuật toán Naive Bayes và so sánh với các thuật toán khác")
-LECTURER = "TS. Trần Mạnh Tuần"
+LECTURER = "TS. Trần Mạnh Tuấn"
 TABLE_CAPTIONS = (
     "Các bước thực hiện đề tài",
     "Trích năm mẫu đầu của dữ liệu thô",
@@ -52,6 +53,7 @@ TABLE_CAPTIONS = (
     "Phân tích các dạng sai số của Naive Bayes",
     "Đối chiếu kết quả Python và Weka",
     "Các tình huống kiểm thử ứng dụng dự đoán",
+    "Trích dữ liệu thô với đầy đủ chín chỉ tiêu và nhãn",
 )
 
 
@@ -82,6 +84,9 @@ def build(template, students, public=False):
     for relative, expected in manifest["files"].items():
         if sha256((FOLDER / relative).read_bytes()).hexdigest() != expected:
             raise ValueError(f"Checksum không khớp {relative}")
+    for filename, expected in read(EVIDENCE / "manifest.json")["files"].items():
+        if sha256((EVIDENCE / filename).read_bytes()).hexdigest() != expected:
+            raise ValueError(f"Ảnh minh chứng bị thay đổi: {filename}")
     summary, weka = read(FOLDER / "summary.json"), read(FOLDER / "weka_summary.json")
     params = read(FOLDER / "preprocessing.json")
     results = summary["models"]
@@ -239,7 +244,6 @@ def build(template, students, public=False):
             heading(chapter, 1, True)
         parents = {
             "1.1. Kiểm tra dữ liệu trên Python": "1. Tiền xử lý dữ liệu",
-            "1.2.1. Dữ liệu trước xử lý trên Weka": "1.4. Tiền xử lý dữ liệu trên Weka",
             "2.1. Thống kê và chất lượng dữ liệu": "2. Phân tích dữ liệu",
             "3.1. Lựa chọn sáu thuật toán học máy": "3. Xây dựng sáu thuật toán học máy",
             "3.2.1. Cơ sở lý thuyết Naive Bayes": "3.2. Thuật toán Naive Bayes",
@@ -247,9 +251,9 @@ def build(template, students, public=False):
         replacements = {
             "1.1.1. Điền thiếu và chia khoảng cho Naive Bayes": "1.2. Điền thiếu và chia khoảng cho Naive Bayes",
             "1.1.2. Chuẩn hóa cho các mô hình số": "1.3. Chuẩn hóa cho các mô hình số",
-            "1.2.1. Dữ liệu trước xử lý trên Weka": "1.4.1. Dữ liệu trước xử lý trên Weka",
-            "1.2.2. Xử lý thiếu bằng Weka": "1.4.2. Xử lý thiếu bằng Weka",
-            "1.2.3. Rời rạc hóa bằng Weka": "1.4.3. Rời rạc hóa bằng Weka",
+            "1.2.1. Dữ liệu trước xử lý trên Weka": "1.4.2. Mở tập phát triển trước xử lý",
+            "1.2.2. Xử lý thiếu bằng Weka": "1.4.3. Xử lý thiếu bằng Weka",
+            "1.2.3. Rời rạc hóa bằng Weka": "1.4.4. Rời rạc hóa bằng Weka",
         }
         if title in parents:
             parent = parents[title]
@@ -283,9 +287,8 @@ def build(template, students, public=False):
 
     table_index = 0
 
-    def table(headers, rows, widths=None):
+    def table(headers, rows, widths=None, font_size=None, compact=False):
         nonlocal table_index
-        sequence_caption("Bảng", table_index + 1, TABLE_CAPTIONS[table_index], above=True)
         table_index += 1
         t = doc.add_table(rows=1, cols=len(headers))
         t.autofit = False
@@ -304,7 +307,7 @@ def build(template, students, public=False):
                 properties = cell._tc.get_or_add_tcPr()
                 margins = OxmlElement("w:tcMar")
                 for side in ("top", "left", "bottom", "right"):
-                    el = OxmlElement("w:" + side); el.set(qn("w:w"), "100"); el.set(qn("w:type"), "dxa"); margins.append(el)
+                    el = OxmlElement("w:" + side); el.set(qn("w:w"), "60" if compact else "100"); el.set(qn("w:type"), "dxa"); margins.append(el)
                 properties.append(margins)
                 borders = OxmlElement("w:tcBorders")
                 for side in ("top", "left", "bottom", "right"):
@@ -316,22 +319,22 @@ def build(template, students, public=False):
                     properties.append(shade)
                 for p in cell.paragraphs:
                     p.paragraph_format.first_line_indent = Cm(0)
-                    p.paragraph_format.space_after = Pt(2)
-                    p.paragraph_format.space_before = Pt(2)
+                    p.paragraph_format.space_after = Pt(1 if compact else 2)
+                    p.paragraph_format.space_before = Pt(1 if compact else 2)
                     p.paragraph_format.line_spacing = 1.05
                     p.alignment = (WD_ALIGN_PARAGRAPH.CENTER if i == 0 or re.fullmatch(r"[-+0-9.,/%± ()]+|N/A", p.text)
                                    else WD_ALIGN_PARAGRAPH.LEFT)
                     for run in p.runs:
-                        font(run, 10.5 if len(headers) > 5 else 11.5, i == 0)
+                        font(run, font_size or (10.5 if len(headers) > 5 else 11.5), i == 0)
             row._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
-            if i < len(t.rows) - 1:
-                for cell in row.cells:
-                    for paragraph in cell.paragraphs:
-                        paragraph.paragraph_format.keep_with_next = True
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    paragraph.paragraph_format.keep_with_next = True
         t.rows[0]._tr.get_or_add_trPr().append(OxmlElement("w:tblHeader"))
         if widths:
             for col, width in zip(t.columns, widths):
                 col.width = Cm(width)
+        sequence_caption("Bảng", table_index, TABLE_CAPTIONS[table_index - 1])
         spacer = doc.add_paragraph()
         spacer.paragraph_format.space_after = Pt(0)
         spacer.paragraph_format.space_before = Pt(0)
@@ -369,7 +372,13 @@ def build(template, students, public=False):
         field.set(qn("w:instr"), instruction)
         p._p.append(field)
 
-    contents("MỤC LỤC", 'TOC \\o "1-3" \\h \\z')
+    heading("LỜI CẢM ƠN", 1)
+    para("Nhóm chúng em xin gửi lời cảm ơn đến TS. Trần Mạnh Tuấn, giảng viên học phần Khai phá dữ liệu. Những kiến thức và tài liệu của học phần là cơ sở để nhóm tìm hiểu bài toán phân lớp, xây dựng thuật toán Naive Bayes và tổ chức thực nghiệm so sánh trong bài tập lớn này.")
+    para("Chúng em cảm ơn Khoa Công nghệ thông tin, Trường Đại học Thủy Lợi đã tạo điều kiện học tập và thực hành. Trong quá trình thực hiện, các thành viên đã cùng kiểm tra dữ liệu, trao đổi cách cài đặt thuật toán và đối chiếu kết quả để hoàn thiện báo cáo cũng như ứng dụng dự đoán.")
+    para("Do kiến thức và kinh nghiệm thực nghiệm còn hạn chế, bài làm có thể còn thiếu sót. Nhóm chúng em mong nhận được góp ý của thầy để hiểu rõ hơn những hạn chế của phương pháp và cải thiện cách giải quyết bài toán.")
+    thanks = para("Nhóm 11")
+    thanks.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    contents("MỤC LỤC", 'TOC \\o "1-3" \\h \\z', True)
     contents("DANH MỤC BẢNG", 'TOC \\h \\z \\c "Bảng"', True)
     contents("DANH MỤC HÌNH", 'TOC \\h \\z \\c "Hình"', True)
     heading("LỜI MỞ ĐẦU", 1, True)
@@ -405,6 +414,8 @@ def build(template, students, public=False):
         (i, *("Thiếu" if X[i][j] is None else number(X[i][j],2) for j in (0,1,4,7)),y[i]) for i in range(5)], [1.6,2.2,3.1,3.1,3.1,1.7])
     table(["Đại lượng", "Giá trị"],[("Số mẫu",3276),("Số thuộc tính đầu vào",9),("Số lớp",2),("Lớp 0",1998),("Lớp 1",1278),("pH thiếu",491),("Sulfate thiếu",781),("Trihalomethanes thiếu",162)], [8.5,6.8])
     para("Lớp 0 chiếm 60,99% và lớp 1 chiếm 39,01% toàn bộ dữ liệu. Do đó, một mô hình luôn chọn lớp 0 cũng đạt accuracy khoảng 61%. Việc so sánh cần xét thêm recall của lớp 1 và các chỉ số đánh giá cả hai lớp.")
+    para("Phụ lục A trình bày thêm các bản ghi với đầy đủ mười cột của CSV, bao gồm những ô thiếu. Toàn bộ 3.276 dòng được cung cấp trong tệp water_potability.csv đi kèm báo cáo; tệp này giữ nguyên độ chính xác và nội dung của dữ liệu tải từ nguồn [4].")
+    figure(EVIDENCE / "weka-raw-rows.png", "Các bản ghi CSV gốc trong cửa sổ Viewer của Weka, các ô trống chưa được điền.", max_height=11.5)
 
     page("1.1. Kiểm tra dữ liệu trên Python", "II. Quy trình khai phá dữ liệu")
     para("Dữ liệu được kiểm tra tên cột, thứ tự thuộc tính, kiểu số và nhãn 0/1. Ô rỗng hoặc NaN được biểu diễn bằng None; số 0 vẫn được giữ là một giá trị quan sát. Chuỗi không chuyển được thành số và giá trị vô hạn được ghi nhận là lỗi đầu vào.")
@@ -427,6 +438,15 @@ def build(template, students, public=False):
     para("Một giá trị bằng mean được biến đổi thành 0. Đối với mẫu mới nằm ngoài khoảng min/max của dữ liệu huấn luyện, chương trình vẫn tính z-score theo các tham số đã lưu. Tuy nhiên, vùng giá trị này có thể ít được đại diện trong tập huấn luyện.")
     para("Bảng 6 trình bày tham số của lần huấn luyện cuối trên 2.620 mẫu development. Trong kiểm định chéo, mỗi lượt tính lại trung vị, mean và std từ bốn phần huấn luyện; phần còn lại chỉ dùng để đánh giá.")
 
+    heading("1.4. Tiền xử lý dữ liệu trên Weka", 3, True)
+    heading("1.4.1. Mở CSV gốc và thiết lập nhãn", 4)
+    para("Mở Weka Explorer, chọn Preprocess → Open file, đổi Files of Type sang CSV data files rồi mở water_potability.csv. Chọn ph trong danh sách Attributes để kiểm tra 3.276 mẫu, 10 cột và 491 giá trị thiếu. Chọn Sulfate để kiểm tra 781 ô thiếu. Đây là dữ liệu đầy đủ trước khi chia tập, chỉ được mở để quan sát và kiểm tra nguồn vào.")
+    figure(EVIDENCE / "weka-raw-ph.png", "CSV gốc trên Weka: 3.276 mẫu và 491 ô pH thiếu.")
+    figure(EVIDENCE / "weka-raw-sulfate.png", "Kiểm tra 781 ô Sulfate thiếu trên dữ liệu gốc.")
+    para("Khi đọc CSV, Weka nhận Potability là Numeric vì cột chỉ chứa số 0 và 1. Để dùng nhãn phân loại, chọn Filter → unsupervised → attribute → NumericToNominal, mở phần tham số và đặt attributeIndices = last. Giữ invertSelection = False, nhấn OK rồi Apply. Bộ lọc chỉ đổi kiểu cột cuối; chín chỉ tiêu đầu vào vẫn là Numeric và các ô thiếu vẫn được giữ nguyên.")
+    figure(EVIDENCE / "weka-class-options.png", "Tham số NumericToNominal chỉ áp dụng cho cột nhãn cuối.", width=11, max_height=7)
+    para("Đặt Class = Potability rồi chọn thuộc tính này. Weka hiển thị nhãn Nominal với 1.998 mẫu lớp 0 và 1.278 mẫu lớp 1. Việc đổi kiểu nhãn không điền thiếu, không chuẩn hóa và không học tham số từ toàn bộ dữ liệu. Sau bước kiểm tra này, các thao tác học tiền xử lý chỉ dùng tập development.")
+    figure(EVIDENCE / "weka-class-counts.png", "Potability ở dạng danh nghĩa với số mẫu của hai lớp trên CSV gốc.")
     for title, filename, caption, text in [
         ("1.2.1. Dữ liệu trước xử lý trên Weka", "01-weka-raw.png", "Sulfate trên development trước tiền xử lý trong Weka.",
          "Trong Weka Explorer, chọn Preprocess rồi Open file và mở development_raw.arff. Đặt Class là Potability và chọn Sulfate. Giao diện cho thấy 2.620 mẫu, 10 thuộc tính và 616 ô Sulfate thiếu. Các vạch histogram có màu theo lớp giúp quan sát phân bố trước khi điền.") ,
@@ -436,6 +456,9 @@ def build(template, students, public=False):
          "Từ dữ liệu development đã điền, chọn bộ lọc Discretize, đặt bins = 3 và useEqualFrequency = True rồi Apply. Weka đổi các cột số thành các mức danh nghĩa. Tệp weka_discretized.arff lưu trạng thái sau biến đổi. Nhóm đối chiếu kiểu thuộc tính, số khoảng và số mẫu để kiểm tra thao tác.")]:
         page(title)
         para(text)
+        if filename == "03-weka-discretize.png":
+            figure(EVIDENCE / "weka-discretize-options.png", "Thiết lập Discretize: bins = 3, useEqualFrequency = True, ignoreClass = False.", max_height=10.5)
+            para("Ảnh tham số ghi lại cấu hình rời rạc hóa trên tập phát triển; ảnh tiếp theo thể hiện kết quả sau khi điền thiếu và áp dụng bộ lọc trong lần thực nghiệm đã lưu.")
         figure(FOLDER/"weka"/filename,caption)
     para("Ba thao tác trên được thực hiện trong Weka Explorer với tập development [5]. ReplaceMissingValues điền bằng giá trị trung bình, còn chương trình Python điền bằng trung vị. Weka chia khoảng sau khi điền thiếu; Python tính điểm cắt từ các giá trị quan sát trước bước điền. Vì vậy, dữ liệu sau xử lý của hai quy trình có thể khác nhau.")
     para("Để so sánh riêng các bộ phân lớp ở phần III, Weka sử dụng tệp ARFF đã biến đổi theo tham số của Python và giữ cùng danh sách ID huấn luyện, kiểm tra. Các tệp lọc minh họa ở phần này không được dùng thay đầu vào của phép kiểm định chéo.")
@@ -448,12 +471,12 @@ def build(template, students, public=False):
 
     page("2.2. Phân bố các chỉ tiêu và tương quan")
     figure(FOLDER/"figures"/"histograms.png", "Histogram các chỉ tiêu số trên development.",max_height=10)
-    para("Các biểu đồ ở Hình 5 cho thấy chín chỉ tiêu có phạm vi giá trị khác nhau. Naive Bayes, ID3 và C4.5 dùng mã khoảng nên các số đo trong cùng một khoảng được xem là giống nhau. KNN, Logistic Regression và SVM giữ giá trị số sau chuẩn hóa. Khác biệt này cần được xét khi so sánh kết quả.")
+    para("Các histogram cho thấy chín chỉ tiêu có phạm vi giá trị khác nhau. Naive Bayes, ID3 và C4.5 dùng mã khoảng nên các số đo trong cùng một khoảng được xem là giống nhau. KNN, Logistic Regression và SVM giữ giá trị số sau chuẩn hóa. Khác biệt này cần được xét khi so sánh kết quả.")
     figure(FOLDER/"figures"/"correlation.png", "Tương quan Pearson tính theo các cặp ô quan sát.",width=10,max_height=7)
-    para("Hệ số Pearson được tính trên các cặp giá trị không thiếu. Biểu đồ cho biết mức liên hệ tuyến tính giữa từng cặp thuộc tính. Tương quan nhỏ giữa hai cột chưa đủ để kết luận chúng độc lập khi biết lớp, nên Hình 6 chỉ được dùng để mô tả dữ liệu.")
+    para("Hệ số Pearson được tính trên các cặp giá trị không thiếu. Biểu đồ cho biết mức liên hệ tuyến tính giữa từng cặp thuộc tính. Tương quan nhỏ giữa hai cột chưa đủ để kết luận chúng độc lập khi biết lớp, nên biểu đồ tương quan chỉ được dùng để mô tả dữ liệu.")
 
     page("3.1. Lựa chọn sáu thuật toán học máy")
-    table(["Thuật toán", "Tài liệu lý thuyết", "Vai trò"],[("Naive Bayes","Bài 5 trang 40–45; giáo trình 4.2","Chính"),("ID3","Bài 5 trang 25–33; giáo trình 4.3","Đối chiếu"),("C4.5","Bài 5 trang 34","Đối chiếu"),("KNN","Bài 5 trang 46–49; giáo trình 4.4","Đối chiếu"),("Logistic Regression","Giáo trình mục 4.5.4","Đối chiếu"),("SVM tuyến tính","Tài liệu học máy Cornell [3]","Bổ sung")],[4.5,7.3,3.5])
+    table(["Thuật toán", "Tài liệu lý thuyết", "Vai trò"],[("Naive Bayes","Giáo trình và bài giảng [1, 2]","Chính"),("ID3","Giáo trình và bài giảng [1, 2]","Đối chiếu"),("C4.5","Bài giảng Khai phá dữ liệu [2]","Đối chiếu"),("KNN","Giáo trình và bài giảng [1, 2]","Đối chiếu"),("Logistic Regression","Giáo trình Khai phá dữ liệu [1]","Đối chiếu"),("SVM tuyến tính","Tài liệu học máy Cornell [3]","Bổ sung")],[4.5,7.3,3.5])
     para("Các bộ phân lớp được lựa chọn để có những cách suy luận khác nhau trên cùng nhãn nhị phân. Naive Bayes dùng xác suất sinh dữ liệu theo lớp. ID3 và C4.5 chia không gian theo thuộc tính. KNN quyết định theo các mẫu gần nhau. Logistic Regression và SVM tuyến tính xây dựng một mặt phân cách trong không gian đã chuẩn hóa.")
     para("Mã Python tự cài đặt bước huấn luyện và dự đoán của sáu thuật toán. Thư viện được sử dụng cho đọc ghi tệp, vẽ biểu đồ, kiểm thử và giao diện. Weka được dùng làm môi trường đối chiếu; cấu hình và kết quả của Weka được trình bày riêng với Python.")
     para("Phần C4.5 triển khai tiêu chí gain ratio trên dữ liệu danh nghĩa đã chia khoảng, với cây chưa cắt tỉa. Cấu hình J48 chưa cắt tỉa trong Weka được dùng để đối chiếu với phạm vi triển khai này.")
@@ -643,15 +666,23 @@ return int(2 * votes > 5), votes / 5""")
     para("Trong phép so sánh bộ phân lớp, Weka sử dụng ARFF đã biến đổi theo tham số học từ development của Python. Các thao tác bộ lọc ở phần II được trình bày riêng để mô tả cách dùng Weka. Nhờ dùng cùng đầu vào trong phép đối chiếu, khác biệt giữa điền trung bình và điền trung vị không ảnh hưởng đến bảng so sánh bộ phân lớp.")
 
     page("1. Mục tiêu và luồng sử dụng", "IV. Phát triển ứng dụng dự đoán")
-    para("Ứng dụng Streamlit chạy cục bộ tại http://127.0.0.1:8501. Trang chính ghi rõ Naive Bayes là phương pháp chính và có ba tab cho nhập một mẫu, dự đoán CSV và xem kết quả thực nghiệm. Giao diện dùng tiếng Việt và giữ chín tên cột theo dữ liệu để tránh nhầm thứ tự.")
+    para("Ứng dụng Streamlit chạy cục bộ tại http://127.0.0.1:8501, gồm bốn tab: Dự đoán một mẫu, Dự đoán CSV, Kết quả thực nghiệm và Dữ liệu gốc. Giao diện dùng nền sáng, chữ xanh đậm và nhóm ô nhập theo ba cột. Các chỉ tiêu có tên tiếng Việt kèm tên cột gốc để người dùng đối chiếu với CSV.")
     para("Người dùng nhập số đo cho các chỉ tiêu; ô thiếu có thể để trống. Giao diện có sẵn ví dụ lấy từ trung vị của tập huấn luyện. Sau khi nhấn Dự đoán và so sánh, ứng dụng kiểm tra dữ liệu, áp dụng các tham số đã học và hiển thị kết quả Naive Bayes. Bảng bên dưới trình bày thêm năm mô hình đối chiếu và loại điểm đầu ra của từng mô hình.")
-    figure(FOLDER/"web-metrics.png", "Giao diện tab Kết quả thực nghiệm.",max_height=15)
+    figure(EVIDENCE / "web-form.jpg", "Biểu mẫu nhập đủ chín chỉ tiêu của mẫu nước.", max_height=14.5)
+    para("Nút Nạp mẫu minh họa đưa các trung vị đã học vào ô nhập; đây là ví dụ thao tác, không phải một mẫu kiểm nghiệm mới. Nút Xóa ô nhập làm trống toàn bộ chỉ tiêu. Khi sửa dữ liệu đầu vào, kết quả cũ được ẩn để tránh đọc nhầm dự đoán của bộ số đo trước đó.")
+    figure(EVIDENCE / "web-evaluation.jpg", "Bảng đánh giá và biểu đồ so sánh trên tab Kết quả thực nghiệm.", max_height=14.5)
     para("Tab kết quả thực nghiệm đọc số liệu và mô hình đã lưu từ lần chạy 20261124-six-v1. Khi người dùng yêu cầu dự đoán, ứng dụng chỉ kiểm tra đầu vào, áp dụng tiền xử lý và tính đầu ra; quá trình này không huấn luyện lại mô hình.")
 
     page("2. Kết quả dự đoán và xử lý dữ liệu CSV")
-    figure(FOLDER/"web-prediction.png", "Kết quả dự đoán của sáu mô hình trên ứng dụng.",max_height=15)
-    para("Bảng phân biệt điểm xác suất ước lượng của NB, cây, KNN và Logistic với biên quyết định của SVM. Biên SVM có thể âm hoặc dương và không nằm trong [0,1]. Người dùng có thể tải kết quả CSV để giữ mã dòng, mã mẫu, nhãn, điểm và lỗi.")
+    figure(EVIDENCE / "web-result.jpg", "Kết quả sáu mô hình với bộ đầu vào minh họa trên biểu mẫu.", max_height=14.5)
+    para("Với bộ trung vị hiển thị ở biểu mẫu, Naive Bayes dự đoán lớp 0 và cho điểm ước lượng lớp 1 là 24,79%. Kết quả này chỉ minh họa luồng sử dụng ứng dụng. Dòng Naive Bayes được tô xanh nhạt; nhãn không uống được được hiển thị bằng thông báo màu vàng. Bảng phân biệt xác suất ước lượng, hiển thị theo phần trăm, với biên quyết định của SVM. Biên SVM có thể âm hoặc dương và không nằm trong [0,1]. Tệp kết quả CSV giữ mã dòng, mã mẫu, nhãn, điểm chưa làm tròn và lỗi.")
     para("CSV phải có chín tên cột và mã hóa UTF-8. Cột sample_id được giữ để đối chiếu. Nếu có Potability trong tệp dự đoán, nhãn đó không đi vào vector đầu vào. Dòng lỗi vẫn có bản ghi lỗi theo từng mô hình và không được trình bày như một dự đoán hợp lệ.")
+    para("Trong tab Dự đoán CSV, mở Định dạng tệp và dữ liệu mẫu để tải ví dụ, sau đó chọn Upload và nhấn Dự đoán CSV. Tệp minh họa trích các ID gốc 0, 27 và 100, bỏ cột nhãn và giữ sample_id. Lần thao tác ghi hình xử lý đủ ba dòng, không có lỗi đầu vào, tạo 18 bản ghi kết quả. ID dòng trong bảng là vị trí bắt đầu từ 0 trong tệp tải lên; sample_id trong CSV kết quả dùng để truy ngược dòng dữ liệu gốc.")
+    figure(EVIDENCE / "web-csv.jpg", "Dự đoán CSV ba mẫu: số dòng hợp lệ và kết quả theo từng mô hình.", max_height=14.5)
+
+    heading("2.1. Tra cứu và tải dữ liệu gốc", 3)
+    para("Tab Dữ liệu gốc hiển thị toàn bộ 3.276 bản ghi trước tiền xử lý, gồm chín chỉ tiêu và Potability. Người dùng có thể cuộn bảng để xem đủ các cột, tra cứu những ô thiếu và tải tệp qua nút Tải toàn bộ CSV gốc. Số mẫu hai lớp và số ô thiếu được trình bày ngay trên màn hình. Bảng chỉ làm tròn số khi hiển thị; tệp tải xuống giữ nguyên byte của CSV nguồn.")
+    figure(EVIDENCE / "web-raw-data.jpg", "Tab dữ liệu gốc với thống kê lớp, ô thiếu và chức năng tải CSV nguyên trạng.", max_height=14.5)
 
     page("3. Kiểm thử ứng dụng và khả năng mở rộng")
     table(["Tình huống kiểm tra","Kết quả mong đợi"],[("Nhập một mẫu hợp lệ","Hiển thị NB và đủ năm mô hình đối chiếu"),("CSV nhiều dòng","Giữ thứ tự, ID mẫu, kết quả đủ sáu mô hình"),("Có ô thiếu","Dùng trung vị train đã lưu"),("Chuỗi không phải số","Báo lỗi dòng và không tự gán nhãn"),("Tất cả chỉ tiêu trống","Từ chối dự đoán"),("Model bị thay đổi byte","Dừng nạp khi hash không khớp"),("Nhấn dự đoán nhiều lần","Dùng cùng trạng thái đã học")],[7.3,8])
@@ -666,16 +697,35 @@ return int(2 * votes > 5), votes / 5""")
     para("Kết quả hiện tại cho thấy cần cải thiện khả năng nhận diện lớp 1 của Naive Bayes. Việc bổ sung dữ liệu hoặc thay đổi tiền xử lý phải được kiểm tra bằng thực nghiệm trên dữ liệu có nguồn gốc phù hợp. Ứng dụng chỉ dự đoán nhãn theo bộ dữ liệu nghiên cứu và chưa thay thế được việc kiểm nghiệm chất lượng nước.")
     heading("TÀI LIỆU THAM KHẢO",1,True)
     for text in [
-        "[1] Trần Mạnh Tuấn. Bài giảng Khai phá dữ liệu, Bài 2 Tiền xử lý dữ liệu và Bài 5 Phân lớp dữ liệu. Khoa Công nghệ thông tin, Trường Đại học Thủy Lợi. Bản bài giảng được cung cấp trong học phần.",
-        "[2] Trần Mạnh Tuấn, Hoàng Thị Minh Châu (chủ biên), Trần Thanh Đại, Vũ Mỹ Hạnh, Vũ Anh Tuấn. Giáo trình Khai phá dữ liệu. Trường Đại học Kinh tế - Kỹ thuật Công nghiệp, 2022. Chương 2 và 4, đặc biệt mục 4.2, 4.3, 4.4, 4.5.4 và 4.6.",
-        "[3] Cornell University. CS 4780/5780 Machine Learning, Lecture notes on Logistic Regression and Support Vector Machines. https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/ . Truy cập 24/11/2026.",
-        "[4] Aditya Kadiwal. Water Quality, Kaggle, phiên bản 3, water_potability.csv. https://www.kaggle.com/datasets/adityakadiwal/water-potability . Bản tải đối chiếu ngày 24/11/2026.",
-        "[5] University of Waikato. Weka Knowledge Explorer và tài liệu API Weka 3.8 về J48, IBk, Logistic, SMO, ReplaceMissingValues và Discretize. https://ml.cms.waikato.ac.nz/weka/gui_explorer.html và https://weka.sourceforge.io/doc.stable-3-8/ . Truy cập 24/11/2026.",
-        "[6] Weka team. simpleEducationalLearningSchemes 1.0.1, ID3 educational implementation. https://weka.sourceforge.io/packageMetaData/simpleEducationalLearningSchemes/1.0.1.html . Truy cập 24/11/2026."]:
+        "[1]. Giáo trình Khai phá dữ liệu, TS. Trần Mạnh Tuấn.",
+        "[2]. Bài giảng Khai phá dữ liệu, TS. Trần Mạnh Tuấn.",
+        "[3]. Cornell University. CS 4780/5780 Machine Learning, Lecture Notes. https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/ . Truy cập 24/11/2026.",
+        "[4]. Aditya Kadiwal. Water Quality, Kaggle, phiên bản 3, water_potability.csv. https://www.kaggle.com/datasets/adityakadiwal/water-potability . Bản tải đối chiếu ngày 24/11/2026.",
+        "[5]. University of Waikato. Weka Knowledge Explorer và tài liệu API Weka 3.8. https://ml.cms.waikato.ac.nz/weka/gui_explorer.html và https://weka.sourceforge.io/doc.stable-3-8/ . Truy cập 24/11/2026.",
+        "[6]. Weka team. simpleEducationalLearningSchemes 1.0.1. https://weka.sourceforge.io/packageMetaData/simpleEducationalLearningSchemes/1.0.1.html . Truy cập 24/11/2026."]:
         reference = para(text)
         reference.alignment = WD_ALIGN_PARAGRAPH.LEFT
         reference.paragraph_format.left_indent = Cm(0.75)
         reference.paragraph_format.first_line_indent = Cm(-0.75)
+    appendix = doc.add_section(WD_SECTION_START.NEW_PAGE)
+    appendix.orientation = WD_ORIENT.LANDSCAPE
+    appendix.page_width, appendix.page_height = Cm(29.7), Cm(21)
+    appendix.left_margin, appendix.right_margin = Cm(2.5), Cm(2)
+    appendix.top_margin = appendix.bottom_margin = Cm(2)
+    # Tiếp tục số trang, không lặp lại số 1 của phần thân.
+    appendix_numbering = appendix._sectPr.find(qn("w:pgNumType"))
+    if appendix_numbering is not None:
+        appendix._sectPr.remove(appendix_numbering)
+    heading("PHỤ LỤC A. DỮ LIỆU THÔ", 1)
+    para("Bảng dưới trích 13 bản ghi, gồm 12 dòng đầu và dòng có ID 27 dùng trong ví dụ tính Naive Bayes. ID bắt đầu từ 0, không phải cột của CSV. Ô rỗng là dữ liệu thiếu; số chỉ được làm tròn bốn chữ số thập phân trong bảng. Nhãn 0/1 được giữ nguyên. Toàn bộ dữ liệu nằm trong tệp water_potability.csv đi kèm báo cáo.")
+    table(["ID", "ph", "Hardness", "Solids", "Chloramines", "Sulfate", "Conductivity", "Organic_\ncarbon", "Trihalo-\nmethanes", "Turbidity", "Potability"],
+          [(i, *("" if X[i][j] is None else number(X[i][j]) for j in range(9)), y[i])
+           for i in (*range(12), 27)],
+          [0.8, 1.4, 2.5, 2.9, 2.5, 2.3, 2.9, 2.5, 2.8, 2.3, 2.0], font_size=9, compact=True)
+    note = para("Nguồn: Water Quality, Aditya Kadiwal, Kaggle, phiên bản 3 [4]. CSV gốc có 3.276 dòng dữ liệu và 10 cột; 491 ô ph, 781 ô Sulfate và 162 ô Trihalomethanes bị thiếu. Không có thao tác điền thiếu, chuẩn hóa hoặc chia khoảng trong tệp này.")
+    note.paragraph_format.first_line_indent = Cm(0)
+    for run in note.runs:
+        font(run, 11)
     # Xóa quan hệ ảnh thân báo cáo mẫu đã được thay thế, giữ logo/bìa đang dùng.
     assert table_index == len(TABLE_CAPTIONS)
     used_relationships=set(doc.element.xpath('//@r:embed')) | set(doc.element.xpath('//@r:id'))

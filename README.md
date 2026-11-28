@@ -13,8 +13,11 @@ rtk proxy .venv/Scripts/python.exe -X utf8 report/weka/run_six_weka.py --run-id 
 rtk proxy .venv/Scripts/python.exe -X utf8 -m streamlit run app/comparison_app.py --server.address 127.0.0.1 --server.port 8501
 ```
 
-Web mặc định nạp `results/comparison/20261124-six-v1`, có nhập tay, CSV và
-bảng kết quả. Mô hình, thống kê train, dự đoán, biểu đồ, log Weka và manifest
+Web mặc định nạp `results/comparison/20261124-six-v1`, có bốn tab: nhập một
+mẫu, dự đoán CSV, so sánh thực nghiệm và dữ liệu gốc. Có nút nạp mẫu minh
+họa, xóa đầu vào, tải CSV mẫu và tải toàn bộ dữ liệu gốc. Giao diện nền sáng,
+tô nổi bật Naive Bayes, phân biệt điểm xác suất với biên SVM và ẩn kết quả
+cũ khi thay đầu vào. Mô hình, thống kê train, dự đoán, biểu đồ, log Weka và manifest
 được lưu trong thư mục lần chạy. Cấu hình cố định, cùng 5 fold, cùng 656 mẫu
 test lịch sử. Test này từng được xem trong phiên bản cũ, không phải đánh giá
 ngoài độc lập. Không ghi đè lần chạy đã có.
@@ -30,8 +33,16 @@ Các bản này cùng tệp roster thành viên được lưu cục bộ. Bản 
 [PDF công khai](output/pdf/BaiTapLon-cong-khai.pdf) và
 [Word công khai](output/docx/BaiTapLon-cong-khai.docx). Trình dựng nằm ở
 `report/build_six_report.py`, nhận `--template`, `--students` và `--public`.
-Bản căn chỉnh ngày 25/11/2026 có 44 trang, mục lục tự động, danh mục 20 bảng
-và 17 hình. Sau khi dựng Word, cập nhật các trường bằng `Ctrl+A`, `F9` rồi
+Bản bổ sung ngày 28/11/2026 có lời cảm ơn, chú thích dưới bảng/hình, tài
+liệu tham khảo dạng `[1]. …`, phụ lục dữ liệu thô đủ mười cột và ảnh thao
+tác Weka/web. Ảnh bổ sung và checksum nằm trong
+[hồ sơ minh chứng](report/evidence/20261128/README.md).
+Bản PDF đã kiểm tra gồm 54 trang, 21 bảng và 26 hình; mục lục và các danh
+mục có 94 liên kết số trang đã đối chiếu. Xem
+[đối chiếu với mẫu](DOCS/DOI_CHIEU_BAO_CAO_MAU.md).
+Gói nộp `output/submission/BaiTapLon_Nhom11_20261128.zip` lưu cục bộ, gồm
+Word, PDF có thông tin thành viên, CSV gốc đầy đủ và ảnh thao tác.
+Sau khi dựng Word, cập nhật các trường bằng `Ctrl+A`, `F9` rồi
 lưu và xuất PDF để số trang và danh mục khớp với bố cục mới.
 Bộ lọc Weka
 thực hành dùng mean, Python dùng median; bảng đối chiếu bộ phân lớp Weka

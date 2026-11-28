@@ -1,0 +1,19 @@
+{
+  "captured_on": "2026-11-28",
+  "weka": "3.8.7 Explorer, real native UI captures",
+  "web": "Streamlit at 127.0.0.1:8501, real browser captures",
+  "files": {
+    "web-csv.jpg": "138e89708a207a557331bacfcf25242e330f1a997215bd6bf43265fe9e6b9525",
+    "web-evaluation.jpg": "ac330237abde34b8330132b6f8e04ef2d60ad43d312eff49d0b34a74220b6c6d",
+    "web-form.jpg": "914ddd5a38b91f125e2265a9ca53b4f9969b73a5b1971ef5b77431fa58619217",
+    "web-raw-data.jpg": "47bdadcd3b219a81a6a0ef48eecc7436c39721f7222b49ed4e1634b81cb369bd",
+    "web-result.jpg": "d82147360e5b6d7255c62546839a62ad70cd3918b81a94f2dbb06bb9b49ebcce",
+    "weka-class-counts.png": "b83f7fe14ace2957dcd76bda039e8523210d2f2637bce119f965a9c6b30020d8",
+    "weka-class-nominal.png": "3ee3edbc9dab63f91ecae4a67b6bb4e0731b502fb4a122a2a36f3a765878e012",
+    "weka-class-options.png": "56c291c4f49af8f36f955dbf8c75279d48026598db70d10e16605204bf78e787",
+    "weka-discretize-options.png": "a85080e6b66b8e82f2d8dbdfd3fb28e0b0fc0d6128b2dd8d8657c69ce0e11da1",
+    "weka-raw-ph.png": "b633c41cb647274bdaa6ace257e7e2256de59f848e1a1dedbc412b8ce7b29245",
+    "weka-raw-rows.png": "f3760c557b78944e43f6b6ffd80c6401e68f3a9bb5a3d2a61abbaa3eede9b932",
+    "weka-raw-sulfate.png": "14cb9ea9134d18f5c2932b94f3a6b8fb4a424f10b4a73d11cf1fbafc239f6927"
+  }
+}

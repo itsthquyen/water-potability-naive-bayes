@@ -16,7 +16,7 @@ mẫu DOCX mới và web dự đoán cục bộ.
 - Chỉ trình bày kết quả đã chạy và kiểm chứng. Mọi giới hạn của dữ liệu,
   thuật toán hoặc phép đánh giá phải nêu trong phần phân tích.
 - Báo cáo Nhóm 11 giữ thông tin thành viên đã xác nhận. Roster/MSSV
-  lưu cục bộ. Không tự commit/push trong đợt chỉnh sửa này.
+  lưu cục bộ. Commit/push theo ủy quyền của người dùng, tách theo chức năng.
 
 ## 1. Chọn thuật toán từ bài giảng
 

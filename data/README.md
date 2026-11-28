@@ -6,6 +6,11 @@ Tệp này giữ 491 ô pH thiếu, 781 ô Sulfate thiếu và 162 ô THM thiế
 được dùng làm đầu vào trước tiền xử lý cho thực nghiệm sáu thuật toán.
 Các tệp đã điền/chuẩn hóa/đổi mã chỉ nằm trong đầu ra của lần chạy.
 
+Bản báo cáo bổ sung ngày 28/11/2026 có phụ lục trích 13 bản ghi đủ mười
+cột; ô thiếu vẫn để trống. Gói nộp cục bộ trong `output/submission/` kèm
+toàn bộ `water_potability.csv`, không thay bằng bản đã làm tròn trong báo
+cáo. Tab **Dữ liệu gốc** của web cho xem và tải đúng CSV nguyên trạng.
+
 Đã tải CSV gốc ngày 24/10/2026 từ [Water Quality, Aditya Kadiwal](https://www.kaggle.com/datasets/adityakadiwal/water-potability), version 3. Kaggle API công khai ghi giấy phép **CC0: Public Domain**. Không thay bằng bản mirror hoặc dữ liệu tổng hợp.
 
 - `raw/`: dành cho dữ liệu gốc; giữ nguyên nội dung khi bắt đầu xử lý.
