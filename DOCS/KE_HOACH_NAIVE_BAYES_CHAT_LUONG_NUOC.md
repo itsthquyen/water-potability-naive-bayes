@@ -150,8 +150,8 @@ phần chưa chạy được thay vì tạo số liệu minh họa.
 ## 8. Tổ chức source và gói gửi giảng viên
 
 Mỗi thuật toán nằm trong một file ở src/algorithms. Tiền xử lý tập trung
-ở src/preprocessing.py và src/discretization.py, kiểm CSV ở
-src/data_validation.py. Thực nghiệm và đánh giá được tách khỏi mô hình.
+ở src/data_processing/preprocessing.py và src/data_processing/discretization.py, kiểm CSV ở
+src/data_processing/data_validation.py. Thực nghiệm và đánh giá được tách khỏi mô hình.
 Weka tham chiếu ở weka/, giao diện ở app/.
 
 tools/package_source.py tạo output/source/BaiTapLon_Nhom11_Source theo

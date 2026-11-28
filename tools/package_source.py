@@ -8,8 +8,8 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 ROOT = Path(__file__).resolve().parents[1]
 FILES = [
-    'src/__init__.py', 'src/config.py', 'src/data_validation.py',
-    'src/preprocessing.py', 'src/discretization.py', 'src/metrics.py',
+    'src/__init__.py', 'src/config.py', 'src/data_processing/__init__.py', 'src/data_processing/data_validation.py',
+    'src/data_processing/preprocessing.py', 'src/data_processing/discretization.py', 'src/metrics.py',
     'src/artifacts.py', 'src/six_experiments.py', 'src/eda.py', 'src/plots.py',
     'src/download_data.py', 'src/ui_theme.py',
     'src/algorithms/__init__.py', 'src/algorithms/common.py',
@@ -25,7 +25,7 @@ FILES = [
 
 
 def main():
-    destination = ROOT / 'output/source/BaiTapLon_Nhom11_Source'
+    destination = ROOT / 'output/source/BaiTapLon_Nhom11_NopGV'
     mapping = {relative: ROOT / relative for relative in FILES}
     mapping['README.md'] = ROOT / 'DOCS/README_NOP_SOURCE.md'
     expected = set(mapping) | {'requirements.txt'}

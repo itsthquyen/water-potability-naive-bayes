@@ -20,9 +20,11 @@ from src.ui_theme import (
     render_consensus_board,
     render_hero_header,
     render_metric_card,
+    potability_name,
+    confusion_figure,
 )
 from src.config import FEATURE_COLUMNS, RAW_DATA_PATH
-from src.data_processing.data_validation import read_csv_records, validate_records
+from src.data_processing.data_validation import read_csv_records, validate_records, _parse_label
 from src.artifacts import sha256_file
 from src.six_experiments import ALGORITHMS, NAMES, RUN_ID, load_models
 
@@ -82,6 +84,16 @@ def clear_inputs():
     for name in FEATURE_COLUMNS:
         st.session_state["six_" + name] = ""
     st.session_state.pop("six_manual", None)
+    remember_manual_inputs()
+
+
+def remember_manual_inputs():
+    """Giữ các ô đã nhập khi chuyển trang rồi quay lại biểu mẫu."""
+    saved = dict(st.session_state.get("six_saved_manual", {}))
+    for name in FEATURE_COLUMNS:
+        if "six_" + name in st.session_state:
+            saved[name] = st.session_state["six_" + name]
+    st.session_state["six_saved_manual"] = saved
 
 
 def example_csv(records):
@@ -124,6 +136,75 @@ def predict(records, models):
     return output
 
 
+def label_comparison(records, predictions):
+    """Ghép nhãn gốc với kết quả theo row_id, không đưa nhãn vào mô hình.
+
+    Trả (các dòng có nhãn 0/1 hợp lệ, số dòng thiếu/sai nhãn). Mỗi dòng
+    giữ sample_id và nhãn của cả sáu thuật toán; lỗi dự đoán giữ None.
+    Đây là đối chiếu lượt CSV hiện tại, không thay kết quả test đã lưu.
+    """
+    by_row = {}
+    for prediction in predictions:
+        by_row.setdefault(prediction["row_id"], {})[prediction["algorithm"]] = prediction["label"]
+    compared, skipped = [], 0
+    for row_id, record in enumerate(records):
+        try:
+            actual = _parse_label(record.get("Potability", ""))
+        except ValueError:
+            skipped += 1
+            continue
+        row = {"row_id": row_id, "sample_id": record.get("sample_id", ""), "actual": actual}
+        for algorithm in ALGORITHMS:
+            row[algorithm] = by_row.get(row_id, {}).get(NAMES[algorithm])
+        compared.append(row)
+    return compared, skipped
+
+
+def prediction_csv(results):
+    """CSV đầu ra dùng tên nhãn; mã số chỉ tồn tại trong trạng thái tính toán."""
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=(
+        "row_id", "sample_id", "algorithm", "classification", "potable_score", "score_type", "error"))
+    writer.writeheader()
+    for row in results:
+        writer.writerow({"row_id": row["row_id"], "sample_id": row["sample_id"],
+                         "algorithm": row["algorithm"], "classification": potability_name(row["label"]),
+                         "potable_score": row["score_1"], "score_type": row["score_type"], "error": row["error"]})
+    return stream.getvalue().encode("utf-8-sig")
+
+
+def show_label_comparison(records, predictions):
+    """Hiển thị nhãn thật tách biệt và cho tải bảng đối chiếu nguyên thứ tự."""
+    if not any("Potability" in record for record in records):
+        return
+    compared, skipped = label_comparison(records, predictions)
+    st.subheader("Đối chiếu nhãn gốc và dự đoán")
+    st.caption("Nhãn gốc lấy từ cột Potability để kiểm tra sau dự đoán. Nhãn và sample_id không được đưa vào chín thuộc tính đầu vào.")
+    if not compared:
+        st.info("Không có nhãn gốc hợp lệ để đối chiếu.")
+        return
+    def label_cell(label, actual):
+        if label is None:
+            return "<span class='badge-error'>Lỗi</span>"
+        badge = "match-label" if label == actual else "mismatch-label"
+        return f"<span class='{badge}'>{potability_name(label)}</span>"
+    selected = st.selectbox("Thuật toán đối chiếu", ALGORITHMS, format_func=NAMES.get, key="truth_algorithm")
+    table(("Mã mẫu", "Nhãn gốc", "Dự đoán trên web", "Đối chiếu"), [
+        (escape(str(row["sample_id"] or row["row_id"])), potability_name(row["actual"]),
+         label_cell(row[selected], row["actual"]),
+         "Không xác định" if row[selected] is None else "Đúng" if row[selected] == row["actual"] else "Sai")
+        for row in compared[:60]
+    ])
+    st.caption(f"Đối chiếu {len(compared)} dòng có nhãn; {skipped} dòng thiếu/sai nhãn. Đây là kiểm tra trên tệp vừa tải lên, không thay thế đánh giá trên toàn bộ tập test.")
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=("row_id", "sample_id", "actual", *ALGORITHMS))
+    writer.writeheader()
+    writer.writerows({**row, "actual": potability_name(row["actual"]),
+                     **{a: potability_name(row[a]) for a in ALGORITHMS}} for row in compared)
+    st.download_button("Tải bảng đối chiếu nhãn gốc", stream.getvalue().encode("utf-8-sig"),
+                       "doi_chieu_nhan_goc.csv", "text/csv", key="truth_download")
+
+
 def table(headers, records, primary_column=None):
     """Hiển thị bảng dữ liệu với phong cách giao diện hiện đại."""
     html = ["<div class='custom-table-wrapper'><table class='custom-table'><thead><tr>"]
@@ -151,9 +232,9 @@ def show_results(results, key):
         if label is None:
             label_cell = "<span class='badge-error'>Không xác định</span>"
         elif label == 1:
-            label_cell = "<span class='badge-potable'>1 · Uống được</span>"
+            label_cell = f"<span class='badge-potable'>{potability_name(label)}</span>"
         else:
-            label_cell = "<span class='badge-non-potable'>0 · Không uống được</span>"
+            label_cell = f"<span class='badge-non-potable'>{potability_name(label)}</span>"
 
         score_val = result["score_1"]
         if score_val is None:
@@ -177,16 +258,9 @@ def show_results(results, key):
     if len(results) > 120:
         st.caption(f"Đang hiển thị 120/{len(results)} kết quả. Tệp CSV tải xuống chứa toàn bộ kết quả.")
 
-    stream = io.StringIO(newline="")
-    writer = csv.DictWriter(
-        stream,
-        fieldnames=("row_id", "sample_id", "algorithm", "label", "score_1", "score_type", "error"),
-    )
-    writer.writeheader()
-    writer.writerows(results)
     st.download_button(
         "Tải toàn bộ kết quả CSV",
-        stream.getvalue().encode("utf-8-sig"),
+        prediction_csv(results),
         "du_doan_nuoc.csv",
         "text/csv",
         key=key,
@@ -199,13 +273,13 @@ def main():
         page_title="Chất lượng nước · Nhóm 11",
         page_icon=None,
         layout="wide",
-        initial_sidebar_state="collapsed",
+        initial_sidebar_state="expanded",
     )
 
+    st.html(CUSTOM_CSS)
     css_path = ROOT / "app" / "assets" / "comparison.css"
     if css_path.is_file():
         st.html("<style>" + css_path.read_text(encoding="utf-8") + "</style>")
-    st.html(CUSTOM_CSS)
 
     try:
         models, summary = resources(sha256_file(FOLDER / "manifest.json"))
@@ -215,88 +289,86 @@ def main():
         st.error(f"Chưa nạp được mô hình đã kiểm chứng. {error}")
         return
 
+    pages = ("Dự đoán một mẫu", "Dự đoán CSV", "Kết quả thực nghiệm", "Dữ liệu gốc", "Thông tin 9 chỉ tiêu")
+    with st.sidebar:
+        st.html("<div class='app-brand'><span class='brand-mark'>WQ</span><div><strong>Water Quality</strong><small>Phân loại chất lượng nước</small></div></div>")
+        st.caption("KHÔNG GIAN THỰC NGHIỆM")
+        selected_page = st.radio("Điều hướng", pages, key="six_page", label_visibility="collapsed", on_change=remember_manual_inputs)
+        st.html("<div class='sidebar-project'><strong>Bài tập lớn Khai phá dữ liệu</strong><p>Nhóm 11 · Lớp 65CNTT</p><span>Naive Bayes là thuật toán chính.<br>Năm mô hình còn lại dùng để so sánh.</span></div>")
     raw_count = f"{len(raw_records):,}".replace(",", ".")
+    st.html(f"<div class='page-breadcrumb'>Water Quality <span>/</span> <strong>{escape(selected_page)}</strong></div>")
     st.html(
         render_hero_header(
-            title="Hệ thống Phân loại Chất lượng Nước & Đối chiếu Sáu Thuật toán Học máy",
-            subtitle="Bài tập lớn Khai phá dữ liệu — Nhóm 11 · 65CNTT · Trường Đại học Thủy Lợi",
+            title=selected_page,
+            subtitle="Phân loại nước bằng Naive Bayes và đối chiếu với năm thuật toán học máy.",
             badges=[
                 f"{raw_count} mẫu dữ liệu",
                 f"{len(FEATURE_COLUMNS)} chỉ tiêu đo",
                 "Naive Bayes [Chính]",
-                "ID3",
-                "C4.5",
-                "KNN",
-                "Logistic Regression",
-                "Linear SVM",
-                "Tự cài đặt 100% Python",
-                "Xác thực SHA-256",
+                "6 thuật toán tự cài",
             ],
         )
     )
 
     st.warning("Ứng dụng học thuật theo nhãn Water Quality. Kết quả không thay thế kiểm nghiệm chất lượng nước.")
 
-    manual, upload, experiments, raw_tab, guide_tab = st.tabs(
-        ("Dự đoán một mẫu", "Dự đoán CSV", "Kết quả thực nghiệm", "Dữ liệu gốc", "Thông tin 9 chỉ tiêu")
-    )
-
-    with manual:
+    if selected_page == pages[0]:
         medians = models["naive_bayes"].processor.to_state()["fill_values"]
 
-        st.subheader("Thông số mẫu nước")
-        st.caption("Nhập số thập phân bằng dấu chấm; để trống chỉ tiêu chưa có. Mẫu minh họa ban đầu dùng trung vị tập huấn luyện.")
+        with st.container(border=True, key="manual_panel"):
+            st.subheader("Thông số mẫu nước")
+            st.caption("Nhập số thập phân bằng dấu chấm; để trống chỉ tiêu chưa có. Mẫu minh họa ban đầu dùng trung vị tập huấn luyện.")
 
-        st.markdown("##### Mẫu thử nghiệm nhanh:")
-        btn_cols = st.columns([1.2, 1.2, 1.2, 1.2, 2])
-        if btn_cols[0].button("Nạp bộ số thử A", help="Ví dụ thao tác, chưa có nhãn kiểm nghiệm"):
-            for k, v in PRESET_SAMPLES["sample_a"]["values"].items():
-                st.session_state[f"six_{k}"] = f"{v:.4f}"
-            st.session_state.pop("six_manual", None)
-            st.rerun()
+            st.markdown("##### Mẫu thử nghiệm nhanh:")
+            btn_cols = st.columns([1.1, 1.1, 1.4, 1])
+            if btn_cols[0].button("Nạp bộ số thử A", help="Ví dụ thao tác, chưa có nhãn kiểm nghiệm"):
+                for k, v in PRESET_SAMPLES["sample_a"]["values"].items():
+                    st.session_state[f"six_{k}"] = f"{v:.4f}"
+                st.session_state.pop("six_manual", None)
+                st.rerun()
 
-        if btn_cols[1].button("Nạp bộ số thử B", help="Ví dụ thao tác, chưa có nhãn kiểm nghiệm"):
-            for k, v in PRESET_SAMPLES["sample_b"]["values"].items():
-                st.session_state[f"six_{k}"] = f"{v:.4f}"
-            st.session_state.pop("six_manual", None)
-            st.rerun()
+            if btn_cols[1].button("Nạp bộ số thử B", help="Ví dụ thao tác, chưa có nhãn kiểm nghiệm"):
+                for k, v in PRESET_SAMPLES["sample_b"]["values"].items():
+                    st.session_state[f"six_{k}"] = f"{v:.4f}"
+                st.session_state.pop("six_manual", None)
+                st.rerun()
 
-        btn_cols[2].button("Nạp mẫu minh họa", on_click=fill_example, args=(medians,), help="Nạp trung vị tập huấn luyện")
-        btn_cols[3].button("Xóa ô nhập", on_click=clear_inputs, help="Xóa trắng 9 ô nhập liệu")
+            btn_cols[2].button("Nạp mẫu minh họa", on_click=fill_example, args=(medians,), help="Nạp trung vị tập huấn luyện")
+            btn_cols[3].button("Xóa ô nhập", on_click=clear_inputs, help="Xóa trắng 9 ô nhập liệu")
 
-        st.write("")
-        record = {}
+            st.write("")
+            record = {}
 
-        group_categories = [
-            ("Tính chất lý hóa cơ bản", [c for c in FEATURE_COLUMNS if FEATURE_INFO[c]["category"] == "Tính chất lý hóa cơ bản"]),
-            ("Khử trùng & Khoáng chất", [c for c in FEATURE_COLUMNS if FEATURE_INFO[c]["category"] == "Khử trùng & Khoáng chất"]),
-            ("Độc chất vi lượng & Độ đục", [c for c in FEATURE_COLUMNS if FEATURE_INFO[c]["category"] == "Độc chất vi lượng & Độ đục"]),
-        ]
+            group_categories = [
+                ("Tính chất lý hóa cơ bản", [c for c in FEATURE_COLUMNS if FEATURE_INFO[c]["category"] == "Tính chất lý hóa cơ bản"]),
+                ("Khử trùng & Khoáng chất", [c for c in FEATURE_COLUMNS if FEATURE_INFO[c]["category"] == "Khử trùng & Khoáng chất"]),
+                ("Độc chất vi lượng & Độ đục", [c for c in FEATURE_COLUMNS if FEATURE_INFO[c]["category"] == "Độc chất vi lượng & Độ đục"]),
+            ]
 
-        group_cols = st.columns(3)
-        for idx, (group_name, group_features) in enumerate(group_categories):
-            with group_cols[idx]:
-                st.html(f"<div class='feature-group-header'>{group_name}</div>")
-                for name in group_features:
-                    info = FEATURE_INFO.get(name, {})
-                    label_text = FEATURE_LABELS.get(name, name)
-                    help_text = f"Cột CSV: {name}. {info.get('desc', '')} Giữ thang đo của CSV nguồn."
-                    record[name] = st.text_input(
-                        label_text,
-                        value=st.session_state.get(f"six_{name}", f"{medians[FEATURE_COLUMNS.index(name)]:.4f}"),
-                        key=f"six_{name}",
-                        help=help_text,
-                    )
+            group_cols = st.columns(3)
+            for idx, (group_name, group_features) in enumerate(group_categories):
+                with group_cols[idx]:
+                    st.html(f"<div class='feature-group-header'>{group_name}</div>")
+                    for name in group_features:
+                        info = FEATURE_INFO.get(name, {})
+                        label_text = FEATURE_LABELS.get(name, name)
+                        help_text = f"Cột CSV: {name}. {info.get('desc', '')} Giữ thang đo của CSV nguồn."
+                        record[name] = st.text_input(
+                            label_text,
+                            value=st.session_state.get(f"six_{name}", st.session_state.get("six_saved_manual", {}).get(name, f"{medians[FEATURE_COLUMNS.index(name)]:.4f}")),
+                            key=f"six_{name}",
+                            help=help_text,
+                        )
 
-        identity = tuple(record.values())
-        if st.session_state.get("six_manual_identity") != identity:
-            st.session_state.pop("six_manual", None)
-            st.session_state["six_manual_identity"] = identity
+            identity = tuple(record.values())
+            if st.session_state.get("six_manual_identity") != identity:
+                st.session_state.pop("six_manual", None)
+                st.session_state["six_manual_identity"] = identity
 
-        st.write("")
-        col_btn, _ = st.columns([2, 5])
-        with col_btn:
-            submit = st.button("Dự đoán và so sánh", type="primary")
+            st.write("")
+            col_btn, _ = st.columns([2, 5])
+            with col_btn:
+                submit = st.button("Dự đoán và so sánh", type="primary")
 
         if submit:
             st.session_state["six_manual"] = predict([record], models)
@@ -311,11 +383,7 @@ def main():
             if primary["label"] is not None:
                 is_potable = primary["label"] == 1
                 card_class = "result-hero-potable" if is_potable else "result-hero-non-potable"
-                status_title = (
-                    "NAIVE BAYES: UỐNG ĐƯỢC THEO NHÃN DỮ LIỆU (Lớp 1)"
-                    if is_potable
-                    else "NAIVE BAYES: KHÔNG UỐNG ĐƯỢC THEO NHÃN DỮ LIỆU (Lớp 0)"
-                )
+                status_title = "NAIVE BAYES: " + potability_name(primary["label"])
                 status_desc = (
                     "Mẫu nước có các đặc trưng phù hợp với nguồn nước uống được theo phân phối xác suất mô hình."
                     if is_potable
@@ -331,8 +399,8 @@ def main():
                     <div class="result-hero-desc">{status_desc}</div>
                     <div class="confidence-container">
                         <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
-                            <span>Điểm ước lượng lớp 1 (Uống được):</span>
-                            <span>{score_val * 100:.2f}% ({percent(score_val)})</span>
+                            <span>Điểm ước lượng UỐNG ĐƯỢC:</span>
+                            <span>{percent(score_val)}</span>
                         </div>
                         <div class="confidence-bar-bg">
                             <div class="{fill_class}" style="width: {bar_width};"></div>
@@ -351,7 +419,7 @@ def main():
             st.markdown("##### Chi tiết kết quả từng thuật toán:")
             show_results(result, "manual_download")
 
-    with upload:
+    elif selected_page == pages[1]:
         st.subheader("Dự đoán nhiều mẫu từ CSV")
         st.write("Tải tệp UTF-8 có đủ chín cột chỉ tiêu. Mỗi dòng được dự đoán bằng cả sáu mô hình.")
 
@@ -372,6 +440,7 @@ def main():
             try:
                 records = read_csv_records(file.getvalue().decode("utf-8-sig"), from_text=True)
                 st.session_state["six_csv"] = predict(records, models)
+                st.session_state["six_csv_records"] = records
             except (ValueError, UnicodeError) as error:
                 st.error(str(error))
 
@@ -394,9 +463,11 @@ def main():
                 {render_metric_card("Tỷ lệ uống được (NB)", f"{potable_nb / max(len(nb_results), 1) * 100:.1f}%", f"{potable_nb}/{len(nb_results)} mẫu hợp lệ")}
             </div>
             """)
+            show_label_comparison(st.session_state["six_csv_records"], csv_results)
+            st.subheader("Chi tiết dự đoán từng mẫu")
             show_results(csv_results, "csv_download")
 
-    with experiments:
+    elif selected_page == pages[2]:
         st.subheader("So sánh sáu thuật toán")
         st.caption("Cùng 2.620 mẫu phát triển, 656 mẫu kiểm tra và năm lượt kiểm định chéo. Naive Bayes được tô nổi bật trong bảng.")
 
@@ -460,9 +531,7 @@ def main():
                 st.image(str(roc_img), caption="Đường cong ROC của sáu mô hình trên tập kiểm thử", width="stretch")
 
         with fig_tab3:
-            confusions_img = FOLDER / "figures" / "confusions.png"
-            if confusions_img.is_file():
-                st.image(str(confusions_img), caption="Ma trận nhầm lẫn (Confusion Matrix) của từng mô hình", width="stretch")
+            st.pyplot(confusion_figure({NAMES[a]: summary["models"][a]["test"]["confusion_matrix"] for a in ALGORITHMS}))
 
         with fig_tab4:
             eda_cols = st.columns(2)
@@ -473,21 +542,23 @@ def main():
             if corr_img.is_file():
                 eda_cols[1].image(str(corr_img), caption="Ma trận hệ số tương quan Pearson giữa các chỉ số", width="stretch")
 
-    with raw_tab:
+    elif selected_page == pages[3]:
         st.subheader("Dữ liệu trước tiền xử lý")
         st.write("CSV Water Quality nguyên trạng, bao gồm ô thiếu và nhãn Potability. Bảng này chưa điền thiếu, chuẩn hóa hoặc chia khoảng.")
         stats = st.columns(4)
         stats[0].metric("Số mẫu", f"{len(raw_records):,}".replace(",", "."))
         stats[1].metric("Thuộc tính đầu vào", len(FEATURE_COLUMNS))
-        stats[2].metric("Không uống được · 0", raw_info["classes"][0])
-        stats[3].metric("Uống được · 1", raw_info["classes"][1])
+        stats[2].metric("KHÔNG UỐNG ĐƯỢC", raw_info["classes"][0])
+        stats[3].metric("UỐNG ĐƯỢC", raw_info["classes"][1])
+        displayed_data = pd.read_csv(io.BytesIO(raw_bytes))
+        displayed_data["Potability"] = [potability_name(int(record["Potability"])) for record in raw_records]
         st.dataframe(
-            pd.read_csv(io.BytesIO(raw_bytes)),
+            displayed_data,
             width="stretch",
             height=390,
             column_config={
                 **{name: st.column_config.NumberColumn(format="%.4f") for name in FEATURE_COLUMNS},
-                "Potability": st.column_config.NumberColumn(format="%d"),
+                "Potability": st.column_config.TextColumn("Phân loại"),
             },
         )
         st.caption("Bảng hiển thị bốn chữ số thập phân để dễ đọc; tệp tải xuống giữ nguyên độ chính xác của CSV.")
@@ -495,7 +566,7 @@ def main():
         st.caption("Ô thiếu: " + " · ".join(f"{name}: {count}" for name, count in raw_info["missing"].items() if count))
         st.caption("Nguồn: Water Quality, Aditya Kadiwal, Kaggle, phiên bản 3. Tệp tải xuống giữ nguyên các byte của dữ liệu gốc.")
 
-    with guide_tab:
+    elif selected_page == pages[4]:
         st.subheader("Thông tin chín thuộc tính đầu vào")
         st.write("Đây là các cột của CSV Water Quality. Giữ thang đo trong tệp nguồn khi nhập dữ liệu.")
         st.caption("Nguồn chưa xác nhận đầy đủ đơn vị và quy trình kiểm nghiệm. Mô hình dự đoán Potability, không chứng nhận đạt tiêu chuẩn nước uống.")

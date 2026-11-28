@@ -8,8 +8,9 @@ dự đoán; tiền xử lý, chia tập, thống kê và metric cũng tự vi�
 ## Cấu trúc đang sử dụng
 
 - `src/algorithms/`: sáu file thuật toán đặt cạnh nhau; common.py dùng chung kiểm tra và entropy.
-- `src/preprocessing.py`: kiểm ma trận, trung vị, z-score, audit, chia train/test và fold.
-- `src/discretization.py`: học mã khoảng cho NB/ID3; `src/data_validation.py`: kiểm CSV và nhãn.
+- `src/data_processing/`: nhóm file tiền xử lý, đặt riêng với các thuật toán.
+- `src/data_processing/preprocessing.py`: kiểm ma trận, trung vị, z-score, audit, chia train/test và fold.
+- `src/data_processing/discretization.py`: học mã khoảng cho NB/ID3; `src/data_processing/data_validation.py`: kiểm CSV và nhãn.
 - `src/six_experiments.py`, `src/metrics.py`: thực nghiệm và đánh giá.
 - `src/eda.py`, `src/plots.py`: thống kê và hình từ số liệu tự tính.
 - `app/comparison_app.py`, `src/ui_theme.py`: web hiện hành.
@@ -57,7 +58,7 @@ C4.5 khớp nhãn J48 trên toàn bộ test và năm fold; cây sau cắt tỉa 
 tăng so với cây gain ratio danh nghĩa cũ, nhưng recall lớp 1 chỉ 16,41%.
 NB nhận đúng 30/256 mẫu lớp 1. Báo cáo phân tích các hạn chế này.
 
-Bộ kiểm thử có 328 ca đạt; tám cảnh báo deprecation từ Streamlit/pandas.
+Bộ kiểm thử hiện có 334 ca đạt; một cảnh báo deprecation từ Streamlit/pandas.
 Gói source được kiểm thêm trong bản sao độc lập, gồm tải CSV, unit test và web.
 
 ## Bàn giao
@@ -66,10 +67,14 @@ Gói source được kiểm thêm trong bản sao độc lập, gồm tải CSV,
 rtk proxy .venv/Scripts/python.exe tools/package_source.py
 ```
 
-Lệnh tạo `output/source/BaiTapLon_Nhom11_Source` và ZIP cùng tên, chỉ
+Lệnh tạo `output/source/BaiTapLon_Nhom11_NopGV` và ZIP cùng tên, chỉ
 gồm source cần cho đề tài, kiểm thử và hướng dẫn. Không chứa báo cáo,
 dữ liệu mẫu, model sẵn, cache hay bản cũ. Danh sách và checksum gói nằm
 ngoài thư mục source. Xem [hướng dẫn kèm gói](DOCS/README_NOP_SOURCE.md).
+
+Web hiển thị nhãn KHÔNG UỐNG ĐƯỢC/UỐNG ĐƯỢC bằng chữ, gồm sidebar
+đóng/mở, bố cục responsive, nhập một mẫu/CSV và bảng đối chiếu nhãn gốc.
+CSV kết quả dùng `classification` và `potable_score`; CSV gốc giữ nguyên.
 
 Báo cáo nộp có thông tin thành viên ở `output/docx/BaiTapLon-C45.docx` và
 `output/pdf/BaiTapLon-C45.pdf`, lưu cục bộ. Bản công khai ở

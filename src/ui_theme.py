@@ -1,5 +1,33 @@
 """Thành phần trình bày và mô tả thuộc tính; không chứa thuật toán hoặc ngưỡng phân lớp."""
 
+from .config import POTABILITY_LABEL_NAMES
+
+
+def potability_name(label):
+    """Đổi mã nội bộ thành tên nhãn dành cho giao diện và tệp kết quả."""
+    return POTABILITY_LABEL_NAMES[label].upper() if label in POTABILITY_LABEL_NAMES else "KHÔNG XÁC ĐỊNH"
+
+
+def confusion_figure(models):
+    """Vẽ các số đếm đã có, dùng tên nhãn trên trục; không tính lại metric."""
+    from matplotlib.figure import Figure
+    figure = Figure(figsize=(11, 12), layout="constrained")
+    axes = figure.subplots(3, 2)
+    names = ("KHÔNG\nUỐNG ĐƯỢC", "UỐNG\nĐƯỢC")
+    for axis, (name, counts) in zip(axes.flat, models.items()):
+        axis.imshow(counts, cmap="Blues", vmin=0)
+        axis.set_title(name, fontsize=12, fontweight="bold")
+        axis.set_xticks((0, 1), names, fontsize=9)
+        axis.set_yticks((0, 1), names, fontsize=9)
+        axis.set_xlabel("Dự đoán", fontsize=10)
+        axis.set_ylabel("Nhãn thật", fontsize=10)
+        largest = max(max(row) for row in counts)
+        for i in range(2):
+            for j in range(2):
+                axis.text(j, i, str(counts[i][j]), ha="center", va="center", fontsize=14,
+                          color="white" if counts[i][j] > largest / 2 else "#12213c")
+    return figure
+
 FEATURE_INFO = {'ph': {'name': 'Độ pH',
         'desc': 'Chỉ tiêu thể hiện tính axit hoặc kiềm của mẫu nước.',
         'category': 'Tính chất lý hóa cơ bản'},
@@ -398,9 +426,9 @@ def render_consensus_board(results):
     total_valid = len(valid_predictions)
     
     consensus_pct = (max(potable_count, non_potable_count) / total_valid) * 100 if total_valid > 0 else 0
-    majority_text = "Uống được (1)" if potable_count > non_potable_count else "Không uống được (0)"
+    majority_text = potability_name(1 if potable_count > non_potable_count else 0)
     if potable_count == non_potable_count:
-        majority_text = "Tỷ lệ hòa (3 vs 3)"
+        majority_text = "CHƯA CÓ NHÃN CHIẾM ĐA SỐ"
 
     return f"""
     <div class="consensus-card">
@@ -408,8 +436,8 @@ def render_consensus_board(results):
             Đồng thuận giữa các mô hình học máy: <span style="color: #0284c7;">{majority_text}</span>
         </div>
         <div style="font-size: 13.5px; color: #475569;">
-            Có <strong>{potable_count}/{total_valid}</strong> mô hình dự đoán <em>Uống được</em> và 
-            <strong>{non_potable_count}/{total_valid}</strong> mô hình dự đoán <em>Không uống được</em> 
+            Có <strong>{potable_count}/{total_valid}</strong> mô hình dự đoán <em>UỐNG ĐƯỢC</em> và 
+            <strong>{non_potable_count}/{total_valid}</strong> mô hình dự đoán <em>KHÔNG UỐNG ĐƯỢC</em> 
             (Mức độ đồng thuận: <strong>{consensus_pct:.1f}%</strong>).
         </div>
     </div>

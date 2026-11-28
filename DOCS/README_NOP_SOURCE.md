@@ -10,6 +10,20 @@ khi thực thi. Báo cáo và CSV gốc được bàn giao riêng.
 
 ## Tổ chức mã nguồn
 
+```text
+src/
+├── algorithms/           Sáu thuật toán học máy, mỗi thuật toán một file
+├── data_processing/      Đọc/kiểm tra CSV, điền thiếu, chia tập và chia khoảng
+├── six_experiments.py    Chạy huấn luyện và thực nghiệm sáu thuật toán
+├── metrics.py            Tính các chỉ số đánh giá tường minh
+├── eda.py, plots.py      Phân tích dữ liệu và vẽ kết quả
+├── ui_theme.py           Tên nhãn và các thành phần hiển thị
+└── config.py             Cột dữ liệu, seed và đường dẫn dùng chung
+app/                     Web Streamlit và giao diện CSS
+weka/                    Mã đối chiếu tham chiếu với Weka
+tests/                   Kiểm thử thuật toán, dữ liệu và ứng dụng
+```
+
 | Tệp | Nội dung |
 | --- | --- |
 | `src/algorithms/naive_bayes.py` | Đếm tần suất, prior, tích xác suất và MAP; thuật toán chính |
@@ -19,9 +33,9 @@ khi thực thi. Báo cáo và CSV gốc được bàn giao riêng.
 | `src/algorithms/logistic.py` | Sigmoid, gradient và cập nhật hệ số Logistic |
 | `src/algorithms/svm.py` | Hinge loss và SGD cho SVM tuyến tính |
 | `src/algorithms/common.py` | Kiểm tra dữ liệu có nhãn và entropy dùng chung |
-| `src/preprocessing.py` | Kiểm tra ma trận, trung vị, z-score, audit và chia phân tầng/fold |
-| `src/discretization.py` | Học các khoảng từ train, dùng cho NB và ID3 |
-| `src/data_validation.py` | Đọc CSV, tách nhãn, kiểm tra kiểu, thiếu và trùng |
+| `src/data_processing/preprocessing.py` | Kiểm tra ma trận, trung vị, z-score, audit và chia phân tầng/fold |
+| `src/data_processing/discretization.py` | Học các khoảng từ train, dùng cho NB và ID3 |
+| `src/data_processing/data_validation.py` | Đọc CSV, tách nhãn, kiểm tra kiểu, thiếu và trùng |
 | `src/six_experiments.py` | Chạy 6 thuật toán, 5 fold, test và lưu kết quả |
 | `src/metrics.py` | Tự đếm ma trận, Accuracy, Precision, Recall, F1, BA và ROC-AUC |
 | `src/eda.py`, `src/plots.py` | Tự tính thống kê và vẽ các kết quả đã tính |
@@ -62,6 +76,19 @@ Lần chạy mặc định là `20261128-c45-full-v1`, tạo model, dự đoán 
 giữ các kết quả trước; chương trình không ghi đè lần chạy đã có.
 Web mặc định đọc lần chạy trong hằng `RUN_ID` ở `src/six_experiments.py`.
 Khi sử dụng ID khác cho web, đổi hằng này và chạy lại web.
+
+## Sử dụng web
+
+Thanh điều hướng bên trái mở năm trang chức năng, có nút thu gọn/mở lại.
+Giao diện tự điều chỉnh trên điện thoại; bảng rộng cuộn ngang trong khung.
+Các ô nhập được giữ khi chuyển trang rồi quay lại.
+
+Nhãn trên web và CSV kết quả dùng **KHÔNG UỐNG ĐƯỢC**, **UỐNG ĐƯỢC**;
+dòng lỗi dùng **KHÔNG XÁC ĐỊNH**. CSV dự đoán có `classification` và
+`potable_score`; CSV đối chiếu có nhãn gốc và sáu dự đoán bằng chữ.
+Khi tệp đầu vào có Potability, có thể chọn từng thuật toán để xem bảng
+đúng/sai sau dự đoán. Potability không được dùng làm đặc trưng đầu vào.
+CSV nguồn vẫn được tải nguyên byte, giữ cách mã hóa của tác giả dữ liệu.
 
 ## Đối chiếu Weka
 
