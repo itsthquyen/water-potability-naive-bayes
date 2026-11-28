@@ -5,7 +5,7 @@ import random
 
 import pytest
 
-from src.preprocessing import stratified_folds, stratified_holdout
+from src.data_processing.preprocessing import stratified_folds, stratified_holdout
 
 
 def test_holdout_rounding_and_invariants():

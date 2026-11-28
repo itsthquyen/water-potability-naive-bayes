@@ -1,7 +1,7 @@
 """Hồi quy Logistic tự tính sigmoid, gradient và cập nhật trọng số."""
 
 from math import exp, isfinite
-from ..preprocessing import _validate_matrix
+from ..data_processing.preprocessing import _validate_matrix
 from .common import _supervised
 
 

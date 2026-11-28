@@ -8,7 +8,7 @@ from src.algorithms.knn import KNearestNeighbors
 from src.algorithms.logistic import LogisticRegression
 from src.algorithms.svm import LinearSVM
 from src.algorithms.common import entropy
-from src.preprocessing import NumericPreprocessor
+from src.data_processing.preprocessing import NumericPreprocessor
 from src.six_experiments import ComparisonPipeline, ALGORITHMS
 
 

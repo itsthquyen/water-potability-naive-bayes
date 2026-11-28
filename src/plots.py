@@ -12,7 +12,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from src.config import FEATURE_COLUMNS, RAW_DATA_PATH
-from src.data_validation import read_csv_records, validate_records
+from src.data_processing.data_validation import read_csv_records, validate_records
 from src.eda import summarize_features, pearson_correlation, histogram_counts
 from src.artifacts import sha256_file, write_json
 from src.six_experiments import ALGORITHMS, NAMES, RUN_ID

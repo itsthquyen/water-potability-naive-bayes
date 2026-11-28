@@ -7,7 +7,7 @@ import math
 from pathlib import Path
 
 from .config import FEATURE_COLUMNS, PROJECT_ROOT, RAW_DATA_PATH, TARGET_COLUMN
-from .data_validation import clean_training_data, read_csv_records, validate_records
+from .data_processing.data_validation import clean_training_data, read_csv_records, validate_records
 from .evaluate import _confined_path
 from .metrics import evaluate_predictions
 from .pipeline import load_pipeline, sha256_file

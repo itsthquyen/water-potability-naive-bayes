@@ -1,7 +1,7 @@
 """ID3 tự xây cây theo Information Gain trên mã thuộc tính danh nghĩa."""
 
 from copy import deepcopy
-from ..preprocessing import _validate_matrix
+from ..data_processing.preprocessing import _validate_matrix
 from .common import _supervised, entropy
 
 

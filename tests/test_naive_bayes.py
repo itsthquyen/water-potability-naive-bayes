@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.discretization import Discretizer
+from src.data_processing.discretization import Discretizer
 from src.algorithms.naive_bayes import NaiveBayes
 
 

@@ -5,7 +5,7 @@ import copy
 import pytest
 
 from src.config import FEATURE_COLUMNS, TARGET_COLUMN
-from src.data_validation import clean_training_data, read_csv_records, validate_records
+from src.data_processing.data_validation import clean_training_data, read_csv_records, validate_records
 
 
 def make_record(**overrides):

@@ -6,9 +6,9 @@ import math
 from pathlib import Path
 
 from .config import CLASS_LABELS, FEATURE_COLUMNS, MODEL_ALGORITHM
-from .discretization import Discretizer
+from .data_processing.discretization import Discretizer
 from .algorithms.naive_bayes import NaiveBayes
-from .preprocessing import _validate_matrix
+from .data_processing.preprocessing import _validate_matrix
 
 
 def _json_copy(value):

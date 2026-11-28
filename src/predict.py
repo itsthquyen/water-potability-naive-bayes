@@ -6,7 +6,7 @@ import io
 from pathlib import Path
 
 from src.config import FEATURE_COLUMNS, MISSING_WARNING_COUNT
-from src.data_validation import read_csv_records, validate_records
+from src.data_processing.data_validation import read_csv_records, validate_records
 
 
 def predict_records(records, pipeline, run_id=""):

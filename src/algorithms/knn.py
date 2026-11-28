@@ -1,6 +1,6 @@
 """KNN tự tính khoảng cách Euclid và bỏ phiếu k láng giềng."""
 
-from ..preprocessing import _validate_matrix
+from ..data_processing.preprocessing import _validate_matrix
 from .common import _supervised
 
 

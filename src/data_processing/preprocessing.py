@@ -8,8 +8,8 @@ from numbers import Integral, Real
 import random
 from math import sqrt, isfinite
 
-from .config import N_FOLDS, SEED, TEST_FRACTION, PROJECT_ROOT
-from .artifacts import write_json, runtime_metadata
+from ..config import N_FOLDS, SEED, TEST_FRACTION, PROJECT_ROOT
+from ..artifacts import write_json, runtime_metadata
 
 
 def _finite_number(value, name):
@@ -192,7 +192,7 @@ def prepare_data(csv_path, output_root=PROJECT_ROOT, seed=SEED):
     Không fit/EDA trên test; phép chia dùng ID trước lọc. Nếu manifest đã có,
     checksum khác sẽ dừng thay vì âm thầm thay phép chia chuẩn.
     """
-    from src.data_validation import read_csv_records, validate_records, clean_training_data
+    from src.data_processing.data_validation import read_csv_records, validate_records, clean_training_data
     from src.artifacts import sha256_file
     csv_path, output_root = Path(csv_path), Path(output_root)
     validated = validate_records(read_csv_records(csv_path, training=True), training=True)

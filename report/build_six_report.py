@@ -23,7 +23,7 @@ from docx.shared import Cm, Pt, RGBColor
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from src.config import FEATURE_COLUMNS, RAW_DATA_PATH
-from src.data_validation import read_csv_records, validate_records
+from src.data_processing.data_validation import read_csv_records, validate_records
 from src.eda import summarize_features
 from src.six_experiments import ALGORITHMS, NAMES, RUN_ID
 

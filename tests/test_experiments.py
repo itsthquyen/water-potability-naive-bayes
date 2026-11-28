@@ -6,7 +6,7 @@ import pytest
 
 from src import experiments
 from src.config import FEATURE_COLUMNS, MODEL_ALGORITHM, N_BINS
-from src.preprocessing import stratified_folds
+from src.data_processing.preprocessing import stratified_folds
 
 
 def sample_data():

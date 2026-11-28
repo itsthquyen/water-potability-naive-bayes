@@ -2,7 +2,7 @@
 
 from math import log2
 from numbers import Integral
-from ..preprocessing import _validate_matrix
+from ..data_processing.preprocessing import _validate_matrix
 
 
 def _supervised(X, y):

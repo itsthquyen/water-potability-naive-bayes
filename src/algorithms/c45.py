@@ -11,7 +11,7 @@ from copy import deepcopy
 from math import isfinite, log, log2, sqrt
 from numbers import Integral, Real
 
-from ..preprocessing import _midpoint
+from ..data_processing.preprocessing import _midpoint
 from .common import entropy
 
 EPSILON = 1e-6  # So sánh điểm số cùng dung sai với J48, không bỏ trọng số mẫu.

@@ -2,7 +2,7 @@
 
 from math import isfinite
 import random
-from ..preprocessing import _validate_matrix
+from ..data_processing.preprocessing import _validate_matrix
 from .common import _supervised
 
 

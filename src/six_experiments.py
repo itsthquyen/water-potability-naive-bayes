@@ -13,11 +13,11 @@ from .algorithms.knn import KNearestNeighbors
 from .algorithms.logistic import LogisticRegression
 from .algorithms.svm import LinearSVM
 from .config import FEATURE_COLUMNS, PROJECT_ROOT, RAW_DATA_PATH
-from .discretization import Discretizer
+from .data_processing.discretization import Discretizer
 from .metrics import evaluate_predictions, summarize_scores
 from .algorithms.naive_bayes import NaiveBayes
 from .artifacts import sha256_file, write_json, validate_run_id, runtime_metadata
-from .preprocessing import prepare_data, NumericPreprocessor, _validate_matrix
+from .data_processing.preprocessing import prepare_data, NumericPreprocessor, _validate_matrix
 
 RUN_ID = "20261128-c45-full-v1"
 ALGORITHMS = ("naive_bayes", "id3", "c45", "knn", "logistic", "svm")

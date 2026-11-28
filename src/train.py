@@ -10,7 +10,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
-from src.preprocessing import prepare_data
+from src.data_processing.preprocessing import prepare_data
 from src.artifacts import validate_run_id
 
 from src.config import (PROJECT_ROOT, RAW_DATA_PATH, SEED, N_FOLDS, TEST_FRACTION,

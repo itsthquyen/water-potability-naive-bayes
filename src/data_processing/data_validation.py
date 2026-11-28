@@ -6,7 +6,7 @@ import math
 from numbers import Real
 from pathlib import Path
 
-from .config import FEATURE_COLUMNS, TARGET_COLUMN, MISSING_WARNING_COUNT
+from ..config import FEATURE_COLUMNS, TARGET_COLUMN, MISSING_WARNING_COUNT
 
 
 def _validate_columns(columns, training):

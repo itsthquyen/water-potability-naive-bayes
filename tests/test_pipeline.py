@@ -7,7 +7,7 @@ import json
 import pytest
 
 from src.config import FEATURE_COLUMNS
-from src.discretization import Discretizer
+from src.data_processing.discretization import Discretizer
 from src.algorithms.naive_bayes import NaiveBayes
 from src.pipeline import WaterPipeline, load_pipeline, save_pipeline, sha256_file
 
