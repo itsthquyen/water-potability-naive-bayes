@@ -1,0 +1,6 @@
+{
+  "weka_version": "3.8.7",
+  "weka_jar_sha256": "621054b25a950e5c61c04e859d0ca5fad5bde55435a1a4633144389d44ec52d5",
+  "educational_package_url": "https://prdownloads.sourceforge.net/weka/simpleEducationalLearningSchemes1.0.1.zip?download",
+  "educational_package_jar_sha256": "703487ebcdfcc5d226910de43900b8bcc94b30ef9a072f760442a73a5034f8f2"
+}

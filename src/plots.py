@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import json
+import argparse
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,12 +13,16 @@ import matplotlib.pyplot as plt
 
 from src.config import FEATURE_COLUMNS, RAW_DATA_PATH
 from src.data_validation import read_csv_records, validate_records
-from src.eda import summarize_features, pearson_correlation
+from src.eda import summarize_features, pearson_correlation, histogram_counts
+from src.artifacts import sha256_file, write_json
 from src.six_experiments import ALGORITHMS, NAMES, RUN_ID
 
 
 def main():
-    folder = ROOT / "results/comparison" / RUN_ID
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--run-id", default=RUN_ID)
+    arguments = parser.parse_args()
+    folder = ROOT / "results/comparison" / arguments.run_id
     summary = json.loads((folder / "summary.json").read_text(encoding="utf-8"))
     clean = validate_records(read_csv_records(RAW_DATA_PATH, training=True), training=True)
     X = [clean["X"][i] for i in summary["development_ids"]]
@@ -44,9 +49,12 @@ def main():
 
     fig, axes = plt.subplots(3, 3, figsize=(10, 7))
     for j, (name, axis) in enumerate(zip(FEATURE_COLUMNS, axes.flat)):
-        # Histogram của matplotlib chỉ phục vụ trình bày, không học tham số mô hình.
+        # Tự đếm histogram; matplotlib chỉ vẽ các số đếm đã tính.
         observed = [row[j] for row in X if row[j] is not None]
-        axis.hist(observed, bins=18, color="#396b92", edgecolor="white")
+        histogram = histogram_counts(observed, bins=18)
+        edges = histogram['edges']
+        axis.bar(edges[:-1], histogram['counts'], width=[b-a for a,b in zip(edges, edges[1:])],
+                 align='edge', color="#396b92", edgecolor="white")
         axis.set_title(name)
     save(fig, "histograms.png")
 
@@ -94,7 +102,11 @@ def main():
     axis.legend(loc="lower right")
     save(fig, "roc_comparison.png")
     (folder / "eda.json").write_text(json.dumps(stats, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("Saved six figures and development EDA.")
+    manifest = json.loads((folder / 'manifest.json').read_text(encoding='utf-8'))
+    manifest['files'] = {p.relative_to(folder).as_posix(): sha256_file(p) for p in folder.rglob('*')
+                         if p.is_file() and p.name != 'manifest.json'}
+    write_json(folder / 'manifest.json', manifest)
+    print("Saved six figures and development EDA; checksums updated.")
 
 
 if __name__ == "__main__":

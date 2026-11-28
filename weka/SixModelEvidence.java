@@ -80,7 +80,8 @@ public class SixModelEvidence {
         LinkedHashMap<String,Classifier> models=new LinkedHashMap<>();
         models.put("naive_bayes",new weka.classifiers.bayes.DirectFrequencyNB());
         models.put("id3",(Classifier)Class.forName("weka.classifiers.trees.Id3").newInstance());
-        J48 tree=new J48();tree.setUnpruned(true);tree.setMinNumObj(1);tree.setCollapseTree(false);models.put("c45",tree);
+        J48 tree=new J48();tree.setUnpruned(false);tree.setConfidenceFactor(0.25f);
+        tree.setMinNumObj(2);tree.setCollapseTree(true);tree.setSubtreeRaising(true);models.put("c45",tree);
         IBk knn=new IBk(5);
         weka.core.EuclideanDistance distance=new weka.core.EuclideanDistance();distance.setDontNormalize(true);
         knn.getNearestNeighbourSearchAlgorithm().setDistanceFunction(distance);models.put("knn",knn);
@@ -89,14 +90,15 @@ public class SixModelEvidence {
         PolyKernel kernel=new PolyKernel();kernel.setExponent(1);svm.setKernel(kernel);svm.setRandomSeed(42);models.put("svm",svm);
         LinkedHashMap<String,String> logs=new LinkedHashMap<>();
         for(Map.Entry<String,Classifier> entry:models.entrySet()) {
-            String name=entry.getKey();boolean categorical=Arrays.asList("naive_bayes","id3","c45").contains(name);
-            Instances train=categorical?nominal:numeric, test=categorical?nominalTest:numericTest;
+            String name=entry.getKey();boolean categorical=Arrays.asList("naive_bayes","id3").contains(name);
+            Instances train=name.equals("c45")?raw:categorical?nominal:numeric;
+            Instances test=name.equals("c45")?read(folder,"test_raw.arff"):categorical?nominalTest:numericTest;
             Classifier model=entry.getValue();long start=System.nanoTime();model.buildClassifier(train);
             double seconds=(System.nanoTime()-start)/1e9;
             Evaluation eval=new Evaluation(train);eval.evaluateModel(model,test);
             String text="=== Weka "+Version.VERSION+" - "+name+" ===\n\nScheme: "+model.getClass().getName()+
               "\nOptions: "+Utils.joinOptions(((OptionHandler)model).getOptions())+"\nTrain: "+train.numInstances()+"\nTest: "+test.numInstances()+
-              "\nFit seconds: "+seconds+"\n\n"+eval.toSummaryString()+"\n"+eval.toClassDetailsString()+"\n"+eval.toMatrixString();
+              "\nFit seconds: "+seconds+"\n\n"+eval.toSummaryString()+"\n"+eval.toClassDetailsString()+"\n"+eval.toMatrixString()+"\n"+model.toString();
             Files.write(folder.resolve(name+"_weka.txt"),text.getBytes(StandardCharsets.UTF_8));logs.put(name,text);
             try(PrintWriter writer=new PrintWriter(Files.newBufferedWriter(folder.resolve(name+"_weka_predictions.csv"),StandardCharsets.UTF_8))) {
                 writer.println("test_position,actual,predicted,score_1");
@@ -110,6 +112,20 @@ public class SixModelEvidence {
             }
             System.out.println(name+" Weka accuracy="+eval.pctCorrect());
         }
+        // Cùng năm fold được Python xuất theo ID, không dùng CV ngẫu nhiên khác.
+        for(int fold=0;fold<5;fold++) {
+            Instances train=read(folder,"cv/fold_"+fold+"_train.arff");
+            Instances test=read(folder,"cv/fold_"+fold+"_validation.arff");
+            J48 model=new J48();model.setConfidenceFactor(0.25f);model.setMinNumObj(2);
+            model.buildClassifier(train);
+            try(PrintWriter writer=new PrintWriter(Files.newBufferedWriter(folder.resolve("c45_fold_"+fold+"_weka_predictions.csv"),StandardCharsets.UTF_8))) {
+                writer.println("validation_position,actual,predicted,score_1");
+                for(int i=0;i<test.numInstances();i++) {
+                    Instance row=test.instance(i);
+                    writer.println(i+","+(int)row.classValue()+","+(int)model.classifyInstance(row)+","+model.distributionForInstance(row)[1]);
+                }
+            }
+        }
         LinkedHashMap<String,Explorer> panels=new LinkedHashMap<>();
         SwingUtilities.invokeAndWait(()->{
             try {
@@ -117,8 +133,9 @@ public class SixModelEvidence {
                 panels.put("02-weka-mean",preprocess(filled,"Sulfate"));
                 panels.put("03-weka-discretize",preprocess(binned,"Sulfate"));
                 for(String name:models.keySet()) {
-                    Explorer explorer=preprocess(Arrays.asList("naive_bayes","id3","c45").contains(name)?nominal:numeric,"Potability");
-                    output(explorer,logs.get(name),models.get(name),folder.resolve(Arrays.asList("naive_bayes","id3","c45").contains(name)?"test_nominal.arff":"test_numeric.arff"));
+                    boolean isNominal=Arrays.asList("naive_bayes","id3").contains(name);
+                    Explorer explorer=preprocess(name.equals("c45")?raw:isNominal?nominal:numeric,"Potability");
+                    output(explorer,logs.get(name),models.get(name),folder.resolve(name.equals("c45")?"test_raw.arff":isNominal?"test_nominal.arff":"test_numeric.arff"));
                     panels.put("result-"+name,explorer);
                 }
                 for(Map.Entry<String,Explorer> e:panels.entrySet()) paint(e.getValue(),folder.resolve(e.getKey()+".png"));

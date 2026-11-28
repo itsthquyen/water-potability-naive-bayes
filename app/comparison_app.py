@@ -16,14 +16,14 @@ sys.path.insert(0, str(ROOT))
 from src.ui_theme import (
     CUSTOM_CSS,
     PRESET_SAMPLES,
-    WATER_STANDARDS,
+    FEATURE_INFO,
     render_consensus_board,
     render_hero_header,
     render_metric_card,
 )
 from src.config import FEATURE_COLUMNS, RAW_DATA_PATH
 from src.data_validation import read_csv_records, validate_records
-from src.pipeline import sha256_file
+from src.artifacts import sha256_file
 from src.six_experiments import ALGORITHMS, NAMES, RUN_ID, load_models
 
 FOLDER = ROOT / "results" / "comparison" / RUN_ID
@@ -194,35 +194,6 @@ def show_results(results, key):
     st.caption("Các điểm xác suất chưa được hiệu chỉnh. Biên quyết định của SVM có thể âm hoặc dương và không phải xác suất.")
 
 
-def check_water_safety(record):
-    """So sánh từng chỉ số với ngưỡng an toàn khuyến nghị của WHO."""
-    safety_rows = []
-    for col in FEATURE_COLUMNS:
-        raw_val = record.get(col, "")
-        info = WATER_STANDARDS.get(col, {})
-        name = info.get("name", col)
-        unit = info.get("unit", "")
-        who_range = info.get("who_range", "-")
-        min_safe = info.get("min_safe", 0)
-        max_safe = info.get("max_safe", float("inf"))
-
-        try:
-            val = float(raw_val)
-            is_safe = min_safe <= val <= max_safe
-            status_badge = (
-                "<span class='badge-potable'>Trong khoảng khuyến nghị</span>"
-                if is_safe
-                else "<span class='badge-non-potable'>Vượt ngưỡng khuyến cáo</span>"
-            )
-            val_display = f"<strong>{val:.2f}</strong> {unit}"
-        except (ValueError, TypeError):
-            val_display = f"<em>{escape(str(raw_val))}</em>"
-            status_badge = "<span class='badge-error'>Thiếu / Chưa nhập</span>"
-
-        safety_rows.append((name, val_display, who_range, status_badge))
-    return safety_rows
-
-
 def main():
     st.set_page_config(
         page_title="Chất lượng nước · Nhóm 11",
@@ -267,7 +238,7 @@ def main():
     st.warning("Ứng dụng học thuật theo nhãn Water Quality. Kết quả không thay thế kiểm nghiệm chất lượng nước.")
 
     manual, upload, experiments, raw_tab, guide_tab = st.tabs(
-        ("Dự đoán một mẫu", "Dự đoán CSV", "Kết quả thực nghiệm", "Dữ liệu gốc", "Cẩm nang 9 chỉ tiêu nước (WHO)")
+        ("Dự đoán một mẫu", "Dự đoán CSV", "Kết quả thực nghiệm", "Dữ liệu gốc", "Thông tin 9 chỉ tiêu")
     )
 
     with manual:
@@ -278,14 +249,14 @@ def main():
 
         st.markdown("##### Mẫu thử nghiệm nhanh:")
         btn_cols = st.columns([1.2, 1.2, 1.2, 1.2, 2])
-        if btn_cols[0].button("Nạp mẫu nước sạch", help="Nạp chỉ số trong ngưỡng an toàn khuyến nghị của WHO"):
-            for k, v in PRESET_SAMPLES["clean"]["values"].items():
+        if btn_cols[0].button("Nạp bộ số thử A", help="Ví dụ thao tác, chưa có nhãn kiểm nghiệm"):
+            for k, v in PRESET_SAMPLES["sample_a"]["values"].items():
                 st.session_state[f"six_{k}"] = f"{v:.4f}"
             st.session_state.pop("six_manual", None)
             st.rerun()
 
-        if btn_cols[1].button("Nạp mẫu nước ô nhiễm", help="Nạp chỉ số axit cao, độc chất và độ đục vượt ngưỡng"):
-            for k, v in PRESET_SAMPLES["polluted"]["values"].items():
+        if btn_cols[1].button("Nạp bộ số thử B", help="Ví dụ thao tác, chưa có nhãn kiểm nghiệm"):
+            for k, v in PRESET_SAMPLES["sample_b"]["values"].items():
                 st.session_state[f"six_{k}"] = f"{v:.4f}"
             st.session_state.pop("six_manual", None)
             st.rerun()
@@ -297,9 +268,9 @@ def main():
         record = {}
 
         group_categories = [
-            ("Tính chất lý hóa cơ bản", [c for c in FEATURE_COLUMNS if WATER_STANDARDS[c]["category"] == "Tính chất lý hóa cơ bản"]),
-            ("Khử trùng & Khoáng chất", [c for c in FEATURE_COLUMNS if WATER_STANDARDS[c]["category"] == "Khử trùng & Khoáng chất"]),
-            ("Độc chất vi lượng & Độ đục", [c for c in FEATURE_COLUMNS if WATER_STANDARDS[c]["category"] == "Độc chất vi lượng & Độ đục"]),
+            ("Tính chất lý hóa cơ bản", [c for c in FEATURE_COLUMNS if FEATURE_INFO[c]["category"] == "Tính chất lý hóa cơ bản"]),
+            ("Khử trùng & Khoáng chất", [c for c in FEATURE_COLUMNS if FEATURE_INFO[c]["category"] == "Khử trùng & Khoáng chất"]),
+            ("Độc chất vi lượng & Độ đục", [c for c in FEATURE_COLUMNS if FEATURE_INFO[c]["category"] == "Độc chất vi lượng & Độ đục"]),
         ]
 
         group_cols = st.columns(3)
@@ -307,9 +278,9 @@ def main():
             with group_cols[idx]:
                 st.html(f"<div class='feature-group-header'>{group_name}</div>")
                 for name in group_features:
-                    info = WATER_STANDARDS.get(name, {})
+                    info = FEATURE_INFO.get(name, {})
                     label_text = FEATURE_LABELS.get(name, name)
-                    help_text = f"Cột CSV: {name}. Chuẩn WHO: {info.get('who_range', '-')}. {info.get('desc', '')}"
+                    help_text = f"Cột CSV: {name}. {info.get('desc', '')} Giữ thang đo của CSV nguồn."
                     record[name] = st.text_input(
                         label_text,
                         value=st.session_state.get(f"six_{name}", f"{medians[FEATURE_COLUMNS.index(name)]:.4f}"),
@@ -341,9 +312,9 @@ def main():
                 is_potable = primary["label"] == 1
                 card_class = "result-hero-potable" if is_potable else "result-hero-non-potable"
                 status_title = (
-                    "MÔ HÌNH CHÍNH (NAIVE BAYES): ĐẠT CHUẨN UỐNG ĐƯỢC (Nhãn 1)"
+                    "NAIVE BAYES: UỐNG ĐƯỢC THEO NHÃN DỮ LIỆU (Lớp 1)"
                     if is_potable
-                    else "MÔ HÌNH CHÍNH (NAIVE BAYES): KHÔNG ĐẠT CHUẨN UỐNG ĐƯỢC (Nhãn 0)"
+                    else "NAIVE BAYES: KHÔNG UỐNG ĐƯỢC THEO NHÃN DỮ LIỆU (Lớp 0)"
                 )
                 status_desc = (
                     "Mẫu nước có các đặc trưng phù hợp với nguồn nước uống được theo phân phối xác suất mô hình."
@@ -352,7 +323,7 @@ def main():
                 )
                 score_val = primary["score_1"] if primary["score_1"] is not None else 0.5
                 fill_class = "confidence-bar-fill-potable" if is_potable else "confidence-bar-fill-non-potable"
-                bar_width = f"{score_val * 100:.1f}%" if is_potable else f"{(1 - score_val) * 100:.1f}%"
+                bar_width = f"{score_val * 100:.1f}%"
 
                 hero_html = f"""
                 <div class="{card_class}">
@@ -360,7 +331,7 @@ def main():
                     <div class="result-hero-desc">{status_desc}</div>
                     <div class="confidence-container">
                         <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
-                            <span>Độ tin cậy xác suất lớp 1 (Uống được):</span>
+                            <span>Điểm ước lượng lớp 1 (Uống được):</span>
                             <span>{score_val * 100:.2f}% ({percent(score_val)})</span>
                         </div>
                         <div class="confidence-bar-bg">
@@ -379,10 +350,6 @@ def main():
 
             st.markdown("##### Chi tiết kết quả từng thuật toán:")
             show_results(result, "manual_download")
-
-            with st.expander("Đối chiếu các chỉ số mẫu nước vừa nhập với chuẩn an toàn WHO"):
-                safety_data = check_water_safety(record)
-                table(("Chỉ tiêu đo", "Giá trị nhập", "Khoảng khuyến cáo WHO", "Đánh giá sơ bộ"), safety_data)
 
     with upload:
         st.subheader("Dự đoán nhiều mẫu từ CSV")
@@ -529,17 +496,15 @@ def main():
         st.caption("Nguồn: Water Quality, Aditya Kadiwal, Kaggle, phiên bản 3. Tệp tải xuống giữ nguyên các byte của dữ liệu gốc.")
 
     with guide_tab:
-        st.subheader("Cẩm nang ý nghĩa 9 chỉ tiêu chất lượng nước theo tiêu chuẩn WHO")
-        st.markdown(
-            "Bộ dữ liệu gồm chín đặc trưng đo lường tính chất hóa học và sinh học của nước. "
-            "Dưới đây là định nghĩa, ý nghĩa môi trường y tế và ngưỡng tiêu chuẩn khuyến cáo bởi Tổ chức Y tế Thế giới (WHO):"
-        )
+        st.subheader("Thông tin chín thuộc tính đầu vào")
+        st.write("Đây là các cột của CSV Water Quality. Giữ thang đo trong tệp nguồn khi nhập dữ liệu.")
+        st.caption("Nguồn chưa xác nhận đầy đủ đơn vị và quy trình kiểm nghiệm. Mô hình dự đoán Potability, không chứng nhận đạt tiêu chuẩn nước uống.")
         for col_name in FEATURE_COLUMNS:
-            info = WATER_STANDARDS.get(col_name, {})
-            with st.expander(f"{info.get('name', col_name)} — Khuyến nghị: {info.get('who_range', '-')}"):
+            info = FEATURE_INFO.get(col_name, {})
+            with st.expander(f"{info.get('name', col_name)} · {col_name}"):
                 st.markdown(f"**Nhóm chỉ tiêu:** {info.get('category', '-')}")
-                st.markdown(f"**Đơn vị đo:** `{info.get('unit', '')}`")
-                st.markdown(f"**Ý nghĩa y tế và an toàn:** {info.get('desc', '')}")
+                st.write(info.get('desc', ''))
+                st.caption("Giá trị thiếu được xử lý bằng tham số train của từng mô hình; C4.5 phân phối trọng số theo nhánh.")
 
 
 if __name__ == "__main__":

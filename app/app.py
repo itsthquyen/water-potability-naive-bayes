@@ -13,7 +13,7 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.ui_theme import (
     CUSTOM_CSS,
-    WATER_STANDARDS,
+    FEATURE_INFO,
     render_hero_header,
     render_metric_card,
 )
@@ -249,7 +249,7 @@ def main():
         st.session_state["model_identity"] = model_identity
 
     manual_tab, csv_tab, experiment_tab, guide_tab = st.tabs(
-        ["Nhập một mẫu", "Dự đoán CSV", "Thực nghiệm", "Cẩm nang 9 chỉ tiêu (WHO)"]
+        ["Nhập một mẫu", "Dự đoán CSV", "Thực nghiệm", "Thông tin 9 chỉ tiêu"]
     )
 
     with manual_tab:
@@ -258,9 +258,9 @@ def main():
             columns = st.columns(3)
             record = {}
             for index, feature in enumerate(FEATURE_COLUMNS):
-                info = WATER_STANDARDS.get(feature, {})
+                info = FEATURE_INFO.get(feature, {})
                 label_text = f"{feature} ({info.get('unit', '')})" if info.get("unit") else feature
-                help_text = f"{info.get('name', feature)}. Chuẩn WHO: {info.get('who_range', '-')}"
+                help_text = f"{info.get('name', feature)}. {info.get('desc', '')}"
                 record[feature] = columns[index % 3].text_input(
                     label_text,
                     value="",
@@ -319,10 +319,10 @@ def main():
         show_experiment(run_id, checksum)
 
     with guide_tab:
-        st.subheader("Tiêu chuẩn tham chiếu 9 chỉ số chất lượng nước theo WHO")
+        st.subheader("Thông tin các chỉ tiêu trong dữ liệu nguồn")
         for col_name in FEATURE_COLUMNS:
-            info = WATER_STANDARDS.get(col_name, {})
-            with st.expander(f"{info.get('name', col_name)} — Ngưỡng WHO: {info.get('who_range', '-')}"):
+            info = FEATURE_INFO.get(col_name, {})
+            with st.expander(f"{info.get('name', col_name)}"):
                 st.markdown(f"**Nhóm chỉ tiêu:** {info.get('category', '-')}")
                 st.markdown(f"**Đơn vị đo:** `{info.get('unit', '')}`")
                 st.markdown(f"**Ý nghĩa môi trường và an toàn sức khỏe:** {info.get('desc', '')}")

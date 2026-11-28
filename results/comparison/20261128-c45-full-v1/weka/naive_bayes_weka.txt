@@ -1,0 +1,32 @@
+=== Weka 3.8.7 - naive_bayes ===
+
+Scheme: weka.classifiers.bayes.DirectFrequencyNB
+Options: 
+Train: 2620
+Test: 656
+Fit seconds: 0.0026022
+
+
+Correctly Classified Instances         396               60.3659 %
+Incorrectly Classified Instances       260               39.6341 %
+Kappa statistic                          0.0372
+Mean absolute error                      0.4727
+Root mean squared error                  0.491 
+Relative absolute error                 99.3229 %
+Root relative squared error            100.664  %
+Total Number of Instances              656     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0,915    0,883    0,618      0,915    0,738      0,053    0,522     0,629     0
+                 0,117    0,085    0,469      0,117    0,188      0,053    0,522     0,422     1
+Weighted Avg.    0,604    0,571    0,560      0,604    0,523      0,053    0,522     0,548     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 366  34 |   a = 0
+ 226  30 |   b = 1
+
+Direct frequency Naive Bayes; no pseudo-count; nominal attributes; classes 0,1.

@@ -14,6 +14,7 @@ from src.config import PROJECT_ROOT, RAW_DATA_PATH
 SOURCE_URL = "https://www.kaggle.com/datasets/adityakadiwal/water-potability"
 METADATA_URL = "https://www.kaggle.com/api/v1/datasets/list?search=water-potability&user=adityakadiwal"
 DOWNLOAD_URL = "https://www.kaggle.com/api/v1/datasets/download/adityakadiwal/water-potability?datasetVersionNumber=3"
+EXPECTED_SHA256 = "904004bde729bfe3d2e195f46343bceead09e32a0eb95bb8184e7e20e029b2bf"
 
 
 def download_dataset(destination=RAW_DATA_PATH):
@@ -37,6 +38,8 @@ def download_dataset(destination=RAW_DATA_PATH):
         if len(names) != 1:
             raise ValueError("ZIP không chứa đúng một water_potability.csv.")
         csv_bytes = archive.read(names[0])
+    if hashlib.sha256(csv_bytes).hexdigest() != EXPECTED_SHA256:
+        raise ValueError("CSV phiên bản 3 không khớp checksum của thực nghiệm; không ghi tệp.")
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_bytes(csv_bytes)
     provenance = {

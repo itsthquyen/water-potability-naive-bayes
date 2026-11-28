@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-28",
+  "python_tests": {
+    "passed": 328,
+    "warnings": 8,
+    "failures": 0,
+    "runtime": "3.12.14"
+  },
+  "package": {
+    "source_files": 36,
+    "local_imports": "resolved",
+    "ml_library_imports": "none",
+    "dataset_download_sha256": "matched",
+    "tests": "unit tests and web tests passed in independent copy",
+    "delivered_cache_files": 0
+  },
+  "raw_sha256": "904004bde729bfe3d2e195f46343bceead09e32a0eb95bb8184e7e20e029b2bf",
+  "unchanged_other_predictions": {
+    "naive_bayes": true,
+    "id3": true,
+    "knn": true,
+    "logistic": true,
+    "svm": true
+  }
+}

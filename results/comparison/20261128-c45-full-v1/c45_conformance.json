@@ -1,0 +1,558 @@
+{
+  "purpose": "synthetic implementation checks, not water evaluation",
+  "cases": [
+    {
+      "case": "case00",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 0.0,
+      "python_nodes": 1,
+      "weka_nodes": 1,
+      "pruning": {
+        "collapsed": 1,
+        "replaced_by_leaf": 5,
+        "raised": 0,
+        "before": {
+          "nodes": 25,
+          "leaves": 18,
+          "depth": 3
+        },
+        "after": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        }
+      }
+    },
+    {
+      "case": "case01",
+      "rows": 31,
+      "label_differences": 0,
+      "maximum_score_difference": 0.0,
+      "python_nodes": 5,
+      "weka_nodes": 5,
+      "pruning": {
+        "collapsed": 3,
+        "replaced_by_leaf": 2,
+        "raised": 1,
+        "before": {
+          "nodes": 17,
+          "leaves": 9,
+          "depth": 6
+        },
+        "after": {
+          "nodes": 5,
+          "leaves": 3,
+          "depth": 2
+        }
+      }
+    },
+    {
+      "case": "case02",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 1.1102230246251565e-16,
+      "python_nodes": 3,
+      "weka_nodes": 3,
+      "pruning": {
+        "collapsed": 0,
+        "replaced_by_leaf": 1,
+        "raised": 0,
+        "before": {
+          "nodes": 5,
+          "leaves": 3,
+          "depth": 2
+        },
+        "after": {
+          "nodes": 3,
+          "leaves": 2,
+          "depth": 1
+        }
+      }
+    },
+    {
+      "case": "case03",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 3.3306690738754696e-16,
+      "python_nodes": 9,
+      "weka_nodes": 9,
+      "pruning": {
+        "collapsed": 4,
+        "replaced_by_leaf": 5,
+        "raised": 0,
+        "before": {
+          "nodes": 35,
+          "leaves": 23,
+          "depth": 4
+        },
+        "after": {
+          "nodes": 9,
+          "leaves": 7,
+          "depth": 2
+        }
+      }
+    },
+    {
+      "case": "case04",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 1.1102230246251565e-16,
+      "python_nodes": 5,
+      "weka_nodes": 5,
+      "pruning": {
+        "collapsed": 0,
+        "replaced_by_leaf": 0,
+        "raised": 0,
+        "before": {
+          "nodes": 5,
+          "leaves": 3,
+          "depth": 2
+        },
+        "after": {
+          "nodes": 5,
+          "leaves": 3,
+          "depth": 2
+        }
+      }
+    },
+    {
+      "case": "case05",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 2.220446049250313e-16,
+      "python_nodes": 25,
+      "weka_nodes": 25,
+      "pruning": {
+        "collapsed": 5,
+        "replaced_by_leaf": 0,
+        "raised": 0,
+        "before": {
+          "nodes": 39,
+          "leaves": 20,
+          "depth": 7
+        },
+        "after": {
+          "nodes": 25,
+          "leaves": 13,
+          "depth": 6
+        }
+      }
+    },
+    {
+      "case": "case06",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 0.0,
+      "python_nodes": 1,
+      "weka_nodes": 1,
+      "pruning": {
+        "collapsed": 0,
+        "replaced_by_leaf": 2,
+        "raised": 0,
+        "before": {
+          "nodes": 23,
+          "leaves": 17,
+          "depth": 3
+        },
+        "after": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        }
+      }
+    },
+    {
+      "case": "case07",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 4.440892098500626e-16,
+      "python_nodes": 13,
+      "weka_nodes": 13,
+      "pruning": {
+        "collapsed": 4,
+        "replaced_by_leaf": 7,
+        "raised": 0,
+        "before": {
+          "nodes": 39,
+          "leaves": 20,
+          "depth": 8
+        },
+        "after": {
+          "nodes": 13,
+          "leaves": 7,
+          "depth": 6
+        }
+      }
+    },
+    {
+      "case": "case08",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 0.0,
+      "python_nodes": 1,
+      "weka_nodes": 1,
+      "pruning": {
+        "collapsed": 0,
+        "replaced_by_leaf": 0,
+        "raised": 0,
+        "before": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        },
+        "after": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        }
+      }
+    },
+    {
+      "case": "case09",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 1.6653345369377348e-16,
+      "python_nodes": 23,
+      "weka_nodes": 23,
+      "pruning": {
+        "collapsed": 8,
+        "replaced_by_leaf": 0,
+        "raised": 0,
+        "before": {
+          "nodes": 39,
+          "leaves": 25,
+          "depth": 4
+        },
+        "after": {
+          "nodes": 23,
+          "leaves": 17,
+          "depth": 3
+        }
+      }
+    },
+    {
+      "case": "case10",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 0.0,
+      "python_nodes": 1,
+      "weka_nodes": 1,
+      "pruning": {
+        "collapsed": 0,
+        "replaced_by_leaf": 0,
+        "raised": 0,
+        "before": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        },
+        "after": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        }
+      }
+    },
+    {
+      "case": "case11",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 2.220446049250313e-16,
+      "python_nodes": 3,
+      "weka_nodes": 3,
+      "pruning": {
+        "collapsed": 4,
+        "replaced_by_leaf": 9,
+        "raised": 0,
+        "before": {
+          "nodes": 41,
+          "leaves": 21,
+          "depth": 10
+        },
+        "after": {
+          "nodes": 3,
+          "leaves": 2,
+          "depth": 1
+        }
+      }
+    },
+    {
+      "case": "case12",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 0.0,
+      "python_nodes": 1,
+      "weka_nodes": 1,
+      "pruning": {
+        "collapsed": 2,
+        "replaced_by_leaf": 4,
+        "raised": 0,
+        "before": {
+          "nodes": 25,
+          "leaves": 18,
+          "depth": 3
+        },
+        "after": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        }
+      }
+    },
+    {
+      "case": "case13",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 2.220446049250313e-16,
+      "python_nodes": 25,
+      "weka_nodes": 25,
+      "pruning": {
+        "collapsed": 6,
+        "replaced_by_leaf": 0,
+        "raised": 0,
+        "before": {
+          "nodes": 47,
+          "leaves": 24,
+          "depth": 10
+        },
+        "after": {
+          "nodes": 25,
+          "leaves": 13,
+          "depth": 7
+        }
+      }
+    },
+    {
+      "case": "case14",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 0.0,
+      "python_nodes": 1,
+      "weka_nodes": 1,
+      "pruning": {
+        "collapsed": 0,
+        "replaced_by_leaf": 0,
+        "raised": 0,
+        "before": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        },
+        "after": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        }
+      }
+    },
+    {
+      "case": "case15",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 1.1102230246251565e-16,
+      "python_nodes": 9,
+      "weka_nodes": 9,
+      "pruning": {
+        "collapsed": 2,
+        "replaced_by_leaf": 4,
+        "raised": 0,
+        "before": {
+          "nodes": 31,
+          "leaves": 21,
+          "depth": 5
+        },
+        "after": {
+          "nodes": 9,
+          "leaves": 6,
+          "depth": 3
+        }
+      }
+    },
+    {
+      "case": "case16",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 2.7755575615628914e-16,
+      "python_nodes": 3,
+      "weka_nodes": 3,
+      "pruning": {
+        "collapsed": 1,
+        "replaced_by_leaf": 0,
+        "raised": 0,
+        "before": {
+          "nodes": 5,
+          "leaves": 3,
+          "depth": 2
+        },
+        "after": {
+          "nodes": 3,
+          "leaves": 2,
+          "depth": 1
+        }
+      }
+    },
+    {
+      "case": "case17",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 2.7755575615628914e-16,
+      "python_nodes": 31,
+      "weka_nodes": 31,
+      "pruning": {
+        "collapsed": 4,
+        "replaced_by_leaf": 0,
+        "raised": 0,
+        "before": {
+          "nodes": 43,
+          "leaves": 22,
+          "depth": 12
+        },
+        "after": {
+          "nodes": 31,
+          "leaves": 16,
+          "depth": 12
+        }
+      }
+    },
+    {
+      "case": "case18",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 0.0,
+      "python_nodes": 1,
+      "weka_nodes": 1,
+      "pruning": {
+        "collapsed": 2,
+        "replaced_by_leaf": 2,
+        "raised": 0,
+        "before": {
+          "nodes": 25,
+          "leaves": 18,
+          "depth": 3
+        },
+        "after": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        }
+      }
+    },
+    {
+      "case": "case19",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 0.0,
+      "python_nodes": 1,
+      "weka_nodes": 1,
+      "pruning": {
+        "collapsed": 4,
+        "replaced_by_leaf": 7,
+        "raised": 0,
+        "before": {
+          "nodes": 43,
+          "leaves": 22,
+          "depth": 10
+        },
+        "after": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        }
+      }
+    },
+    {
+      "case": "case20",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 0.0,
+      "python_nodes": 1,
+      "weka_nodes": 1,
+      "pruning": {
+        "collapsed": 0,
+        "replaced_by_leaf": 0,
+        "raised": 0,
+        "before": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        },
+        "after": {
+          "nodes": 1,
+          "leaves": 1,
+          "depth": 0
+        }
+      }
+    },
+    {
+      "case": "case21",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 2.220446049250313e-16,
+      "python_nodes": 23,
+      "weka_nodes": 23,
+      "pruning": {
+        "collapsed": 5,
+        "replaced_by_leaf": 0,
+        "raised": 0,
+        "before": {
+          "nodes": 33,
+          "leaves": 22,
+          "depth": 3
+        },
+        "after": {
+          "nodes": 23,
+          "leaves": 17,
+          "depth": 3
+        }
+      }
+    },
+    {
+      "case": "case22",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 0.0,
+      "python_nodes": 7,
+      "weka_nodes": 7,
+      "pruning": {
+        "collapsed": 1,
+        "replaced_by_leaf": 4,
+        "raised": 0,
+        "before": {
+          "nodes": 17,
+          "leaves": 9,
+          "depth": 4
+        },
+        "after": {
+          "nodes": 7,
+          "leaves": 4,
+          "depth": 3
+        }
+      }
+    },
+    {
+      "case": "case23",
+      "rows": 86,
+      "label_differences": 0,
+      "maximum_score_difference": 2.220446049250313e-16,
+      "python_nodes": 23,
+      "weka_nodes": 23,
+      "pruning": {
+        "collapsed": 4,
+        "replaced_by_leaf": 1,
+        "raised": 0,
+        "before": {
+          "nodes": 37,
+          "leaves": 19,
+          "depth": 9
+        },
+        "after": {
+          "nodes": 23,
+          "leaves": 12,
+          "depth": 8
+        }
+      }
+    }
+  ],
+  "total_predictions": 2009
+}

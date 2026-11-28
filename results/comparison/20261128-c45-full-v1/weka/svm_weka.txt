@@ -1,0 +1,55 @@
+=== Weka 3.8.7 - svm ===
+
+Scheme: weka.classifiers.functions.SMO
+Options: -C 1.0 -L 0.001 -P 1.0E-12 -N 2 -V -1 -W 42 -K "weka.classifiers.functions.supportVector.PolyKernel -E 1.0 -C 250007" -calibrator "weka.classifiers.functions.Logistic -R 1.0E-8 -M -1 -num-decimal-places 4"
+Train: 2620
+Test: 656
+Fit seconds: 6.5443274
+
+
+Correctly Classified Instances         321               48.9329 %
+Incorrectly Classified Instances       335               51.0671 %
+Kappa statistic                         -0.0059
+Mean absolute error                      0.5107
+Root mean squared error                  0.7146
+Relative absolute error                107.3088 %
+Root relative squared error            146.4955 %
+Total Number of Instances              656     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0,463    0,469    0,607      0,463    0,525      -0,006   0,497     0,608     0
+                 0,531    0,538    0,387      0,531    0,448      -0,006   0,497     0,389     1
+Weighted Avg.    0,489    0,496    0,521      0,489    0,495      -0,006   0,497     0,523     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 185 215 |   a = 0
+ 120 136 |   b = 1
+
+SMO
+
+Kernel used:
+  Linear Kernel: K(x,y) = <x,y>
+
+Classifier for classes: 0, 1
+
+BinarySMO
+
+Machine linear: showing attribute weights, not support vectors.
+
+         0.4059 * ph
+ +       0.178  * Hardness
+ +       0.192  * Solids
+ +       0.1149 * Chloramines
+ +      -0.015  * Sulfate
+ +      -0.0913 * Conductivity
+ +      -0.0616 * Organic_carbon
+ +       0.168  * Trihalomethanes
+ +       0.283  * Turbidity
+ +       0.108 
+
+Number of kernel evaluations: 4715414 (46.969% cached)
+

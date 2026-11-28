@@ -1,0 +1,58 @@
+=== Weka 3.8.7 - c45 ===
+
+Scheme: weka.classifiers.trees.J48
+Options: -C 0.25 -M 2
+Train: 2620
+Test: 656
+Fit seconds: 0.1699977
+
+
+Correctly Classified Instances         406               61.8902 %
+Incorrectly Classified Instances       250               38.1098 %
+Kappa statistic                          0.0847
+Mean absolute error                      0.4602
+Root mean squared error                  0.4842
+Relative absolute error                 96.707  %
+Root relative squared error             99.2539 %
+Total Number of Instances              656     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0,910    0,836    0,630      0,910    0,744      0,112    0,573     0,658     0
+                 0,164    0,090    0,538      0,164    0,251      0,112    0,573     0,463     1
+Weighted Avg.    0,619    0,545    0,594      0,619    0,552      0,112    0,573     0,582     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 364  36 |   a = 0
+ 214  42 |   b = 1
+
+J48 pruned tree
+------------------
+
+Sulfate <= 258.9306: 1 (92.82/30.71)
+Sulfate > 258.9306
+|   Sulfate <= 363.472798
+|   |   Hardness <= 162.008703
+|   |   |   ph <= 6.745307
+|   |   |   |   Solids <= 9082.816175: 1 (6.41/1.0)
+|   |   |   |   Solids > 9082.816175: 0 (117.43/36.56)
+|   |   |   ph > 6.745307
+|   |   |   |   Sulfate <= 333.084455: 1 (76.62/19.92)
+|   |   |   |   Sulfate > 333.084455: 0 (29.58/13.63)
+|   |   Hardness > 162.008703: 0 (1706.2/574.94)
+|   Sulfate > 363.472798
+|   |   ph <= 8.14143
+|   |   |   Solids <= 18223.02708: 1 (194.07/70.11)
+|   |   |   Solids > 18223.02708
+|   |   |   |   Chloramines <= 5.216683
+|   |   |   |   |   ph <= 6.839416: 1 (27.79/3.54)
+|   |   |   |   |   ph > 6.839416: 0 (9.24/3.34)
+|   |   |   |   Chloramines > 5.216683: 0 (222.06/87.83)
+|   |   ph > 8.14143: 0 (137.78/33.29)
+
+Number of Leaves  : 	11
+
+Size of the tree : 	21

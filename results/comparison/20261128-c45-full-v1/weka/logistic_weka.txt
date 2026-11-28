@@ -1,0 +1,61 @@
+=== Weka 3.8.7 - logistic ===
+
+Scheme: weka.classifiers.functions.Logistic
+Options: -R 0.001 -M 400 -num-decimal-places 4
+Train: 2620
+Test: 656
+Fit seconds: 0.3055519
+
+
+Correctly Classified Instances         400               60.9756 %
+Incorrectly Classified Instances       256               39.0244 %
+Kappa statistic                          0     
+Mean absolute error                      0.4746
+Root mean squared error                  0.4875
+Relative absolute error                 99.7363 %
+Root relative squared error             99.9354 %
+Total Number of Instances              656     
+
+=== Detailed Accuracy By Class ===
+
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 1,000    1,000    0,610      1,000    0,758      ?        0,518     0,607     0
+                 0,000    0,000    ?          0,000    ?          ?        0,518     0,441     1
+Weighted Avg.    0,610    0,610    ?          0,610    ?          ?        0,518     0,542     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 400   0 |   a = 0
+ 256   0 |   b = 1
+
+Logistic Regression with ridge parameter of 0.001
+Coefficients...
+                     Class
+Variable                 0
+==========================
+ph                 -0.0182
+Hardness            0.0403
+Solids             -0.0738
+Chloramines        -0.0298
+Sulfate             0.0134
+Conductivity        0.0152
+Organic_carbon      0.0703
+Trihalomethanes    -0.0003
+Turbidity          -0.0151
+Intercept           0.4485
+
+
+Odds Ratios...
+                     Class
+Variable                 0
+==========================
+ph                  0.9819
+Hardness            1.0411
+Solids              0.9288
+Chloramines         0.9707
+Sulfate             1.0135
+Conductivity        1.0153
+Organic_carbon      1.0729
+Trihalomethanes     0.9997
+Turbidity            0.985
