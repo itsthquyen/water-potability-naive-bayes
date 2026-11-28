@@ -1,6 +1,6 @@
 # Kế hoạch phân loại nước với sáu thuật toán học máy
 
-Cập nhật 24/11/2026 theo yêu cầu mới. Naive Bayes là phương pháp chính.
+Cập nhật 28/11/2026: C4.5 đầy đủ các bước dựng cây và cắt tỉa cho nhãn 0/1. Naive Bayes là phương pháp chính.
 Năm phương pháp còn lại phục vụ so sánh. Sản phẩm gồm mã Python tự cài,
 thực nghiệm có kết quả và phân tích, thực hành Weka, báo cáo chi tiết theo
 mẫu DOCX mới và web dự đoán cục bộ.
@@ -29,9 +29,9 @@ mẫu DOCX mới và web dự đoán cục bộ.
 | Đối chiếu | Logistic Regression | Giáo trình, mục 4.5.4, trang in 93–94 |
 | Bổ sung | SVM tuyến tính | Bài giảng học máy Cornell và tài liệu Weka SMO |
 
-C4.5 tự cài dùng gain ratio, điều kiện gain không thấp hơn gain trung
-bình, thuộc tính danh nghĩa và cây chưa cắt tỉa. Phải nêu phạm vi này khi
-so với J48. Các nội dung K-Means, RFM và Apriori của báo cáo mẫu phục vụ
+C4.5 tự cài xử lý thuộc tính số/danh nghĩa, ô thiếu bằng trọng số, MDL,
+gain ratio theo gain trung bình, collapse, cắt tỉa bi quan và nâng cây con.
+Chi tiết công thức và kiểm chứng nằm trong [C45.md](C45.md). Các nội dung K-Means, RFM và Apriori của báo cáo mẫu phục vụ
 đề tài bán hàng, không dùng để thay một trong sáu bộ phân lớp của đề tài.
 
 ## 2. Dữ liệu thô và nguồn
@@ -64,7 +64,7 @@ kiểm chứng ngoài độc lập. Không chỉnh tham số theo điểm test.
 | --- | --- | --- |
 | Naive Bayes | Trung vị và tối đa ba khoảng | Tần suất trực tiếp, MAP, không giả mẫu |
 | ID3 | Cùng mã khoảng với NB | Gain, cây chưa cắt tỉa, thuộc tính mỗi đường dùng một lần |
-| C4.5 | Cùng mã khoảng với NB | Gain ratio, gain ≥ trung bình, cây chưa cắt tỉa |
+| C4.5 | Số thô còn ô thiếu; không điền trung vị/chia khoảng | Gain ratio, MDL, min leaf 2, CF 0,25, pruning/collapse/subtree raising |
 | KNN | Trung vị và z-score | k=5, Euclid, bỏ phiếu đều |
 | Logistic | Trung vị và z-score | 400 epoch, tốc độ 0,1, L2=0,001 |
 | SVM tuyến tính | Trung vị và z-score | Hinge loss, SGD 100 epoch, tốc độ 0,01, L2=0,01 |
@@ -82,13 +82,15 @@ không tính vào sáu thuật toán.
 1. Xác minh nguồn và checksum. Trích bảng mẫu thô còn ô thiếu.
 2. Audit dữ liệu và bản ghi trùng, thống kê số lượng trước/sau.
 3. Chia train/test rồi năm fold trong development, lưu ID.
-4. Học trung vị từ ô quan sát train và điền thiếu bằng trung vị đã học.
-5. Với NB/ID3/C4.5, học vị trí làm tròn lên n/3 và 2n/3 trên ô quan sát.
+4. Với NB, ID3, KNN, Logistic và SVM, học trung vị từ ô quan sát train
+   rồi điền thiếu bằng trung vị đã học. C4.5 không áp dụng bước điền này.
+5. Với NB/ID3, học vị trí làm tròn lên n/3 và 2n/3 trên ô quan sát.
    Lấy trung điểm hai giá trị kề khác nhau. Bỏ cắt giữa hai số bằng nhau.
    Điểm cắt thuộc khoảng dưới. Đổi sang mã danh nghĩa 0/1/2.
-6. Với KNN/Logistic/SVM, tính mean và std ddof=0 trên train đã điền.
+6. C4.5 giữ số đo và ô thiếu; tự học ngưỡng và tỷ trọng nhánh từ train.
+7. Với KNN/Logistic/SVM, tính mean và std ddof=0 trên train đã điền.
    Cột hằng dùng scale 1; giữ lại cả chín chỉ tiêu.
-7. Lưu tham số theo từng mô hình và kiểm tra sau khi nạp lại.
+8. Lưu tham số theo từng mô hình và kiểm tra sau khi nạp lại.
 
 Không loại quan sát chỉ vì hiếm hoặc làm kết quả xấu. Không fit bộ lọc
 trên test. Thống kê mô tả toàn bộ CSV phải phân biệt với thống kê học
@@ -102,10 +104,11 @@ ReplaceMissingValues và Discretize trên development để có hình trước
 và sau xử lý. Weka mặc định điền mean, khác median trong Python. Ghi rõ
 sự khác biệt và không dùng hình minh họa làm kết quả CV.
 
-Bảng đối chiếu Weka dùng cùng các ID và ARFF đã biến đổi bằng tham số
-train của Python để kiểm soát đầu vào. NB dùng bộ phân lớp Weka tự viết
+Bảng đối chiếu Weka dùng cùng các ID. NB/ID3 và ba mô hình số dùng ARFF
+đã biến đổi bằng tham số train của Python để kiểm soát đầu vào; C4.5
+giữ số đo và ô thiếu trong ARFF. NB dùng bộ phân lớp Weka tự viết
 theo công thức tần suất trực tiếp. ID3 dùng gói giáo dục chính thức,
-C4.5 dùng J48 chưa cắt tỉa, KNN dùng IBk k=5, Logistic dùng Logistic,
+C4.5 dùng J48 -C 0.25 -M 2 trên ARFF số còn ô thiếu; bật MDL, collapse và subtree raising; KNN dùng IBk k=5, Logistic dùng Logistic,
 SVM dùng SMO kernel tuyến tính. Lưu tùy chọn, phiên bản, log và dự đoán.
 Giải thích khác biệt tối ưu/ràng buộc giữa Python và Weka. Tự tính lại
 ma trận/chỉ số từ dự đoán Weka để kiểm chứng, không ép hai bảng khớp.
@@ -143,3 +146,17 @@ Hoàn thành khi kiểm thử tính tay đạt, sáu mô hình chạy đủ các
 manifest khớp dữ liệu/model/kết quả, Weka có log và hình thật, Word/PDF
 đã kiểm tra bố cục, web dự đoán được nhập tay và CSV. Ghi trung thực mọi
 phần chưa chạy được thay vì tạo số liệu minh họa.
+
+## 8. Tổ chức source và gói gửi giảng viên
+
+Mỗi thuật toán nằm trong một file ở src/algorithms. Tiền xử lý tập trung
+ở src/preprocessing.py và src/discretization.py, kiểm CSV ở
+src/data_validation.py. Thực nghiệm và đánh giá được tách khỏi mô hình.
+Weka tham chiếu ở weka/, giao diện ở app/.
+
+tools/package_source.py tạo output/source/BaiTapLon_Nhom11_Source theo
+whitelist và ZIP tương ứng. Thư mục chỉ có mã nguồn, kiểm thử, cấu hình
+pytest, requirements và README chạy; không có báo cáo, dữ liệu, mô hình,
+ảnh, môi trường, cache hoặc hồ sơ cũ. Dữ liệu và kết quả được sinh khi
+người nhận chạy lệnh. Kiểm tra gói trong một bản sao độc lập, không chạy
+pytest trực tiếp trong thư mục sạch được bàn giao để tránh sinh cache.

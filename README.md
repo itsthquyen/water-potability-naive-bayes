@@ -1,120 +1,85 @@
-# Phân loại nước uống được hay không bằng Naive Bayes
+# Phân loại chất lượng nước bằng Naive Bayes và năm thuật toán so sánh
 
-## Bản mở rộng sáu thuật toán ngày 24/11/2026
+Bài tập lớn Khai phá dữ liệu, Nhóm 11, lớp 65CNTT. Naive Bayes đếm tần
+suất là thuật toán chính; ID3, C4.5, KNN, Logistic Regression và SVM tuyến
+tính dùng để đối chiếu. Sáu thuật toán Python tự cài phần huấn luyện và
+dự đoán; tiền xử lý, chia tập, thống kê và metric cũng tự viết.
 
-Naive Bayes là thuật toán chính. ID3, C4.5 theo gain ratio, KNN, Logistic
-Regression và SVM tuyến tính được tự cài để đối chiếu. Các thuật toán được
-chọn từ bài giảng và giáo trình trước, SVM bổ sung từ nguồn học máy đại học.
-Xem [kế hoạch hiện hành](DOCS/KE_HOACH_NAIVE_BAYES_CHAT_LUONG_NUOC.md).
+## Cấu trúc đang sử dụng
+
+- `src/algorithms/`: sáu file thuật toán đặt cạnh nhau; common.py dùng chung kiểm tra và entropy.
+- `src/preprocessing.py`: kiểm ma trận, trung vị, z-score, audit, chia train/test và fold.
+- `src/discretization.py`: học mã khoảng cho NB/ID3; `src/data_validation.py`: kiểm CSV và nhãn.
+- `src/six_experiments.py`, `src/metrics.py`: thực nghiệm và đánh giá.
+- `src/eda.py`, `src/plots.py`: thống kê và hình từ số liệu tự tính.
+- `app/comparison_app.py`, `src/ui_theme.py`: web hiện hành.
+- `weka/`: mã đối chiếu bằng Weka, tách khỏi thuật toán Python.
+- `tests/`: đáp án tính tay, tình huống biên và kiểm thử luồng dữ liệu.
+
+C4.5 có ngưỡng số, thuộc tính danh nghĩa, ô thiếu có trọng số, MDL,
+collapse, cắt tỉa bi quan và nâng cây con. Xem [công thức và kiểm chứng](DOCS/C45.md).
+Không dùng thư viện học máy trong mã Python; Weka dùng mô hình tham chiếu riêng.
+
+## Chạy từ gốc dự án trên máy hiện tại
 
 ```powershell
+rtk proxy .venv/Scripts/python.exe -m pip install -r requirements.txt
 rtk proxy .venv/Scripts/python.exe -X utf8 -m src.six_experiments --run-id NEW-SIX-RUN
-rtk proxy .venv/Scripts/python.exe -X utf8 report/weka/run_six_weka.py --run-id NEW-SIX-RUN
-rtk proxy .venv/Scripts/python.exe -X utf8 -m streamlit run app/comparison_app.py --server.address 127.0.0.1 --server.port 8501
+rtk proxy .venv/Scripts/python.exe -X utf8 -m src.plots --run-id NEW-SIX-RUN
+rtk proxy .venv/Scripts/python.exe -X utf8 weka/run_six_weka.py --run-id NEW-SIX-RUN
+rtk proxy .venv/Scripts/python.exe -m pytest -q
+rtk proxy .venv/Scripts/python.exe -m streamlit run app/comparison_app.py --server.address 127.0.0.1 --server.port 8501
 ```
 
-Web mặc định nạp `results/comparison/20261124-six-v1`, có năm tab: nhập một
-mẫu, dự đoán CSV, so sánh thực nghiệm, dữ liệu gốc và cẩm nang chỉ tiêu.
-Bản giao diện `7df6fb7` thêm mẫu nạp nhanh, bảng đồng thuận, thống kê tỷ lệ
-nhãn trong CSV và các tab ROC, ma trận nhầm lẫn, EDA. Naive Bayes vẫn là
-kết quả chính; mức đồng thuận không thay nhãn và không phải accuracy.
-Tên preset và các ngưỡng gắn WHO trên giao diện chưa xác nhận chất lượng
-nước. Báo cáo nêu rõ giới hạn và đối chiếu nguồn chuyên môn.
-Có nút nạp trung vị, xóa đầu vào, tải CSV mẫu và tải toàn bộ dữ liệu gốc.
-Giao diện phân biệt điểm xác suất với biên SVM và ẩn kết quả cũ khi thay
-đầu vào. Mô hình, thống kê train, dự đoán, biểu đồ, log Weka và manifest
-được lưu trong thư mục lần chạy. Cấu hình cố định, cùng 5 fold, cùng 656 mẫu
-test lịch sử. Test này từng được xem trong phiên bản cũ, không phải đánh giá
-ngoài độc lập. Không ghi đè lần chạy đã có.
+Gói source cho máy khác có hướng dẫn Python trực tiếp, không bắt buộc cài RTK.
+Nếu chưa có dữ liệu, chạy `python -m src.download_data` để tải CSV thô từ
+Kaggle phiên bản 3. Dữ liệu gốc được giữ nguyên; thông tin nguồn ở [data](data/README.md).
+Không ghi đè lần chạy đã có. Web mặc định đọc `20261128-c45-full-v1`.
 
-Naive Bayes đạt accuracy 60,37%, BA 51,61%, AUC 0,5218. KNN đạt accuracy
-64,79%, BA 60,72%, AUC 0,6518. C4.5 tự cài giới hạn ở cây danh nghĩa chưa
-cắt tỉa. SVM trả biên quyết định, không gọi biên là xác suất uống được.
-ID3 chính thức của Weka không gán nhãn 53/656 mẫu; báo cáo giữ đủ mẫu số.
+## Kết quả mới
 
-Bản Word và PDF nộp mới ở `output/docx/BaiTapLon.docx` và
-`output/pdf/BaiTapLon.pdf`, theo mẫu `BTL_KPDL_Nhom8_66TTNT2.docx` được cung cấp.
-Các bản này cùng tệp roster thành viên được lưu cục bộ. Bản chia sẻ là
-[PDF công khai](output/pdf/BaiTapLon-cong-khai.pdf) và
-[Word công khai](output/docx/BaiTapLon-cong-khai.docx). Trình dựng nằm ở
-`report/build_six_report.py`, nhận `--template`, `--students` và `--public`.
-Bản bổ sung ngày 28/11/2026 có lời cảm ơn, chú thích dưới bảng/hình, tài
-liệu tham khảo dạng `[1]. …`, phụ lục dữ liệu thô đủ mười cột và ảnh thao
-tác Weka/web. Ảnh bổ sung và checksum nằm trong
-[hồ sơ Weka](report/evidence/20261128/README.md) và
-[ảnh giao diện tại commit 7df6fb7](report/evidence/20261128-7df6fb7/README.md).
-Bản PDF đã kiểm tra gồm 57 trang, 21 bảng và 29 hình; mục lục và các danh
-mục có 100 liên kết số trang đã đối chiếu. Xem
-[đối chiếu với mẫu](DOCS/DOI_CHIEU_BAO_CAO_MAU.md).
-Gói nộp `output/submission/BaiTapLon_Nhom11_20261128.zip` lưu cục bộ, gồm
-Word, PDF có thông tin thành viên, CSV gốc đầy đủ và ảnh thao tác.
-Sau khi dựng Word, cập nhật các trường bằng `Ctrl+A`, `F9` rồi
-lưu và xuất PDF để số trang và danh mục khớp với bố cục mới.
-Bộ lọc Weka
-thực hành dùng mean, Python dùng median; bảng đối chiếu bộ phân lớp Weka
-dùng ARFF theo cùng thống kê train của Python và công bố rõ cấu hình.
+Giữ seed 42, 2.620 mẫu development, 656 mẫu test và năm fold. Test đã
+từng được sử dụng, chưa phải kiểm chứng ngoài độc lập. C4.5/J48 nhận
+cùng dữ liệu số còn ô thiếu; NB/ID3 dùng mã khoảng và ba mô hình số còn
+lại dùng trung vị, z-score học từ train.
 
-## Hồ sơ phiên bản Naive Bayes trước khi mở rộng
+| Thuật toán Python | Accuracy | BA | AUC |
+| --- | ---: | ---: | ---: |
+| Naive Bayes | 60,37% | 51,61% | 0,5218 |
+| ID3 | 55,03% | 52,86% | 0,5385 |
+| C4.5 | 61,89% | 53,70% | 0,5732 |
+| KNN | 64,79% | 60,72% | 0,6518 |
+| Logistic Regression | 60,98% | 50,00% | 0,5182 |
+| SVM tuyến tính | 60,98% | 50,00% | 0,5112 |
 
-Bài tập lớn Khai phá dữ liệu của **Quyền, Lộc, Séc**. Bản hiện tại là
-**Naive Bayes đếm tần suất theo giáo trình**, tự viết bằng Python. Đầu vào
-gồm 9 chỉ tiêu đo; đầu ra là nhãn `Potability`: `0` = không uống được,
-`1` = uống được theo bộ dữ liệu. Đây là demo học thuật.
+C4.5 khớp nhãn J48 trên toàn bộ test và năm fold; cây sau cắt tỉa có
+21 nút, 11 lá. Sai số xác suất lớn nhất trên test dưới 1,56e-14. Accuracy
+tăng so với cây gain ratio danh nghĩa cũ, nhưng recall lớp 1 chỉ 16,41%.
+NB nhận đúng 30/256 mẫu lớp 1. Báo cáo phân tích các hạn chế này.
 
-## Phương pháp
+Bộ kiểm thử có 328 ca đạt; tám cảnh báo deprecation từ Streamlit/pandas.
+Gói source được kiểm thêm trong bản sao độc lập, gồm tải CSV, unit test và web.
 
-1. Kiểm tra dữ liệu, làm sạch và chia phân tầng development/test theo seed 42.
-2. Với từng cột trên phần train, tính trung vị từ ô quan sát và học tối đa ba
-   khoảng theo thứ tự giá trị. Điền ô thiếu bằng trung vị đã học, rồi mã hóa
-   khoảng. Trong 5 fold, mỗi fold chỉ học thống kê từ train của fold đó.
-3. Tự đếm `n_c` và `n(c,j,v)`. Tính `P(c) = n_c/N` và
-   `P(A_j=v | c) = n(c,j,v)/n_c`. Nhân prior và các xác suất có điều kiện,
-   chọn lớp có tích lớn hơn; nếu hai điểm dương bằng nhau chọn 0.
-4. Giữ tần suất 0 theo công thức trực tiếp, không thêm giả mẫu. Nếu cả hai
-   tích bằng 0, dòng đó được báo lỗi, không được tự gán nhãn. Mã lưu bảng
-   đếm và ngưỡng vào JSON kèm SHA-256; demo dùng lại trạng thái đã học.
-
-Không dùng Gaussian, hàm phân phối hoặc thư viện ML trong bản chạy hiện tại.
-Weka đọc ARFF và dựng hình từ dữ liệu/kết quả Python; Weka không học mô hình.
-
-## Chạy trên Windows
-
-Chạy từ thư mục gốc dự án. Nếu chưa có môi trường:
+## Bàn giao
 
 ```powershell
-rtk proxy uv venv --python 3.12 .venv
-rtk proxy uv pip install --python .venv/Scripts/python.exe -r requirements.txt
+rtk proxy .venv/Scripts/python.exe tools/package_source.py
 ```
 
-```powershell
-rtk proxy .venv/Scripts/python.exe -X utf8 -m pytest -q
-rtk proxy .venv/Scripts/python.exe -X utf8 -m streamlit run app/app.py
-```
+Lệnh tạo `output/source/BaiTapLon_Nhom11_Source` và ZIP cùng tên, chỉ
+gồm source cần cho đề tài, kiểm thử và hướng dẫn. Không chứa báo cáo,
+dữ liệu mẫu, model sẵn, cache hay bản cũ. Danh sách và checksum gói nằm
+ngoài thư mục source. Xem [hướng dẫn kèm gói](DOCS/README_NOP_SOURCE.md).
 
-Demo mặc định nạp `artifacts/20261109-NB-final/pipeline.json` và
-checksum bên cạnh. Có thể nhập một mẫu hoặc tải CSV; cột `sample_id` và
-`Potability` không tham gia suy luận. CSV tải xuống giữ đủ kết quả, kể cả
-lỗi từng dòng. Model schema v1 của bản thử nghiệm cũ không được app nạp.
+Báo cáo nộp có thông tin thành viên ở `output/docx/BaiTapLon-C45.docx` và
+`output/pdf/BaiTapLon-C45.pdf`, lưu cục bộ. Bản công khai ở
+[Word](output/docx/BaiTapLon-cong-khai.docx) và [PDF](output/pdf/BaiTapLon-cong-khai.pdf).
+Trình dựng `report/build_six_report.py` lấy số liệu từ manifest lần chạy mới,
+theo mẫu DOCX người dùng cung cấp. Ảnh thao tác mới ở
+[hồ sơ C4.5](report/evidence/20261128-c45-full/README.md).
+Hai bản báo cáo gồm 59 trang, 22 bảng và 25 hình; xem
+[đối chiếu mẫu và kiểm chứng](DOCS/DOI_CHIEU_BAO_CAO_MAU.md).
 
-Để chạy lại, chọn ID mới; lệnh train không đánh giá test và không ghi đè:
-
-```powershell
-rtk proxy .venv/Scripts/python.exe -X utf8 -m src.train --run-id MY-NB-RUN
-rtk proxy .venv/Scripts/python.exe -X utf8 -m src.evaluate --run-id MY-NB-RUN --verification-confirmed
-rtk proxy .venv/Scripts/python.exe -X utf8 -m src.predict --model artifacts/MY-NB-RUN/pipeline.json --input samples.csv --output predictions.csv
-```
-
-## Mã nguồn và kết quả
-
-- [Thuật toán đếm](src/naive_bayes.py), [chia khoảng](src/discretization.py),
-  [pipeline và lưu/nạp](src/pipeline.py).
-- [Nguồn dữ liệu](data/README.md), [đặc tả](DOCS/KE_HOACH_NAIVE_BAYES_CHAT_LUONG_NUOC.md),
-  [ghi chú rà soát](DOCS/RA_SOAT_LY_THUYET_VA_WEKA.md).
-- [Quy trình Weka](report/weka/README.md), [báo cáo công khai](output/pdf/BaiTapLon-cong-khai.pdf).
-- [Run `20261109-NB-final`](results/runs/20261109-NB-final.json) dùng 2.620 mẫu
-  phát triển và 656 mẫu test. Bộ kiểm thử bản chạy hiện tại có 293 ca đạt.
-  Accuracy **60,37%**, Balanced Accuracy **51,61%**, macro-F1 **0,4627**,
-  ROC-AUC **0,5218**. Baseline lớp đa số đạt accuracy **60,98%**.
-  Mô hình nhận ra **30/256** mẫu nhãn 1; kết quả không thay thế kiểm nghiệm nước.
-- Các run `20261024-E4-*` và mã ở `archive/gaussian/` là hồ sơ lịch sử.
-  Notebook và app hiện tại không sử dụng chúng.
+Các lần chạy và archive cũ giữ để truy vết trong repository, không có
+trong gói source gửi giảng viên. [Kế hoạch](DOCS/KE_HOACH_NAIVE_BAYES_CHAT_LUONG_NUOC.md)
+ghi cấu hình và cách giữ tách kết quả Python với Weka.

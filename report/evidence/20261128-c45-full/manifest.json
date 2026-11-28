@@ -1,0 +1,20 @@
+{
+  "captured_on": "2026-11-28",
+  "experiment_run": "20261128-c45-full-v1",
+  "capture_methods": {
+    "weka": "Thao tác trực tiếp trong Weka Explorer 3.8.7 trên máy; ảnh cửa sổ gốc.",
+    "web": "Chrome Capture screenshot trong viewport Responsive 800x900; ảnh PNG gốc tải từ trình duyệt, không có thanh tab riêng tư."
+  },
+  "files": {
+    "web-form.png": "f54770819dda0801946789940010f096b552875553d6b4ce77436855a3fef717",
+    "web-overview.png": "06107806f8a63fcbacb9da60e30002e3c3039225401dced273bda0471e89f190",
+    "weka-c45-raw.png": "218a51ad210d45a487046e1b7404bee04c1ec07e41502ab9ca0b8617207ba46c",
+    "weka-c45-result.png": "2ca4e90221934afdc8beaca8cc793fd143b4cb6f4d245792ddfc676a7c4d72c0",
+    "weka-c45-settings.png": "0953b4aa035e8090f09b1d9c8d8e4e4a113f8fe959f935140edbf72ec6d0c545"
+  },
+  "source_files": {
+    "app/comparison_app.py": "87d1f70fe3f8b96fcb3628bcf39d5f595ffc653282f0558245d89368799fd96a",
+    "src/ui_theme.py": "8246e78220a12f22c0b39eac366ffd6eadd0f7f82b8a9d370c6a3b31c853f8dd",
+    "src/algorithms/c45.py": "31509111618045024a1d6cc67eec137d54f4f2efa9bde20493a2ad63be32f128"
+  }
+}
