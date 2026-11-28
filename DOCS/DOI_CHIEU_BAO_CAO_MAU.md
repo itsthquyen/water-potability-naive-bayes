@@ -9,7 +9,7 @@ toán phân lớp nước và sáu thuật toán theo yêu cầu hiện hành.
 | Nội dung cần kiểm tra | Vị trí trong bản hoàn thiện |
 | --- | --- |
 | Đề tài, giảng viên, nhóm và thành viên | Trang bìa; TS. Trần Mạnh Tuấn theo cách ghi mới nhất của người dùng |
-| Lời cảm ơn | Trước mục lục |
+| Lời cảm ơn | Cuối báo cáo, sau kết luận và ngay trước tài liệu tham khảo |
 | Mục lục, danh mục bảng và hình | Trường tự động, đã cập nhật số trang bằng Word |
 | Mô tả đầu vào, đầu ra, mục tiêu và giới hạn dữ liệu | Phần I |
 | Dữ liệu thô, nguồn và ô thiếu | Phần I.4; ảnh Viewer Weka; phụ lục A đủ mười cột |
@@ -43,3 +43,7 @@ Những giới hạn thực nghiệm vẫn được nêu trong báo cáo: tập 
 được xem, nguồn chưa mô tả đầy đủ cách lấy mẫu/gán nhãn, C4.5 tự cài có
 phạm vi danh nghĩa chưa cắt tỉa, và cấu hình SVM Python/Weka khác nhau.
 Không bổ sung số liệu hoặc ảnh giả để làm đẹp kết quả.
+
+Lời mở đầu, lý do chọn đề tài và tổng quan được viết theo mạch trình bày
+của mẫu: bối cảnh, mục tiêu của nhóm, dữ liệu và các nội dung thực hiện.
+Lời cảm ơn nằm sau kết luận, ngay trước tài liệu tham khảo.

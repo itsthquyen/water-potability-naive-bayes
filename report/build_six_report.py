@@ -372,28 +372,31 @@ def build(template, students, public=False):
         field.set(qn("w:instr"), instruction)
         p._p.append(field)
 
-    heading("LỜI CẢM ƠN", 1)
-    para("Nhóm chúng em xin gửi lời cảm ơn đến TS. Trần Mạnh Tuấn, giảng viên học phần Khai phá dữ liệu. Những kiến thức và tài liệu của học phần là cơ sở để nhóm tìm hiểu bài toán phân lớp, xây dựng thuật toán Naive Bayes và tổ chức thực nghiệm so sánh trong bài tập lớn này.")
-    para("Chúng em cảm ơn Khoa Công nghệ thông tin, Trường Đại học Thủy Lợi đã tạo điều kiện học tập và thực hành. Trong quá trình thực hiện, các thành viên đã cùng kiểm tra dữ liệu, trao đổi cách cài đặt thuật toán và đối chiếu kết quả để hoàn thiện báo cáo cũng như ứng dụng dự đoán.")
-    para("Do kiến thức và kinh nghiệm thực nghiệm còn hạn chế, bài làm có thể còn thiếu sót. Nhóm chúng em mong nhận được góp ý của thầy để hiểu rõ hơn những hạn chế của phương pháp và cải thiện cách giải quyết bài toán.")
-    thanks = para("Nhóm 11")
-    thanks.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    contents("MỤC LỤC", 'TOC \\o "1-3" \\h \\z', True)
+    contents("MỤC LỤC", 'TOC \\o "1-3" \\h \\z')
     contents("DANH MỤC BẢNG", 'TOC \\h \\z \\c "Bảng"', True)
     contents("DANH MỤC HÌNH", 'TOC \\h \\z \\c "Hình"', True)
     heading("LỜI MỞ ĐẦU", 1, True)
-    para("Bài tập lớn nghiên cứu việc phân loại mẫu nước thành hai lớp uống được và không uống được từ chín chỉ tiêu hóa lý. Dữ liệu có giá trị thiếu và số mẫu giữa hai lớp chênh lệch, nên cần xử lý dữ liệu và lựa chọn cách đánh giá phù hợp trước khi so sánh các mô hình.")
-    para("Nhóm chọn Naive Bayes làm thuật toán chính và xây dựng chương trình theo công thức đếm tần suất. Năm thuật toán dùng để so sánh gồm ID3, C4.5, KNN, Logistic Regression và SVM tuyến tính. Việc lựa chọn dựa trên các bài giảng, giáo trình của học phần và tài liệu học máy được dẫn trong báo cáo.")
-    para("Các thuật toán được cài đặt bằng Python, thực nghiệm trên cùng cách chia dữ liệu và đối chiếu với Weka. Riêng Naive Bayes được trình bày từ công thức đến bảng đếm, kèm ví dụ tính tay và phép tính cho một mẫu trong tập kiểm tra. Ứng dụng web sử dụng lại các mô hình đã huấn luyện để dự đoán khi nhập số đo hoặc tải tệp CSV.")
-    para("Phần đánh giá chú trọng khả năng nhận diện lớp uống được. Bên cạnh accuracy, báo cáo sử dụng recall từng lớp, Balanced Accuracy, macro-F1 và ROC-AUC để phân tích những trường hợp dự đoán sai và so sánh Naive Bayes với năm mô hình còn lại.")
+    para("Chất lượng nước được mô tả qua nhiều chỉ tiêu, mỗi chỉ tiêu phản ánh một đặc điểm của mẫu nước. Khi các số đo được lưu trữ cùng nhãn đánh giá, chúng tạo thành nguồn dữ liệu để nghiên cứu mối liên hệ giữa đặc điểm của mẫu và kết quả phân loại. Việc khai thác những dữ liệu này là một hướng vận dụng bài toán phân lớp trong khai phá dữ liệu, từ khâu tìm hiểu số liệu đến xây dựng mô hình và đánh giá khả năng dự đoán.")
+    para("Trong học phần Khai phá dữ liệu, nhóm chúng em lựa chọn đề tài “" + REPORT_TITLE + "”. Đề tài sử dụng các chỉ tiêu hóa lý để dự đoán nhãn uống được hoặc không uống được của mẫu nước trong bộ dữ liệu Water Quality. Naive Bayes được lựa chọn làm thuật toán chính để nhóm tìm hiểu cách ước lượng xác suất từ dữ liệu và vận dụng định lý Bayes vào quá trình phân lớp.")
+    para("Để thực hiện đề tài, nhóm tiến hành tìm hiểu dữ liệu, kiểm tra và xử lý các giá trị thiếu, phân tích thống kê và xây dựng chương trình bằng Python. Thuật toán Naive Bayes được cài đặt tường minh theo cách đếm tần suất. Nhóm đồng thời xây dựng ID3, C4.5, KNN, Logistic Regression và SVM tuyến tính để so sánh trên cùng cách chia dữ liệu, thực hành đối chiếu bằng Weka và phân tích những trường hợp các mô hình dự đoán sai.")
+    para("Thông qua bài tập lớn, nhóm mong muốn củng cố kiến thức về phân lớp và rèn luyện cách tổ chức một thực nghiệm có thể kiểm tra lại. Việc phân tích kết quả giúp nhóm hiểu rõ hơn ưu điểm, hạn chế của Naive Bayes trên dữ liệu đã chọn, cũng như ảnh hưởng của bước tiền xử lý và cách đánh giá. Từ các mô hình đã huấn luyện, nhóm phát triển một ứng dụng web đơn giản để nhập thông số, dự đoán mẫu nước và xem kết quả của các thuật toán.")
 
     page("1. Lý do chọn đề tài", "I. Mô tả bài toán")
-    para("Đề tài sử dụng bộ dữ liệu Water Quality, trong đó mỗi mẫu có chín chỉ tiêu số và một nhãn Potability. Đây là bài toán phù hợp để thực hành phân lớp vì phải xử lý giá trị thiếu, các thang đo khác nhau và sự chênh lệch số mẫu giữa hai lớp.")
-    para("Với Naive Bayes, quá trình học có thể theo dõi qua số mẫu của từng lớp và tần suất từng giá trị thuộc tính trong lớp. Sau khi rời rạc hóa các chỉ tiêu số, chương trình tính xác suất có điều kiện, nhân với xác suất tiên nghiệm và chọn lớp có điểm lớn hơn. Cách triển khai này giúp đối chiếu trực tiếp công thức với mã nguồn.")
+    para("Một mẫu nước có thể được mô tả bằng nhiều số đo như pH, độ cứng, chất rắn hòa tan hoặc độ đục. Các chỉ tiêu có phạm vi giá trị khác nhau, vì vậy cần xem xét chúng trong cùng một quy trình xử lý và phân tích dữ liệu. Bộ dữ liệu Water Quality còn có những ô thiếu và số mẫu giữa hai lớp chênh lệch. Những đặc điểm này đặt ra các vấn đề cụ thể để nhóm thực hành kiến thức đã học, từ kiểm tra chất lượng dữ liệu đến lựa chọn cách đánh giá một mô hình phân lớp.")
+    para("Nhóm lựa chọn Naive Bayes vì quá trình huấn luyện và dự đoán có thể giải thích qua xác suất của từng lớp và tần suất thuộc tính trong lớp. Việc tự xây dựng bảng đếm, tính xác suất và kiểm tra bằng ví dụ nhỏ giúp nhóm đối chiếu lý thuyết với chương trình. Để đánh giá kết quả có cơ sở, nhóm so sánh Naive Bayes với năm thuật toán khác trên cùng tập dữ liệu, đồng thời phát triển ứng dụng web để thể hiện cách sử dụng mô hình sau huấn luyện. Qua đó, đề tài gắn nội dung phân lớp của học phần với một bài toán có dữ liệu và sản phẩm thực hành cụ thể.")
     heading("2. Tổng quan bài toán")
-    para("Đầu vào là vector chín thuộc tính theo thứ tự ph, Hardness, Solids, Chloramines, Sulfate, Conductivity, Organic_carbon, Trihalomethanes và Turbidity. Đầu ra là Potability, với lớp 0 mang nhãn không uống được và lớp 1 mang nhãn uống được. Nhãn thật chỉ tham gia huấn luyện và đánh giá, không tham gia vector đầu vào.")
-    para("Mục tiêu của đề tài là xây dựng Naive Bayes và đánh giá khả năng dự đoán nhãn Potability. Năm thuật toán còn lại được dùng để so sánh trên cùng tập kiểm tra, đặc biệt ở recall của lớp 1 và ROC-AUC. Sản phẩm ứng dụng là một trang web dự đoán cho một mẫu nhập tay hoặc nhiều mẫu trong tệp CSV.")
-    para("Đầu ra của mô hình là nhãn theo bộ dữ liệu công bố. Nguồn CSV chưa cung cấp đầy đủ địa điểm, thời gian lấy mẫu và quy trình kiểm nghiệm, vì vậy kết quả dự đoán trong bài tập chưa thể dùng để chứng nhận chất lượng nước uống.")
+    para("Bài toán sử dụng bộ dữ liệu Water Quality gồm 3.276 mẫu nước. Mỗi mẫu có chín chỉ tiêu đầu vào: pH, độ cứng, tổng chất rắn hòa tan, chloramines, sulfate, độ dẫn điện, carbon hữu cơ, trihalomethanes và độ đục. Cột Potability là nhãn phân loại, trong đó 0 là không uống được và 1 là uống được theo dữ liệu công bố. Từ các mẫu đã có nhãn, mô hình học cách dự đoán nhãn cho một bộ thông số đầu vào; cột nhãn và mã dòng không được dùng làm thuộc tính dự đoán.")
+    para("Trên tập dữ liệu này, nhóm thực hiện quy trình khai phá dữ liệu từ kiểm tra dữ liệu thô, tiền xử lý, phân tích đến xây dựng và đánh giá mô hình. Naive Bayes giữ vai trò chính; ID3, C4.5, KNN, Logistic Regression và SVM tuyến tính được sử dụng để so sánh. Cụ thể, đề tài tập trung vào các nội dung sau:")
+    for text in (
+        "Tìm hiểu và tiền xử lý dữ liệu: xác định ý nghĩa các thuộc tính, kiểm tra giá trị thiếu và bản ghi trùng, phân tích phân bố lớp; học tham số điền thiếu, chia khoảng hoặc chuẩn hóa từ phần dữ liệu huấn luyện.",
+        "Xây dựng thuật toán Naive Bayes: trình bày cơ sở lý thuyết, tự cài đặt bước đếm tần suất và tính xác suất, kiểm chứng bằng ví dụ tính tay và áp dụng cho dữ liệu mẫu nước.",
+        "Thực nghiệm và so sánh: đánh giá sáu thuật toán trên cùng cách chia dữ liệu, đối chiếu kết quả với Weka, phân tích ma trận nhầm lẫn và khả năng nhận diện từng lớp thay vì chỉ xét tỷ lệ dự đoán đúng chung.",
+        "Phát triển ứng dụng: xây dựng trang web cho phép nhập một mẫu hoặc tải tệp CSV, hiển thị dự đoán của Naive Bayes cùng năm thuật toán đối chiếu và tải kết quả để kiểm tra lại.",
+    ):
+        item = para("- " + text)
+        item.paragraph_format.left_indent = Cm(0.5)
+        item.paragraph_format.first_line_indent = Cm(-0.5)
+    para("Kết quả của đề tài gồm chương trình tự cài đặt thuật toán, các bảng và biểu đồ đánh giá, minh chứng thực hành Weka và ứng dụng dự đoán. Phạm vi nghiên cứu là phân loại nhãn trên bộ dữ liệu đã công bố. Do nguồn dữ liệu chưa mô tả đầy đủ địa điểm, thời gian lấy mẫu và quy trình kiểm nghiệm, đầu ra của ứng dụng chỉ phục vụ học tập, chưa dùng để chứng nhận chất lượng nước uống.")
 
     page("3. Quy trình thực hiện")
     table(["Bước", "Hoạt động", "Đầu ra"], [
@@ -695,6 +698,12 @@ return int(2 * votes > 5), votes / 5""")
     para("Trên 656 mẫu kiểm tra, Naive Bayes đạt accuracy 60,37%, BA 51,61% và ROC-AUC 0,5218. KNN có kết quả cao nhất trong sáu cấu hình, với accuracy 64,79%, BA 60,72% và AUC 0,6518. Điểm hạn chế nổi bật của Naive Bayes là chỉ nhận đúng 30/256 mẫu uống được, dù accuracy trên toàn tập đạt hơn 60%.")
     para("Bộ phân lớp Naive Bayes đếm tần suất trên Weka cho cùng nhãn dự đoán với Python trên 656 mẫu. Kết quả ID3 và SVM khác giữa hai môi trường do cách xử lý nhánh chưa gặp, tham số và cơ chế tối ưu. Riêng 53 mẫu không được ID3 của Weka gán nhãn vẫn được giữ trong mẫu số đánh giá.")
     para("Kết quả hiện tại cho thấy cần cải thiện khả năng nhận diện lớp 1 của Naive Bayes. Việc bổ sung dữ liệu hoặc thay đổi tiền xử lý phải được kiểm tra bằng thực nghiệm trên dữ liệu có nguồn gốc phù hợp. Ứng dụng chỉ dự đoán nhãn theo bộ dữ liệu nghiên cứu và chưa thay thế được việc kiểm nghiệm chất lượng nước.")
+    heading("LỜI CẢM ƠN", 1, True)
+    para("Nhóm chúng em xin gửi lời cảm ơn đến TS. Trần Mạnh Tuấn, giảng viên học phần Khai phá dữ liệu. Những kiến thức và tài liệu của học phần là cơ sở để nhóm tìm hiểu bài toán phân lớp, xây dựng thuật toán Naive Bayes và tổ chức thực nghiệm so sánh trong bài tập lớn này.")
+    para("Chúng em cảm ơn Khoa Công nghệ thông tin, Trường Đại học Thủy Lợi đã tạo điều kiện học tập và thực hành. Trong quá trình thực hiện, các thành viên đã cùng kiểm tra dữ liệu, trao đổi cách cài đặt thuật toán và đối chiếu kết quả để hoàn thiện báo cáo cũng như ứng dụng dự đoán.")
+    para("Do kiến thức và kinh nghiệm thực nghiệm còn hạn chế, bài làm có thể còn thiếu sót. Nhóm chúng em mong nhận được góp ý của thầy để hiểu rõ hơn những hạn chế của phương pháp và cải thiện cách giải quyết bài toán.")
+    thanks = para("Nhóm 11")
+    thanks.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     heading("TÀI LIỆU THAM KHẢO",1,True)
     for text in [
         "[1]. Giáo trình Khai phá dữ liệu, TS. Trần Mạnh Tuấn.",
