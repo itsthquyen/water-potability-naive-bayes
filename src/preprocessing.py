@@ -1,10 +1,15 @@
 """Kiểm tra ma trận số và tự chia dữ liệu phân tầng."""
 
 import math
+import hashlib
+import json
+from pathlib import Path
 from numbers import Integral, Real
 import random
+from math import sqrt, isfinite
 
-from .config import N_FOLDS, SEED, TEST_FRACTION
+from .config import N_FOLDS, SEED, TEST_FRACTION, PROJECT_ROOT
+from .artifacts import write_json, runtime_metadata
 
 
 def _finite_number(value, name):
@@ -132,3 +137,106 @@ def stratified_folds(y, n_folds=N_FOLDS, seed=SEED):
         train = [index for index in all_indices if index not in validation_set]
         folds.append((train, sorted(validation)))
     return folds
+
+
+def _midpoint(left, right):
+    """Cộng trước khi chia để tránh làm tròn hai lần ở vùng số cực nhỏ."""
+    total = left + right
+    if isfinite(total):
+        return total / 2
+    return left / 2 + right / 2
+
+
+class NumericPreprocessor:
+    """Học trung vị, mean và std ddof=0 trên train sau điền thiếu."""
+
+    def fit(self, X):
+        rows = _validate_matrix(X)
+        medians, means, scales = [], [], []
+        for column in zip(*rows):
+            observed = sorted(value for value in column if value is not None)
+            if not observed:
+                raise ValueError("Cột toàn thiếu trong tập học.")
+            size = len(observed)
+            median = _midpoint(observed[(size - 1) // 2], observed[size // 2])
+            filled = [median if value is None else value for value in column]
+            mean = sum(value / len(filled) for value in filled)
+            variance = sum((value - mean) ** 2 / len(filled) for value in filled)
+            scale = sqrt(variance) if variance > 0 else 1.0
+            if not isfinite(mean) or not isfinite(scale):
+                raise ValueError("Thống kê chuẩn hóa vượt miền số hữu hạn.")
+            medians.append(median)
+            means.append(mean)
+            scales.append(scale)
+        self.state = {"medians": medians, "means": means, "scales": scales}
+        return self
+
+    def transform(self, X):
+        if not hasattr(self, "state"):
+            raise ValueError("Cần fit tiền xử lý trước.")
+        state = self.state
+        rows = _validate_matrix(X, len(state["medians"]))
+        transformed = []
+        for row in rows:
+            values = [(state["medians"][j] if value is None else value) for j, value in enumerate(row)]
+            normalized = [(value - state["means"][j]) / state["scales"][j] for j, value in enumerate(values)]
+            if not all(isfinite(value) for value in normalized):
+                raise ValueError("Dữ liệu chuẩn hóa không hữu hạn.")
+            transformed.append(normalized)
+        return transformed
+
+
+def prepare_data(csv_path, output_root=PROJECT_ROOT, seed=SEED):
+    """Audit CSV, loại trùng cùng nhãn, chặn mâu thuẫn và lưu split checksum.
+
+    Không fit/EDA trên test; phép chia dùng ID trước lọc. Nếu manifest đã có,
+    checksum khác sẽ dừng thay vì âm thầm thay phép chia chuẩn.
+    """
+    from src.data_validation import read_csv_records, validate_records, clean_training_data
+    from src.artifacts import sha256_file
+    csv_path, output_root = Path(csv_path), Path(output_root)
+    validated = validate_records(read_csv_records(csv_path, training=True), training=True)
+    if validated["errors"]:
+        raise ValueError("Dữ liệu huấn luyện có dòng lỗi: " + json.dumps(validated["errors"][:10], ensure_ascii=False))
+    clean = clean_training_data(validated["X"], validated["y"], validated["row_ids"])
+    dev, test = stratified_holdout(clean["y"], test_fraction=TEST_FRACTION, seed=seed)
+    dev_y = [clean["y"][index] for index in dev]
+    folds = stratified_folds(dev_y, n_folds=N_FOLDS, seed=seed)
+    split_values = {"development": [clean["row_ids"][index] for index in dev],
+                    "test": [clean["row_ids"][index] for index in test]}
+    for fold_id, (train, validation) in enumerate(folds):
+        split_values[f"fold_{fold_id}_train"] = [clean["row_ids"][dev[index]] for index in train]
+        split_values[f"fold_{fold_id}_validation"] = [clean["row_ids"][dev[index]] for index in validation]
+    contents = {name: "".join(f"{row_id}\n" for row_id in ids).encode("utf-8") for name, ids in split_values.items()}
+    checksums = {name: hashlib.sha256(content).hexdigest() for name, content in contents.items()}
+    manifest_path = output_root / "data" / "manifest.json"
+    csv_checksum = sha256_file(csv_path)
+    source_path = output_root / "data" / "source.json"
+    source = json.loads(source_path.read_text(encoding="utf-8")) if source_path.exists() else {"source_status": "Chưa xác minh nguồn; không coi dữ liệu này là thực nghiệm chính thức."}
+    if source_path.exists() and source.get("csv_sha256") != csv_checksum:
+        raise ValueError("Checksum CSV không khớp nguồn source.json.")
+    if manifest_path.exists():
+        old = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if old["csv_sha256"] != csv_checksum or old["split_checksums"] != checksums:
+            raise ValueError("Checksum dữ liệu/phép chia khác manifest chuẩn; dừng để kiểm tra.")
+        for name, checksum in checksums.items():
+            split_path = output_root / "data" / "splits" / f"{name}.txt"
+            if not split_path.is_file() or sha256_file(split_path) != checksum:
+                raise ValueError("Checksum file phép chia khác manifest; không tự ghi đè.")
+    split_directory = output_root / "data" / "splits"
+    split_directory.mkdir(parents=True, exist_ok=True)
+    if not manifest_path.exists():
+        for name, content in contents.items():
+            (split_directory / f"{name}.txt").write_bytes(content)
+    manifest = {"csv_sha256": csv_checksum, "source": source,
+                "raw_count": len(validated["row_ids"]), "clean_count": len(clean["y"]),
+                "audit": validated["audit_summary"], "cleaning": clean["audit_summary"],
+                "removed_row_ids": clean["removed_row_ids"], "cleaning_version": 1,
+                "cleaning_rule": "keep_first_exact_duplicate_reject_conflicting_labels",
+                "seed": seed, "test_fraction": TEST_FRACTION, "n_folds": N_FOLDS,
+                "rounding": f"floor(class_count * {TEST_FRACTION} + 0.5)",
+                "split_checksums": checksums, "environment": runtime_metadata()}
+    if not manifest_path.exists():
+        write_json(manifest_path, manifest)
+    return {"clean": clean, "dev": dev, "test": test, "folds": folds,
+            "manifest": manifest, "manifest_path": manifest_path}

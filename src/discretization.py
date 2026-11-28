@@ -4,7 +4,7 @@ from copy import deepcopy
 from math import isfinite
 
 from .config import N_BINS
-from .preprocessing import _finite_number, _validate_matrix
+from .preprocessing import _finite_number, _validate_matrix, _midpoint
 
 
 def _midpoint(left, right):

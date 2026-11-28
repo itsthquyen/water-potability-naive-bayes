@@ -10,6 +10,9 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
+from src.preprocessing import prepare_data
+from src.artifacts import validate_run_id
+
 from src.config import (PROJECT_ROOT, RAW_DATA_PATH, SEED, N_FOLDS, TEST_FRACTION,
                         FEATURE_COLUMNS)
 
@@ -38,68 +41,10 @@ def environment_metadata():
             "dirty": bool(status.stdout.strip()) if status.returncode == 0 else None}
 
 
-def validate_run_id(run_id):
-    """Chặn ID rỗng/đường dẫn; mỗi lần chạy có thư mục riêng không ghi đè."""
-    if not isinstance(run_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}", run_id):
-        raise ValueError("run_id chỉ gồm chữ/số, gạch dưới/gạch ngang, dài tối đa 80.")
-    return run_id
 
 
-def prepare_data(csv_path, output_root=PROJECT_ROOT, seed=SEED):
-    """Audit CSV, loại trùng cùng nhãn, chặn mâu thuẫn và lưu split checksum.
 
-    Không fit/EDA trên test; phép chia dùng ID trước lọc. Nếu manifest đã có,
-    checksum khác sẽ dừng thay vì âm thầm thay phép chia chuẩn.
-    """
-    from src.data_validation import read_csv_records, validate_records, clean_training_data
-    from src.preprocessing import stratified_holdout, stratified_folds
-    from src.pipeline import sha256_file
-    csv_path, output_root = Path(csv_path), Path(output_root)
-    validated = validate_records(read_csv_records(csv_path, training=True), training=True)
-    if validated["errors"]:
-        raise ValueError("Dữ liệu huấn luyện có dòng lỗi: " + json.dumps(validated["errors"][:10], ensure_ascii=False))
-    clean = clean_training_data(validated["X"], validated["y"], validated["row_ids"])
-    dev, test = stratified_holdout(clean["y"], test_fraction=TEST_FRACTION, seed=seed)
-    dev_y = [clean["y"][index] for index in dev]
-    folds = stratified_folds(dev_y, n_folds=N_FOLDS, seed=seed)
-    split_values = {"development": [clean["row_ids"][index] for index in dev],
-                    "test": [clean["row_ids"][index] for index in test]}
-    for fold_id, (train, validation) in enumerate(folds):
-        split_values[f"fold_{fold_id}_train"] = [clean["row_ids"][dev[index]] for index in train]
-        split_values[f"fold_{fold_id}_validation"] = [clean["row_ids"][dev[index]] for index in validation]
-    contents = {name: "".join(f"{row_id}\n" for row_id in ids).encode("utf-8") for name, ids in split_values.items()}
-    checksums = {name: hashlib.sha256(content).hexdigest() for name, content in contents.items()}
-    manifest_path = output_root / "data" / "manifest.json"
-    csv_checksum = sha256_file(csv_path)
-    source_path = output_root / "data" / "source.json"
-    source = json.loads(source_path.read_text(encoding="utf-8")) if source_path.exists() else {"source_status": "Chưa xác minh nguồn; không coi dữ liệu này là thực nghiệm chính thức."}
-    if source_path.exists() and source.get("csv_sha256") != csv_checksum:
-        raise ValueError("Checksum CSV không khớp nguồn source.json.")
-    if manifest_path.exists():
-        old = json.loads(manifest_path.read_text(encoding="utf-8"))
-        if old["csv_sha256"] != csv_checksum or old["split_checksums"] != checksums:
-            raise ValueError("Checksum dữ liệu/phép chia khác manifest chuẩn; dừng để kiểm tra.")
-        for name, checksum in checksums.items():
-            split_path = output_root / "data" / "splits" / f"{name}.txt"
-            if not split_path.is_file() or sha256_file(split_path) != checksum:
-                raise ValueError("Checksum file phép chia khác manifest; không tự ghi đè.")
-    split_directory = output_root / "data" / "splits"
-    split_directory.mkdir(parents=True, exist_ok=True)
-    if not manifest_path.exists():
-        for name, content in contents.items():
-            (split_directory / f"{name}.txt").write_bytes(content)
-    manifest = {"csv_sha256": csv_checksum, "source": source,
-                "raw_count": len(validated["row_ids"]), "clean_count": len(clean["y"]),
-                "audit": validated["audit_summary"], "cleaning": clean["audit_summary"],
-                "removed_row_ids": clean["removed_row_ids"], "cleaning_version": 1,
-                "cleaning_rule": "keep_first_exact_duplicate_reject_conflicting_labels",
-                "seed": seed, "test_fraction": TEST_FRACTION, "n_folds": N_FOLDS,
-                "rounding": f"floor(class_count * {TEST_FRACTION} + 0.5)",
-                "split_checksums": checksums, "environment": environment_metadata()}
-    if not manifest_path.exists():
-        write_json(manifest_path, manifest)
-    return {"clean": clean, "dev": dev, "test": test, "folds": folds,
-            "manifest": manifest, "manifest_path": manifest_path}
+
 
 
 def run_training(csv_path=RAW_DATA_PATH, run_id=None, output_root=PROJECT_ROOT, *, seed=SEED):
